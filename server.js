@@ -14,6 +14,7 @@ app.set('view engine', 'ejs');
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true})); 
+app.use(bodyParser.json())
 
 var db;
 const MongoClient = require('mongodb').MongoClient;
@@ -34,7 +35,7 @@ app.use(methodOverride('_method'));
 // public 폴더의 내용을 정적파일로 사용
 app.use('/public', express.static('public'));
 
-
+ 
 // 쿠키 미들웨어
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
@@ -44,7 +45,9 @@ const session = require('express-session');
 app.use(session({
     secret: process.env.COOKIE_SECRET,
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 7},
 }));
 
 // 패스포트 passport 미들웨어
@@ -53,6 +56,11 @@ const localStrategy = require('passport-local').Strategy;
 app.use(passport.initialize());
 app.use(passport.session());
 
+// 시간 미들웨어
+var moment = require('moment');
+
+require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
 
 // 라우터 설정
 app.get('/', function(req, res) {
@@ -64,18 +72,167 @@ app.get('/info', function(req, res) {
 });
 
 app.get('/community', function(req, res) {
-    res.render('community.ejs');        // 게시판 페이지
-});
+    db.collection('post').find().toArray(function(err, result){
+        res.render('community.ejs', {posts : result});        // 게시판 페이지
+    });
+})
+
+
+// 좋아요 구현
+app.post("/like/:id", function(req, res){
+    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
+        var chk = false
+        if (!req.isAuthenticated()){
+            res.send('<script>alert("회원만 좋아요가 가능합니다."); history.back();</script>')
+        }
+        else{
+            if(result.like_count == 0){
+                db.collection('post').updateOne(
+                    { _id: parseInt(req.params.id)},
+                    { $inc : {like_count : 1} , $push: { like_user: req.user._id.toString()}},
+                )
+                console.log('좋아요 완료')
+                res.redirect(req.get('referer'))
+            }
+            else{
+                for (var i = 0; i <= result.like_count; i++){
+                    if(result.like_user[i] == req.user._id.toString()){
+                        chk = true
+                        break
+                    }
+                }
+                if(!chk){
+                    console.log('좋아요 완료')
+                    db.collection('post').updateOne(
+                        { _id: parseInt(req.params.id)},
+                        { $inc : {like_count : 1} , $push: { like_user: req.user._id.toString()}},
+                    )
+                     res.redirect(req.get('referer'))
+                }
+                else{
+                    console.log('좋아요 취소')
+                    db.collection('post').updateOne(
+                        { _id: parseInt(req.params.id)},
+                        { $inc : {like_count : -1} , $pull: { like_user: req.user._id.toString()}},
+                    )
+                    res.redirect(req.get('referer'))
+                }
+            }
+        }
+    })
+})
+ 
 app.get('/write', function(req, res) {
     res.render('write.ejs');            // 글 작성 페이지
 });
-app.get('/community_pid', function(req, res) {
-    res.render('community_pid.ejs');    // 글 조회 페이지
-});
 
-app.get('/point', function(req, res) {
-    res.render('point.ejs');            // 포인트 페이지
-});
+app.post("/add", function(req, res){
+    db.collection('post_count').findOne({name : 'postcnt'}, function(err, result){
+        var totalCount = result.total_post;
+        db.collection('post').insertOne({
+            _id : totalCount + 1, 
+            user_id : req.user._id,
+            writer : req.user.nickname, 
+            post_title : req.body.title, 
+            post_content : req.body.date, 
+            like_count : 0, 
+            like_user : [],
+            post_address : "",
+            post_time : moment().format('YYYY-MM-DD [작성]')}, function(err, result){
+            db.collection('counter').updateOne({name : 'postcnt'}, {$inc :{totalpost : 1}}, function(err, result){
+            })
+        })
+    })
+        db.collection('user_info').updateOne({_id : req.user._id}, {$inc : {user_point : 30, posting_count : 1}}, function(err, result){
+        })
+    res.redirect('/')
+})
+
+app.get('/community_pid/:id', function(req, res) {
+    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err,result){
+        if(err) return err;
+        res.render('community_pid.ejs',{data : result}) // 글 조회 페이지
+    })
+})
+
+// 글 수정 페이지
+// 시맨틱 url
+app.get("/edit/:id", function(req, res){
+    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
+        if (err) return err;
+        if (!req.isAuthenticated()){
+            res.send('<script>alert("작성자만 수정할 수 있습니다. (로그인 필요)"); history.back();</script>')
+        }
+        else if(result.user_id.toString() === req.user._id.toString()){
+           res.render('edit.ejs', {post : result})
+        }
+        else{
+            res.send('<script>alert("작성자만 수정할 수 있습니다."); history.back();</script>')
+        }
+    })
+})
+
+app.put('/edit', function(req,res){
+    db.collection('post').updateOne(
+        {_id : parseInt(req.body.id)}, 
+        {$set : {todo : req.body.title, date : req.body.date}}, 
+        function(err, result){
+        if (err) return err;
+        res.redirect('/community')
+    })
+})
+
+app.post('/delete/:id', function(req, res){ 
+    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
+        if (!req.isAuthenticated()){
+            res.send('<script>alert("권한이 없습니다. (로그인 필요)"); history.back();</script>')
+        }
+        else if(result.user_id.toString() == req.user._id.toString()){
+            db.collection('post').deleteOne({_id : parseInt(req.params.id)}, function(err, result){
+                db.collection('user_info').updateOne({_id : req.user._id}, {$inc : {user_point : -30, posting_count : -1}}, function(err, result){
+                })
+                res.send('<script>alert("삭제가 완료되었습니다."); location.href="/community";</script>')
+            })
+        }
+        else{
+            res.send('<script>alert("권한이 없습니다. (작성자만 삭제 가능)"); history.back();</script>')
+        }
+       
+    })
+})
+
+// 포인트 페이지
+app.get("/point", isPoint, function(req, res){
+    res.render('point.ejs',{userpoint : req.user})
+})
+
+function isPoint(req, res, next){
+    if(req.user){
+        console.log(req.user)
+          next()
+    }
+    else{
+        res.send('<script>alert("로그인해주세요"); location.href="/signin";</script>')
+    }
+}
+
+app.post('/point', function(req,res){ 
+    if (!req.isAuthenticated()){
+        res.send('<script>alert("로그인해주세요"); location.href="/signin";</script>')
+    }
+    else{
+        db.collection('user_info').updateOne(
+            {id : req.user.id}, 
+            {$set : {point : req.body.getpoint}}, 
+            function(err, result){
+                if (err) return err;
+                    console.log('process complete')
+                    res.redirect('/point');
+                })
+    }
+    
+})
+
 
 app.get('/QnA', function(req, res) {
     res.render('QnA.ejs');              // 문의 페이지
@@ -120,10 +277,18 @@ app.get("/fail", (req, res) => {
     res.send("로그인 해주세요.");
 });
 
+// 로그아웃
+app.get("/logout", function(req, res){
+   
+    req.session.destroy();
+    console.log("logout success");   
+    res.redirect('/main')
+});
 
 app.get('/signup', function(req, res) {
     res.render('signup.ejs');           // 회원가입 페이지
 });
+
 app.post("/signup", function(req, res){
     db.collection("user_info").insertOne({
         email               : req.body.email,
