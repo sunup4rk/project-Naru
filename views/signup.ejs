@@ -1,1 +1,153 @@
-회원가입 페이지
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.1.js"></script>
+    <!-- <script src="../server.js"></script> -->
+</head>
+<body>
+    <h2 class="container mt-4">회원가입 페이지</h2>
+    
+    <div class="container mt-3">
+        <!-- <form action="/mail" method="post"> -->
+        <form action="/signup" method="post" id="signup">
+            
+            <div class="form-group">
+                <label>이메일</label><br>
+                <input type="email" name="email" class="input-email form-control" onblur="isValidEmail()" checked="false" required>
+                <button type="button" onclick="location.href='/add'">추가하기</button>
+            </div>
+
+            <div class="form-group">
+                <label>닉네임</label><br>
+                <input type="nickname" name="nickname" class="input-nickname form-control" onblur="isValidNickName()" checked="false" required>
+            </div>
+
+            <div class="form-group">
+                <label>비밀번호</label><br>
+                <input type="password" name="password1" id="password1" class="form-control" onblur="isValidPassword()" checked="false" required>
+                <div id="help_pw1" class="help left" style="top: 62px; right: -122px; display: none;">
+                    <div class="txt">
+                        <strong>사용불가</strong> : <span class="ex">최소 12자 이상의 비밀번호를 입력해주세요.</span>
+                    </div>
+                </div>
+                <div id="help_pw2" class="help left" style="top: 62px; right: -122px; display: none;">
+                    <div class="txt">
+                        <strong>사용불가</strong> : <span class="ex">64자 이내의 비밀번호를 입력해주세요.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>비밀번호 확인</label><br>
+                <input type="password" name="password2" id="password2" class="form-control" onblur="checkPasswords()" checked="false" required>
+            </div>
+        </form>
+
+        <button type="submit" class="btn btn-outline-danger" form="signup">제출</button><p></p>
+    </div>
+
+    <script>
+        function isValidEmail() {
+            let inputEmail = $(".input-email").val();
+
+            var reg_email = /^([0-9a-zA-Z_\.-]+)@([0-9a-zA-Z_-]+)(\.[0-9a-zA-Z_-]+){1,2}$/;
+            console.log(inputEmail);
+            if(inputEmail === "") {
+                return false;
+            }
+            else if(!reg_email.test(inputEmail)) {   
+                alert("이메일 형식이 올바르지 않습니다.");
+                return false;    
+            }  
+            else {
+                $.ajax({
+                    type : 'GET',
+                    url : "/isDuplicate",
+                    data : {
+                        input: "email",
+                        email: inputEmail,
+                    },
+                    error : function(err) {
+                        alert("실행중 오류가 발생하였습니다.");
+                    },
+                    success : function(data) {
+                        if(data) {alert("사용중인 이메일입니다.")}
+                    }
+                });
+            }  
+        }
+
+        function isValidNickName() {
+            var inputNick = $(".input-nickname").val();
+            var nickLength = $(".input-nickname").val().length;
+
+            var engCheck = /[a-z]/;
+            var numCheck = /[0-9]/;
+            var specialCheck = /[`~!@#$%^&*|\\\'\";:\/?]/gi;
+                
+            //닉네임 필수 입력
+            if(inputNick === null || inputNick === "") {
+                alert("닉네임 입력은 필수입니다.");
+            }
+            //닉네임 빈칸 포함 안됨
+            else if(inputNick.search(/\s/) !== -1) {
+                alert("닉네임은 빈 칸을 포함 할 수 없습니다.");
+            }
+            //닉네임 한글 1~10자, 영문 및 숫자 2~20자   
+            else if(nickLength < 2 || nickLength > 8) {
+                alert("닉네임은 2 ~ 8자 이내로 작성해주세요.");
+            }
+            //닉네임 특수문자 포함 안됨    
+            else if(specialCheck.test(inputNick)) {
+                alert("닉네임은 특수문자를 포함 할 수 없습니다.");
+            }
+            //닉네임 중복확인
+            else {
+                $.ajax({
+                    type : 'GET',
+                    url : "/isDuplicate",
+                    data : {
+                        input   : "nickname",
+                        nickname: inputNick,
+                    },
+                    error : function(err) {
+                        alert("실행중 오류가 발생하였습니다.");
+                    },
+                    success : function(data) {
+                        if(data) {alert("사용중인 닉네임입니다.")}
+                    }
+                });
+            }
+        }
+
+        function isValidPassword() {
+            if($("#password1").val().length === "") {
+                $("#help_pw1").attr("style", "top: 62px; right: -122px; display: none;");
+                $("#help_pw2").attr("style", "top: 62px; right: -122px; display: none;");
+            }
+            else if($("#password1").val().length > 0 && $("#password1").val().length < 12) {
+                $("#help_pw1").attr("style", "top: 62px; right: -122px;");
+                $("#help_pw2").attr("style", "top: 62px; right: -122px; display: none;");
+            }
+            else if($("#password1").val().length > 64) {
+                $("#help_pw1").attr("style", "top: 62px; right: -122px; display: none;");
+                $("#help_pw2").attr("style", "top: 62px; right: -122px;");
+            }
+            else {
+                $("#help_pw1").attr("style", "top: 62px; right: -122px; display: none;");
+                $("#help_pw2").attr("style", "top: 62px; right: -122px; display: none;");
+            }
+        }
+        function checkPasswords() {
+            if(!($("#password1").val() === $("#password2").val())) {
+                alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.")
+            }            
+        }
+    </script>
+</body>
+</html>
+

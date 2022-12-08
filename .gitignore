@@ -1,2 +1,5 @@
 # dotenv environment variable files
 .env
+
+# AWS Lightsail AccessKey
+config/awsconfig.json
