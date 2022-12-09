@@ -1,10 +1,12 @@
 import './Header.scss';
+import Nav from './../navigation/Nav';
 
 const Header = () => {
 
     return(
         <div className='header'>
-            헤더
+            <img className='header__logo' src='images/logo.svg' alt='naru_logo'/>
+            <Nav />
         </div>
     )
 }
