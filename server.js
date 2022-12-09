@@ -282,7 +282,7 @@ app.get("/logout", function(req, res){
    
     req.session.destroy();
     console.log("logout success");   
-    res.redirect('/main')
+    res.redirect('/')
 });
 
 app.get('/signup', function(req, res) {
@@ -302,9 +302,12 @@ app.post("/signup", function(req, res){
         }, 
         function(err, result){
             if (err) return console.log(err);
-            console.log("회원정보 저장완료");
+            console.log("새로운 회원정보 저장완료");
         }
     )
+    db.collection("auth_request").deleteOne({
+        email: req.body.email,
+    })
     res.send(`<script type="text/javascript">alert("가입을 환영합니다!"); window.location = "/"; </script>`);
 });
 
@@ -350,8 +353,6 @@ app.listen(process.env.PORT2, function(){
 	console.log(`running image server on ${process.env.PORT2}`)
 })
 
-
-
 app.get('/mypage_modifyPw', function(req, res) {
     res.render('mypage_modifyPw.ejs');  // └ 비밀번호 변경
 });
@@ -371,9 +372,10 @@ const ejs = require('ejs');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 const path = require('path');
+const { equal } = require('assert');
 var appDir = path.dirname(require.main.filename);
 
-app.post('/mail', async function(req, res) {
+app.post('/mail',  function(req, res) {
     let authNum = Math.random().toString().substr(2,6);
     let emailtemplate;
     ejs.renderFile(appDir+'/templates/authMail.ejs', {authCode : authNum}, function (err, data) {
@@ -381,34 +383,56 @@ app.post('/mail', async function(req, res) {
       emailtemplate = data;
     });
     
-    let transporter = nodemailer.createTransport({
-        service: 'gmail',
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        auth: {
-            user: process.env.NODEMAILER_USER,
-            pass: process.env.NODEMAILER_PASS,
+    db.collection("auth_request").findOne({
+            email: req.body.email
+        }, 
+        async function(err, result){
+            if (err) return console.log(err);
+            if (result === null) {
+                let transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    host: 'smtp.gmail.com',
+                    port: 587,
+                    secure: false,
+                    auth: {
+                        user: process.env.NODEMAILER_USER,
+                        pass: process.env.NODEMAILER_PASS,
+                    }
+                });
+            
+                let mailOptions = {
+                    from: `나루`,
+                    to: req.body.email,
+                    subject: '회원가입을 위한 인증번호를 입력해주세요.',
+                    html: emailtemplate
+                };
+            
+                transporter.sendMail(mailOptions, function (err, info) {
+                    if (err) console.log(err);
+                    console.log("Mail sent. " + info.response);
+                    
+                    transporter.close();
+                });
+            
+                db.collection("auth_request").insertOne({
+                    email               : req.body.email,
+                    auth_number         : authNum,
+                    }, 
+                    function(err, result){
+                        if (err) return console.log(err);
+                        console.log("신규 인증 요청 생성");
+                        res.send("send");
+                    }
+                )
+            }
+            else {
+                return res.send("exist");
+            }
         }
-    });
+    )
 
-    let mailOptions = await transporter.sendMail({
-        from: `나루`,
-        to: req.body.email,
-        subject: '회원가입을 위한 인증번호를 입력해주세요.',
-        html: emailtemplate
-    });
 
-    transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-            console.log(error);
-        }
-        console.log("Mail sent. " + info.response);
-        transporter.close()
-    });
 });
-
-
 
 ////////// 닉네임 중복 검사 //////////
 app.get('/isDuplicate', function(req, res) {
@@ -416,12 +440,25 @@ app.get('/isDuplicate', function(req, res) {
         db.collection('user_info').findOne({email : req.query.email}, function(err, result){
             if (err) return console.log(err);
             if (result) res.send(true);
+            else res.send(false);
         });   
     } 
     if (req.query.input === "nickname") {
         db.collection('user_info').findOne({nickname : req.query.nickname}, function(err, result){
             if (err) return console.log(err);
             if (result) res.send(true);
+            else res.send(false);
         });   
     }    
 });
+
+app.get('/authCheck', function(req, res) {
+    db.collection('auth_request').findOne({email : req.query.email}, function(err, result){
+        if (err) return console.log(err);
+        if (result) {
+            if(req.query.authNum == result.auth_number) res.send(true);
+            else res.send(result.email);
+        }
+        else res.send(false);
+    });   
+})
