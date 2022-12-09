@@ -1,8 +1,7 @@
-
 const Footer = () => {
 
     return(
-        <div className='container'>
+        <div className='footer'>
             푸터
         </div>
     )
