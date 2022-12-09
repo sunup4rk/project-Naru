@@ -128,24 +128,26 @@ app.get('/write', function(req, res) {
 
 app.post("/add", function(req, res){
     db.collection('post_count').findOne({name : 'postcnt'}, function(err, result){
+        console.log(result)
         var totalCount = result.total_post;
         db.collection('post').insertOne({
             _id : totalCount + 1, 
             user_id : req.user._id,
             writer : req.user.nickname, 
             post_title : req.body.title, 
-            post_content : req.body.date, 
+            post_content : req.body.content, 
             like_count : 0, 
             like_user : [],
             post_address : "",
             post_time : moment().format('YYYY-MM-DD [작성]')}, function(err, result){
-            db.collection('counter').updateOne({name : 'postcnt'}, {$inc :{totalpost : 1}}, function(err, result){
-            })
+            db.collection('post_count').updateOne({name : 'postcnt'}, {$inc :{total_post : 1}}, function(err, result){
+            }) 
         })
     })
         db.collection('user_info').updateOne({_id : req.user._id}, {$inc : {user_point : 30, posting_count : 1}}, function(err, result){
         })
-    res.redirect('/')
+    console.log('글 작성 완료')
+    res.redirect('/community')
 })
 
 app.get('/community_pid/:id', function(req, res) {
@@ -172,13 +174,15 @@ app.get("/edit/:id", function(req, res){
     })
 })
 
-app.put('/edit', function(req,res){
+app.put('/edit/post/:id', function(req,res){
+    console.log(req)
     db.collection('post').updateOne(
-        {_id : parseInt(req.body.id)}, 
-        {$set : {todo : req.body.title, date : req.body.date}}, 
+        {_id : parseInt(req.params.id)}, 
+        {$set : {post_title : req.body.title, post_content : req.body.content}}, 
         function(err, result){
         if (err) return err;
-        res.redirect('/community')
+        res.send('<script>alert("수정이 완료되었습니다."); location.href="/community";</script>')
+        console.log('수정 완료')
     })
 })
 
@@ -327,37 +331,25 @@ app.get('/mypage_modifyInfo', function(req, res) {
 const imageRouter = require('./imageRouter.js');
 
 app.use('/image', imageRouter)
+
 app.get('/upload', function(req, res){
-    const body = `
-<html>
-  <head>
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  </head>
-  <body>
-      <form action="/image" enctype="multipart/form-data" method="post">
-          <input type="file" name="file1" multiple="multiple">
-          <input type="submit" value="Upload file" />
-      </form>
-  </body>
-</html>
-`
-	res.writeHead(200, {"Content-Type": "text/html"});
-	res.write(body);
-	res.end();
+    res.render("upload.ejs")
+	// res.writeHead(200, {"Content-Type": "text/html"});
+	// res.end();
 })
 
 app.listen(process.env.PORT2, function(){
 	console.log(`running image server on ${process.env.PORT2}`)
 })
 
-
+ 
 
 app.get('/mypage_modifyPw', function(req, res) {
     res.render('mypage_modifyPw.ejs');  // └ 비밀번호 변경
 });
 app.get('/mypage_likeList', function(req, res) {
     res.render('mypage_likeList.ejs');  // └ 좋아요 한 게시글
-});
+}); 
 app.get('/mypage_writeList', function(req, res) {
     res.render('mypage_writeList.ejs'); // └ 작성한 게시글
 });
@@ -365,7 +357,7 @@ app.get('/mypage_myQnA', function(req, res) {
     res.render('mypage_myQnA.ejs');     // └ 문의내역
 });
 
-
+ 
 ////////// 회원가입 인증메일 //////////
 const ejs = require('ejs');
 const router = express.Router();
