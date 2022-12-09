@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <link rel="stylesheet" href="/public/main.css">
-    <title>List</title>
+    <title>상세 페이지</title>
 </head>
 <body>
 <div class="container mt-4">
@@ -25,6 +25,7 @@
       <h6 class="card-subtitle mb-2 text-muted">작성시간 : <%= data.post_time %></h6>
       <!-- 좋아요 개수 출력 -->
       <h6 class="card-subtitle mb-2 text-muted">좋아요 : <%= data.like_count %></h6>
+      <div id="imgarea-pid" style="height: 200px; width: 200px; background-color: beige; text-align:center;">이미지영역</div>
       <div class="buttons">
         <form action="/like/<%= data._id %>" method="post">
           <button type="submit">좋아요</button>

@@ -11,14 +11,14 @@
     <h2 class="container mt-4"><strong>글 작성 페이지</strong></h2>
 
     <div class="container mt-3">
-      <form action="/add" method="post">
+      <form action="/edit/post/<%= post._id %>?_method=PUT" method="post">
         <div class="form-group"><p></p>
-          <label>오늘의 할 일</label>
-          <input type="text" name="title" class="form-control">
+          <label>제목</label>
+          <input type="text" name="title" class="form-control" value="<%= post.post_title %>">
         </div>
         <div><p></p>
-          <label>날짜</label>
-          <input type="text" name="date" class="form-control">
+          <label>내용</label>
+          <input type="text" name="date" class="form-control" value="<%= post.post_content %>">
         </div class="form-group"><p></p>
         <button type="submit" class="btn btn-outline-danger">저장</button>
       </form>
