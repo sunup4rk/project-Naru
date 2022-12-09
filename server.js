@@ -349,6 +349,23 @@ app.listen(process.env.PORT2, function(){
 app.get('/mypage_modifyPw', function(req, res) {
     res.render('mypage_modifyPw.ejs');  // └ 비밀번호 변경
 });
+
+app.post('/verifyPassword', function(req, res) {
+    db.collection('user_info').findOne({_id : req.user._id}, function(err, result){
+        console.log(result.password);
+        
+        if (err) return console.log(err);
+        if (result.password == req.body.password) {res.send("correct");}
+        else {res.send}
+    });   
+})
+
+app.post('/submitNewPassword', function(req, res) {
+    
+})
+
+
+
 app.get('/mypage_likeList', function(req, res) {
     res.render('mypage_likeList.ejs');  // └ 좋아요 한 게시글
 }); 
@@ -428,7 +445,7 @@ app.post('/mail',  function(req, res) {
 });
 
 ////////// 닉네임 중복 검사 //////////
-app.get('/isDuplicate', function(req, res) {
+app.post('/isDuplicate', function(req, res) {
     if (req.query.input === "email") {
         db.collection('user_info').findOne({email : req.query.email}, function(err, result){
             if (err) return console.log(err);
@@ -445,7 +462,7 @@ app.get('/isDuplicate', function(req, res) {
     }    
 });
 
-app.get('/authCheck', function(req, res) {
+app.post('/authCheck', function(req, res) {
     db.collection('auth_request').findOne({email : req.query.email}, function(err, result){
         if (err) return console.log(err);
         if (result) {
