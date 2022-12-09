@@ -67,7 +67,7 @@ app.get('/', function(req, res) {
     res.render('main.ejs');             // 메인 페이지
 });
 
-app.get('/info', function(req, res) {
+app.get('/explore', function(req, res) {
     res.render('info.ejs');             // 정보 페이지
 });
 
@@ -121,8 +121,8 @@ app.post("/like/:id", function(req, res){
         }
     })
 })
- 
-app.get('/write', function(req, res) {
+
+app.get('/community/write', function(req, res) {
     res.render('write.ejs');            // 글 작성 페이지
 });
 
@@ -150,16 +150,16 @@ app.post("/add", function(req, res){
     res.redirect('/community')
 })
 
-app.get('/community_pid/:id', function(req, res) {
+app.get('/community/detail/:id', function(req, res) {
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err,result){
         if(err) return err;
-        res.render('community_pid.ejs',{data : result}) // 글 조회 페이지
+        res.render('detail.ejs',{data : result}) // 글 조회 페이지
     })
 })
 
 // 글 수정 페이지
 // 시맨틱 url
-app.get("/edit/:id", function(req, res){
+app.get("/community/edit/:id", function(req, res){
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
         if (err) return err;
         if (!req.isAuthenticated()){
@@ -238,8 +238,8 @@ app.post('/point', function(req,res){
 })
 
 
-app.get('/QnA', function(req, res) {
-    res.render('QnA.ejs');              // 문의 페이지
+app.get('/qna', function(req, res) {
+    res.render('qna.ejs');              // 문의 페이지
 });
 
 app.get('/signin', function(req, res) {
@@ -282,10 +282,10 @@ app.get("/fail", (req, res) => {
 });
 
 // 로그아웃
-app.get("/logout", function(req, res){
+app.get("/signout", function(req, res){
    
     req.session.destroy();
-    console.log("logout success");   
+    console.log("signout success");   
     res.redirect('/')
 });
 
@@ -316,8 +316,8 @@ app.post("/signup", function(req, res){
 });
 
                                         // 마이페이지 - 내정보
-app.get("/mypage_myInfo", isLogin, (req, res) => {
-    res.render("mypage_myInfo.ejs", {userInfo : req.user});
+app.get("/mypage", isLogin, (req, res) => {
+    res.render("mypage.ejs", {userInfo : req.user});
 });
 function isLogin (req, res, next) {
     if (req.user) {
@@ -328,26 +328,24 @@ function isLogin (req, res, next) {
     }
 }
 
-app.get('/mypage_modifyInfo', function(req, res) {
-    res.render('mypage_modifyInfo.ejs', {userInfo : req.user});// └ 개인정보 수정
+app.get('/mypage/edit', function(req, res) {
+    res.render('mypage_edit.ejs', {userInfo : req.user});// └ 개인정보 수정
 });
+
 const imageRouter = require('./imageRouter.js');
-
 app.use('/image', imageRouter)
-
 app.get('/upload', function(req, res){
     res.render("upload.ejs")
 	// res.writeHead(200, {"Content-Type": "text/html"});
 	// res.end();
 })
-
 app.listen(process.env.PORT2, function(){
 	console.log(`running image server on ${process.env.PORT2}`)
 })
 
 
-app.get('/mypage_modifyPw', function(req, res) {
-    res.render('mypage_modifyPw.ejs');  // └ 비밀번호 변경
+app.get('/mypage/editPW', function(req, res) {
+    res.render('mypage_editPW.ejs');  // └ 비밀번호 변경
 });
 
 app.post('/verifyPassword', function(req, res) {
@@ -366,14 +364,14 @@ app.post('/submitNewPassword', function(req, res) {
 
 
 
-app.get('/mypage_likeList', function(req, res) {
-    res.render('mypage_likeList.ejs');  // └ 좋아요 한 게시글
+app.get('/mypage/like', function(req, res) {
+    res.render('mypage_like.ejs');  // └ 좋아요 한 게시글
 }); 
-app.get('/mypage_writeList', function(req, res) {
-    res.render('mypage_writeList.ejs'); // └ 작성한 게시글
+app.get('/mypage/post', function(req, res) {
+    res.render('mypage_post.ejs'); // └ 작성한 게시글
 });
-app.get('/mypage_myQnA', function(req, res) {
-    res.render('mypage_myQnA.ejs');     // └ 문의내역
+app.get('/mypage/qna', function(req, res) {
+    res.render('mypage_qna.ejs');     // └ 문의내역
 });
 
  
