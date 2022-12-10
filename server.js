@@ -306,7 +306,7 @@ app.post("/signup", function(req, res){
         }, 
         function(err, result){
             if (err) return console.log(err);
-            console.log("새로운 회원정보 저장완료");
+            console.log("신규회원 등록 : ", req.body.email);
         }
     )
     db.collection("auth_request").deleteOne({
@@ -316,10 +316,10 @@ app.post("/signup", function(req, res){
 });
 
                                         // 마이페이지 - 내정보
-app.get("/mypage", isLogin, (req, res) => {
+app.get("/mypage", IsLogin, (req, res) => {
     res.render("mypage.ejs", {userInfo : req.user});
 });
-function isLogin (req, res, next) {
+function IsLogin (req, res, next) {
     if (req.user) {
         next();
     }
@@ -328,7 +328,7 @@ function isLogin (req, res, next) {
     }
 }
 
-app.get('/mypage/edit', function(req, res) {
+app.get('/mypage/edit', IsLogin, function(req, res) {
     res.render('mypage_edit.ejs', {userInfo : req.user});// └ 개인정보 수정
 });
 
@@ -344,34 +344,37 @@ app.listen(process.env.PORT2, function(){
 })
 
 
-app.get('/mypage/editPW', function(req, res) {
-    res.render('mypage_editPW.ejs');  // └ 비밀번호 변경
+app.get('/mypage/editPW', IsLogin, function(req, res) {
+    res.render('mypage_editPW.ejs', {userInfo : req.user});  // └ 비밀번호 변경
 });
 
 app.post('/verifyPassword', function(req, res) {
     db.collection('user_info').findOne({_id : req.user._id}, function(err, result){
-        console.log(result.password);
-        
         if (err) return console.log(err);
-        if (result.password == req.body.password) {res.send("correct");}
-        else {res.send}
+        if (result.password == req.body.password) res.send("verified");
+        else res.send()
     });   
 })
 
-app.post('/submitNewPassword', function(req, res) {
-    
+app.put('/editPassword', function(req, res) {
+    console.log(req);
+    db.collection('user_info').updateOne({_id : req.user._id}, {$set : {password : req.body.password[0]}}, function(err, result){
+        if (err) return console.log(err);
+        console.log("비밀번호 수정 : ", req.user.email);
+        console.log("변경내역 : ", req.user.password, " => ", req.body.password);
+        console.log("수정된 항목 수", result.modifiedCount);
+    });
+    res.send(`<script type="text/javascript">alert("변경되었습니다."); window.location = "/mypage"; </script>`);
 })
 
-
-
-app.get('/mypage/like', function(req, res) {
-    res.render('mypage_like.ejs');  // └ 좋아요 한 게시글
+app.get('/mypage/like', IsLogin, function(req, res) {
+    res.render('mypage_like.ejs', {userInfo : req.user});  // └ 좋아요 한 게시글
 }); 
-app.get('/mypage/post', function(req, res) {
-    res.render('mypage_post.ejs'); // └ 작성한 게시글
+app.get('/mypage/post', IsLogin, function(req, res) {
+    res.render('mypage_post.ejs', {userInfo : req.user}); // └ 작성한 게시글
 });
-app.get('/mypage/qna', function(req, res) {
-    res.render('mypage_qna.ejs');     // └ 문의내역
+app.get('/mypage/qna', IsLogin, function(req, res) {
+    res.render('mypage_qna.ejs', {userInfo : req.user});     // └ 문의내역
 });
 
  
@@ -434,7 +437,8 @@ app.post('/mail',  function(req, res) {
                 )
             }
             else {
-                return res.send("exist");
+                console.log(result)
+                res.send("exist");
             }
         }
     )
@@ -444,15 +448,15 @@ app.post('/mail',  function(req, res) {
 
 ////////// 닉네임 중복 검사 //////////
 app.post('/isDuplicate', function(req, res) {
-    if (req.query.input === "email") {
-        db.collection('user_info').findOne({email : req.query.email}, function(err, result){
+    if (req.body.input === "email") {
+        db.collection('user_info').findOne({email : req.body.email}, function(err, result){
             if (err) return console.log(err);
-            if (result) res.send(true);
-            else res.send(false);
+            if (!(result === null)) res.send(true)
+            if (result === null) res.send(false)
         });   
     } 
-    if (req.query.input === "nickname") {
-        db.collection('user_info').findOne({nickname : req.query.nickname}, function(err, result){
+    if (req.body.input === "nickname") {
+        db.collection('user_info').findOne({nickname : req.body.nickname}, function(err, result){
             if (err) return console.log(err);
             if (result) res.send(true);
             else res.send(false);
@@ -461,10 +465,10 @@ app.post('/isDuplicate', function(req, res) {
 });
 
 app.post('/authCheck', function(req, res) {
-    db.collection('auth_request').findOne({email : req.query.email}, function(err, result){
+    db.collection('auth_request').findOne({email : req.body.email}, function(err, result){
         if (err) return console.log(err);
         if (result) {
-            if(req.query.authNum == result.auth_number) res.send(true);
+            if(req.body.authNum == result.auth_number) res.send(true);
             else res.send(result.email);
         }
         else res.send(false);

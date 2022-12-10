@@ -9,28 +9,25 @@
 </head>
 <body> 
     <h2 class="container mt-4"><strong>글 작성 페이지</strong></h2>
-    <form action="/add" method="post">
-      <div class="container mt-3">
-        <div class="form-group"><p></p>
-        
-          <label>제목</label>
-          <input type="text" name="title" class="form-control">
 
+    <form action="/add" method="post" id="postForm">
+      <div class="form-group"><p></p>        
+        <label>제목</label>
+        <input type="text" name="title" class="form-control" id="post-title">
 
-          <label>내용</label>
-          <div id="imgarea" style="width: 300px; height: 200px;">
-            <img id="View" src="#" style="width: 100%; height: 100%;"/><p></p>
-          </div>
-          <input type="text" name="content" class="form-control">
-        </div><p></p>
-
-        <form id="imgForm" action="/image" enctype="multipart/form-data" method="post">
-          <input type="file" id="myFile" name="file1">
-        <button type="submit" class="btn btn-outline-danger" onclick="ImgUpload()">저장</button>
-        </form>
-
-      </div>
+        <label>내용</label>          
+        <input type="text" name="content" class="form-control" id="post-content">
+      </div><p></p>
     </form>
+
+    <form action="/image" method="post" enctype="multipart/form-data" id="imgForm">
+      <div id="imgarea" style="width: 300px; height: 200px;">
+        <img id="View" src="#" style="width: 100%; height: 100%;"/><p></p>
+      </div>
+      <input type="file" id="myFile" name="file1" multiple="multiple">
+    </form><p></p>
+
+    <button type="submit" class="btn btn-outline-danger" onclick="PostUpload()">저장</button>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
 </body>
@@ -39,21 +36,22 @@
 <script type="text/javascript">
 $(function() {
     $("#myFile").on('change', function(){
-    readURL(this);
+      ReadURL(this);
     });
 });
-function readURL(input) {
+function ReadURL(input) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
         reader.onload = function (e) {
-        $('#View').attr('src', e.target.result);
-        }
-        reader.readAsDataURL(input.files[0]);
+      $('#View').attr('src', e.target.result);
+      }
+      reader.readAsDataURL(input.files[0]);
     }
 }
 
-function ImgUpload(){
-  document.getElementById('imgForm').submit()
+function PostUpload(){
+  document.getElementById('postForm').submit();
+  document.getElementById('imgForm').submit();
 }
 </script>
 </html>

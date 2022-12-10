@@ -12,7 +12,9 @@
         <a href="/mypage">내정보</a>
         <a href="/mypage/edit">회원정보 수정</a>
         <a href="/mypage/editPW">비밀번호 변경</a>
-    </div>
+        <img style="height:20px; width:20px; border-radius: 70%; overflow: hidden; align-items: center;" src=<%= userInfo.profile_image_path %>> 
+        <b><%= userInfo.nickname %></b><br>
+    </div><hr>
     
     <div>
         <img style="border-radius: 70%; overflow: hidden;" src=<%= userInfo.profile_image_path %>>

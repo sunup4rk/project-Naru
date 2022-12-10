@@ -12,50 +12,59 @@
         <a href="/mypage">내정보</a>
         <a href="/mypage/edit">회원정보 수정</a>
         <a href="/mypage/editPW">비밀번호 변경</a>
-    </div>
+        <img style="height:20px; width:20px; border-radius: 70%; overflow: hidden; align-items: center;" src=<%= userInfo.profile_image_path %>> 
+        <b><%= userInfo.nickname %></b><br>
+    </div><hr>
 
-    <div class="container mt-3">
-        <form action="/signin" method="post">
-            <div class="form-group">
-                <label>비밀번호 재확인</label><br>
-                <input type="password" name="password" id="input-exist-pass"><br>
-                <button type="button" id="button-exist-pass" onclick="VerifyPassword()">확인</button>
-                <div id="warn-password" style="font-size:12px; color:green"></div>
-            </div><p></p>
-
-            <div class="form-group">
-                <label>비밀번호 변경</label><br>
-                <input type="password" name="password" id="password1" onblur="IsValidPassword()" disabled><br>
-                <div id="warn-password1" style="font-size:12px; color:red"></div>
-                <input type="password" name="password" id="password2" onblur="CheckPasswords()" disabled><br>
-                <div id="warn-password2" style="font-size:12px; color:red"></div>
-                <button type="submit" id="submit-new-pass" onclick="" disabled>변경</button>
-            </div><p></p>            
-        </form>
-    </div>
+    <form action="/editPassword?_method=PUT" method="post" id="edit-password">
+        <div class="form-group">
+            <label>비밀번호 재확인</label><br>
+            <input type="password" name="password" id="old-password"><br>
+            <div id="warn-old-pass" style="font-size:12px; color:green"></div>
+            <button type="button" id="submit-old-pass" onclick="VerifyPassword()">확인</button>
+        </div><p></p>
+    
+        <div class="form-group">
+            <label>비밀번호 변경</label><br>
+            <input type="password" name="password" id="new-password1" onblur="IsValidPassword()" disabled><br>
+            <div id="warn-new-pass1" style="font-size:12px; color:red"></div>
+            <input type="password" name="password" id="new-password2" onblur="CheckPasswords()" disabled><br>
+            <div id="warn-new-pass2" style="font-size:12px; color:red"></div>
+            <button type="button" id="submit-new-pass" onclick="EditPassword()" disabled>변경</button>
+        </div><p></p>
+    </form>
 
     <script>
+
+        let inputOldPass = document.getElementById("old-password");
+        let warnOldPass = document.getElementById("warn-old-pass");
+        let submitOldPass = document.getElementById("submit-old-pass");
+
+        let inputNewPass1 = document.getElementById("new-password1");
+        let warnNewPass1 = document.getElementById("warn-new-pass1");
+        let inputNewPass2 = document.getElementById("new-password2");
+        let warnNewPass2 = document.getElementById("warn-new-pass2");
+        let submitNewPass = document.getElementById("submit-new-pass");
+
         function VerifyPassword() {
-            console.log(document.getElementById("input-exist-pass").value)
-            let inputPass = document.getElementById("input-exist-pass").value;
             $.ajax({
                 type : 'POST',
                 url : "/verifyPassword",
                 data : {
                     input   : "password",
-                    password: inputPass,
+                    password: inputOldPass.value,
                 },
                 error : function(err) {
                     alert("실행중 오류가 발생하였습니다.");
                 },
-                success : function(data) {
-                    if(data === "correct") {
-                        document.getElementById("warn-password").innerHTML = "확인되었습니다.";
-                        document.getElementById("input-exist-pass").disabled = true;
-                        document.getElementById("button-exist-pass").disabled = true;
-                        document.getElementById("password1").disabled = false;
-                        document.getElementById("password2").disabled = false;
-                        document.getElementById("submit-new-pass").disabled = false;
+                success : function(send) {
+                    if(send === "verified") {
+                        inputOldPass.setAttribute("disabled", true);
+                        submitOldPass.setAttribute("disabled", true);
+                        warnOldPass.innerHTML = "확인되었습니다.";
+                        inputNewPass1.removeAttribute("disabled");
+                        inputNewPass2.removeAttribute("disabled");
+                        submitNewPass.removeAttribute("disabled");
                     }
                     else {
                         alert("비밀번호가 맞지 않습니다.")
@@ -65,45 +74,55 @@
         }
 
         function IsValidPassword() {
-            if($("#password1").val().length === "") {
-                document.getElementById("warn-password1").innerHTML = "";
-                $("#password1").removeAttr("checked");
+            if(inputNewPass1.value.length === "") {
+                inputNewPass1.removeAttribute("checked");
+                warnNewPass1.innerHTML = "";
             }
-            else if($("#password1").val().length > 0 && $("#password1").val().length < 12) {
-                document.getElementById("warn-password1").innerHTML = "최소 12자 이상의 비밀번호를 입력해주세요.";
-                $("#password1").removeAttr("checked");
+            else if(inputNewPass1.value.length > 0 && inputNewPass1.value.length < 12) {
+                inputNewPass1.removeAttribute("checked");
+                warnNewPass1.innerHTML = "최소 12자 이상의 비밀번호를 입력해주세요.";
             }
-            else if($("#password1").val().length > 64) {
-                document.getElementById("warn-password1").innerHTML = "64자 이내의 비밀번호를 입력해주세요.";
-                $("#password1").removeAttr("checked");
+            else if(inputNewPass1.value.length > 64) {
+                inputNewPass1.removeAttribute("checked");
+                warnNewPass1.innerHTML = "64자 이내의 비밀번호를 입력해주세요.";
             }
-            else if($("#password1").val() === $("#input-exist-pass").val()) {
-
+            else if(inputNewPass1.value === inputOldPass.value) {
+                inputNewPass1.removeAttribute("checked");
+                warnNewPass1.innerHTML = "이전 비밀번호와 같습니다.";
             }
             else {
-                document.getElementById("warn-password1").innerHTML = "";
-                $("#password1").attr("checked", "on");
+                inputNewPass1.setAttribute("checked", "checked");
+                warnNewPass1.innerHTML = "";
                 CheckPasswords();
             }
         }
 
         function CheckPasswords() {
-            if($("#password1").val() === $("#password2").val()) {
-                document.getElementById("warn-password2").innerHTML = "";
-                $("#password2").attr("checked", "on");
+            if(inputNewPass1.value === inputNewPass2.value) {
+                inputNewPass2.setAttribute("checked", "checked");
+                warnNewPass2.innerHTML = "";
             }
-            else if($("#password2").val() === "") {
-                document.getElementById("warn-password2").innerHTML = "";
-                $("#password2").removeAttr("checked");
+            else if(inputNewPass2.value === "") {
+                inputNewPass2.removeAttribute("checked");
+                warnNewPass2.innerHTML = "";
             }
             else {
-                document.getElementById("warn-password2").innerHTML = "비밀번호가 일치하지 않습니다.";
-                document.getElementById("password2").value = "";
-                $("#password2").removeAttr("checked");
+                inputNewPass2.value = "";
+                inputNewPass2.removeAttribute("checked");
+                warnNewPass2.innerHTML = "비밀번호가 일치하지 않습니다.";
             }
         }
 
-        // 기존비밀번호랑 함수만들다 말았음
+        function EditPassword() {
+            CheckPasswords();
+
+            let checkPass1 = inputNewPass1.getAttribute("checked");
+            let checkPass2 = inputNewPass2.getAttribute("checked");
+
+            if(checkPass1 === "checked" && checkPass2 === "checked") {
+                document.getElementById("edit-password").submit();
+            }            
+        }
     </script>
 </body>
 </html>
