@@ -50,230 +50,277 @@
             </div><br>
         </form><br>
         
-        <button type="submit" class="btn btn-outline-danger" id="submit-button" onclick="CheckAll()" style="width:178px">가입하기</button><p></p>
+        <button type="submit" id="submit-button" onclick="CheckAll()" style="width:178px">가입하기</button><p></p>
     </div>
 
     <script>
-        function IsValidEmail() {
-            let inputEmail = document.getElementById("input-email").value; 
+
+        // 이메일 입력 폼
+        let warnEmail = document.getElementById("warn-email");
+        let inputEmail = document.getElementById("input-email"); 
+        let sendEmail = document.getElementById("send-email");
+        
+        function IsValidEmail() {        
             var reg_email = /^([0-9a-zA-Z_\.-]+)@([0-9a-zA-Z_-]+)(\.[0-9a-zA-Z_-]+){1,2}$/;
-            
-            if(inputEmail === "") {
-                $("#input-email").removeAttr("checked");
-                $("#send-email").attr("disabled", true);
+            warnEmail.setAttribute("style", "color:red; font-size:small");
+
+            // 이메일 입력이 빈 칸인 경우
+            if(inputEmail.value === "") {
+                warnEmail.innerHTML = "";
+                inputEmail.removeAttribute("checked");
+                sendEmail.setAttribute("disabled", true);
             }
-            else if(!reg_email.test(inputEmail)) {
-                document.getElementById("warn-email").innerHTML = "이메일 형식이 올바르지 않습니다.";
-                $("#input-email").removeAttr("checked");
-                $("#send-email").attr("disabled", true);
-            }  
+            // 이메일 형식에 맞지 않는 경우
+            else if(!reg_email.test(inputEmail.value)) {
+                warnEmail.innerHTML = "이메일 형식이 올바르지 않습니다.";
+                inputEmail.removeAttribute("checked");
+                sendEmail.setAttribute("disabled", true);
+            }
+            // 이메일 형식에 맞는 경우, 중복 검사
             else {
                 $.ajax({
                     type : 'POST',
                     url : "/isDuplicate",
                     data : {
                         input: "email",
-                        email: inputEmail,
+                        email: inputEmail.value,
                     },
                     error : function(err) {
                         alert("실행중 오류가 발생하였습니다.");
-                        $("#input-email").removeAttr("checked");
+                        inputEmail.removeAttribute("checked");
                     },
-                    success : function(data) {
-                        if(data === true) {
-                            document.getElementById("warn-email").innerHTML = "이미 사용중인 이메일입니다.";
-                            $("#input-email").removeAttr("checked");
-                            $("#send-email").attr("disabled", true);
+                    success : function(send) {
+                        if(send === true) {
+                            warnEmail.innerHTML = "이미 사용중인 이메일입니다.";
+                            inputEmail.removeAttribute("checked");
+                            sendEmail.setAttribute("disabled", true);
                         }
                         else {
-                            document.getElementById("warn-email").innerHTML = "";
-                            document.getElementById("send-email").disabled = false;
-                            $("#input-email").attr("checked", "on");
-                            return true;
+                            warnEmail.innerHTML = "가입 가능한 이메일입니다.";
+                            warnEmail.setAttribute("style", "color:green; font-size:small");
+                            inputEmail.setAttribute("checked", "checked");
+                            sendEmail.disabled = false;
                         }
                     }
                 });
             }
         }
 
-        function AuthReset() {
-            $("#input-authNum").removeAttr("checked");
-        }
-
+        // 인증메일 발송
         function CheckEmail() {
-            if($("#input-email").attr("checked") === "checked") {
+            warnEmail.setAttribute("style", "color:red; font-size:small");
+            
+            if(inputEmail.getAttribute("checked") === "checked") {
                 $.ajax({
                     type : 'POST',
                     url : "/mail",
                     data : {
                         input   : "email",
-                        email: $("#input-email").val(),
+                        email: inputEmail.value,
                     },
                     error : function(err) {
                         alert("실행중 오류가 발생하였습니다.");
                     },
-                    success : function(data) {
-                        if(data === "send") {
-                            document.getElementById("warn-email").innerHTML = "메일이 발송되었습니다.";
-                            setTimeout(() => document.getElementById("warn-email").innerHTML = "", 3000);
+                    success : function(send) {
+                        if(send === "send") {
+                            warnEmail.setAttribute("style", "color:green; font-size:small");
+                            warnEmail.innerHTML = "메일이 발송되었습니다.";
+                            setTimeout(() => warnEmail.innerHTML = "", 3000);
                         }
-                        if(data === "exist") {
-                            document.getElementById("warn-email").innerHTML = "이미 발송되었습니다.";
-                            setTimeout(() => document.getElementById("warn-email").innerHTML = "", 3000);
+                        if(send === "exist") {
+                            warnEmail.innerHTML = "이미 발송되었습니다.";
+                            setTimeout(() => warnEmail.innerHTML = "", 3000);
                         }
                     }
                 })
             }
         }
 
-        function SendAuthRequest() {
-            let inputAuth = $("#input-authNum").val();
-            let requester = $("#input-email").val();
+        // 인증번호 입력 폼
+        let inputAuth = document.getElementById("input-authNum");
+        let warnAuth = document.getElementById("warn-auth");
+        let sendAuth = document.getElementById("send-authNum")
 
+        function SendAuthRequest() {
             $.ajax({
                 type : 'POST',
                 url : "/authCheck",
                 data : {
                     input  : "authRequest",
-                    email  : requester,
-                    authNum: inputAuth,
+                    email  : inputEmail.value,
+                    authNum: inputAuth.value,
                 },
                 error : function(err) {
                     alert("실행중 오류가 발생하였습니다.");
                 },
-                success : function(data) {
-                    if(data === true) {
-                        document.getElementById("warn-auth").style.color = "green";
-                        document.getElementById("warn-auth").innerHTML = "인증되었습니다.";
-                        $("#input-authNum").attr("checked", "on");
-                        $("#input-email").attr("disabled", true);
-                        $("#send-email").attr("disabled", true);
-                        $("#input-authNum").attr("disabled", true);
-                        $("#send-authNum").attr("disabled", true);
+                // 인증이 유효한 경우 : res.send(true)
+                success : function(send) {
+                    if(send === true) {
+                        warnAuth.style.color = "green";
+                        warnAuth.innerHTML = "인증되었습니다.";
+                        inputEmail.setAttribute("disabled", true);
+                        sendEmail.setAttribute("disabled", true);
+                        inputAuth.setAttribute("disabled", true);
+                        sendAuth.setAttribute("disabled", true);
+                        inputAuth.setAttribute("checked", "checked");
                     }
-                    else document.getElementById("warn-auth").innerHTML = "인증번호가 올바르지 않습니다.";
+                    else warnAuth.innerHTML = "인증번호가 올바르지 않습니다.";
                 }
             });
         }
 
-        function IsValidNickname() {
-            var inputNick = $("#input-nickname").val();
-            var nickLength = $("#input-nickname").val().length;
+        // 인증 후 이메일 변경 시 인증 취소
+        function AuthReset() {
+            inputAuth.removeAttribute("checked");
+        }
 
+        // 닉네임 입력 폼
+        let inputNick = document.getElementById("input-nickname");
+        let warnNick = document.getElementById("warn-nickname");
+
+        function IsValidNickname() {
+            var nickLength = inputNick.value.length;
+            warnNick.setAttribute("style", "color:red; font-size:small");
+
+            // 체크리스트
             var engCheck = /[a-z]/;
             var numCheck = /[0-9]/;
             var specialCheck = /[`~!@#$%^&*|\\\'\";:\/?]/;
                 
-            //닉네임 필수 입력
-            if(inputNick === null || inputNick === "") {
-                document.getElementById("warn-nickname").innerHTML = "닉네임 입력은 필수입니다.";
-                $("#input-nickname").removeAttr("checked");              
+            // 닉네임 입력 필수
+            if(inputNick.value === null || inputNick.value === "") {
+                inputNick.removeAttribute("checked");
+                warnNick.innerHTML = "닉네임 입력은 필수입니다.";
             }
-            //닉네임 빈칸 포함 안됨
-            else if(inputNick.search(/\s/) !== -1) {
-                document.getElementById("warn-nickname").innerHTML = "닉네임은 빈 칸을 포함 할 수 없습니다.";
-                $("#input-nickname").removeAttr("checked"); 
+            // 닉네임 빈칸 포함 불가
+            else if(inputNick.value.search(/\s/) !== -1) {
+                inputNick.removeAttribute("checked");
+                warnNick.innerHTML = "닉네임은 빈 칸을 포함 할 수 없습니다.";
             }
-            //닉네임 한글 1~10자, 영문 및 숫자 2~20자   
+            // 닉네임 한글, 영문 및 숫자 2 ~ 8자 제한
             else if(nickLength < 2 || nickLength > 8) {
-                document.getElementById("warn-nickname").innerHTML = "닉네임은 2 ~ 8자 이내로 작성해주세요.";
-                $("#input-nickname").removeAttr("checked");
+                inputNick.removeAttribute("checked");
+                warnNick.innerHTML = "닉네임은 2 ~ 8자 이내로 작성해주세요.";
             }
-            //닉네임 특수문자 포함 안됨    
-            else if(specialCheck.test(inputNick)) {
-                document.getElementById("warn-nickname").innerHTML = "닉네임은 특수문자를 포함 할 수 없습니다.";
-                $("#input-nickname").removeAttr("checked");
+            // 닉네임 특수문자 포함 불가    
+            else if(specialCheck.test(inputNick.value)) {
+                inputNick.removeAttribute("checked");
+                warnNick.innerHTML = "닉네임은 특수문자를 포함 할 수 없습니다.";
             }
-            //닉네임 중복확인
+            // 닉네임 중복확인
             else {
                 $.ajax({
                     type : 'POST',
                     url : "/isDuplicate",
                     data : {
                         input   : "nickname",
-                        nickname: inputNick,
+                        nickname: inputNick.value,
                     },
                     error : function(err) {
                         alert("실행중 오류가 발생하였습니다.");
                     },
-                    success : function(data) {
-                        if(data === true) {
-                            document.getElementById("warn-nickname").innerHTML = "이미 사용중인 닉네임입니다.";
-                            $("#input-nickname").removeAttr("checked");
+                    // 닉네임 중복인 경우 : res.send(true)
+                    success : function(send) {
+                        if(send === true) {
+                            inputNick.removeAttribute("checked");
+                            warnNick.innerHTML = "이미 사용중인 닉네임입니다.";
                         }
                         else {
-                            document.getElementById("warn-nickname").innerHTML = "";
-                            $("#input-nickname").attr("checked", "on");
+                            inputNick.setAttribute("checked", "checked");
+                            warnNick.setAttribute("style", "color:green; font-size:small");
+                            warnNick.innerHTML = "사용가능한 닉네임입니다.";
                         }
                     }
                 });
             }
         }
 
+        // 비밀번호 입력 폼
+        let password1 = document.getElementById("password1");
+        let warnPass1 = document.getElementById("warn-password1");
+        let password2 = document.getElementById("password2");
+        let warnPass2 = document.getElementById("warn-password2");
+
         function IsValidPassword() {
-            if($("#password1").val().length === "") {
-                document.getElementById("warn-password1").innerHTML = "";
-                $("#password1").removeAttr("checked");
+            // 비밀번호 입력이 빈 칸인 경우
+            if(password1.value.length === "") {
+                password1.removeAttribute("checked");
+                warnPass1.innerHTML = "";
             }
-            else if($("#password1").val().length > 0 && $("#password1").val().length < 12) {
-                document.getElementById("warn-password1").innerHTML = "최소 12자 이상의 비밀번호를 입력해주세요.";
-                $("#password1").removeAttr("checked");
+            // 비밀번호 길이가 12자 미만인 경우
+            else if(password1.value.length > 0 && password1.value.length < 12) {
+                password1.removeAttribute("checked");
+                warnPass1.innerHTML = "최소 12자 이상의 비밀번호를 입력해주세요.";
             }
-            else if($("#password1").val().length > 64) {
-                document.getElementById("warn-password1").innerHTML = "64자 이내의 비밀번호를 입력해주세요.";
-                $("#password1").removeAttr("checked");
+            // 비밀번호 길이가 64자 초과인 경우
+            else if(password1.value.length > 64) {
+                password1.removeAttribute("checked");
+                warnPass1.innerHTML = "64자 이내의 비밀번호를 입력해주세요.";
             }
+            // 권장 비밀번호 길이인 경우
             else {
-                document.getElementById("warn-password1").innerHTML = "";
-                $("#password1").attr("checked", "on");
+                password1.setAttribute("checked", "checked");
+                warnPass1.innerHTML = "";
                 CheckPasswords();
             }
         }
 
         function CheckPasswords() {
-            if($("#password1").val() === $("#password2").val()) {
-                document.getElementById("warn-password2").innerHTML = "";
-                $("#password2").attr("checked", "on");
+            // 비밀번호와 비밀번호 확인 일치
+            if(password1.value === password2.value) {
+                password2.setAttribute("checked", "checked");
+                warnPass2.innerHTML = "";
             }
-            else if($("#password2").val() === "") {
-                document.getElementById("warn-password2").innerHTML = "";
-                $("#password2").removeAttr("checked");
+            // 비밀번호 확인이 빈칸
+            else if(password2.value === "") {
+                password2.removeAttribute("checked");
+                warnPass2.innerHTML = "";
             }
-            else {
-                document.getElementById("warn-password2").innerHTML = "비밀번호가 일치하지 않습니다.";
-                document.getElementById("password2").value = "";
-                $("#password2").removeAttr("checked");
+            // 비밀번호와 비밀번호 확인이 비일치
+            else if(!(password1.value === password2.value)) {
+                password2.value = "";
+                password2.removeAttribute("checked");
+                warnPass2.innerHTML = "비밀번호가 일치하지 않습니다.";
             }
         }
 
         function CheckAll() {
-            let checkEmail = $("#input-email").attr("checked");
-            let checkAuth = $("#input-authNum").attr("checked");
-            let checkNick = $("#input-nickname").attr("checked");
-            let checkPass1 = $("#password1").attr("checked");
-            let checkPass2 = $("#password2").attr("checked");            
+            CheckPasswords();
 
+            // 가입 폼 입력상태
+            let checkEmail = inputEmail.getAttribute("checked");
+            let checkAuth = inputAuth.getAttribute("checked");
+            let checkNick = inputNick.getAttribute("checked");
+            let checkPass1 = password1.getAttribute("checked");
+            let checkPass2 = password2.getAttribute("checked");
+
+            // 올바르게 폼 입력 완료
             if(checkEmail === "checked" && checkNick === "checked" && checkPass1 === "checked" && checkPass2 === "checked" && checkAuth === "checked") {
-                $("#input-email").attr("disabled", false);
+                inputEmail.removeAttribute("disabled");
                 document.getElementById("signup").submit();
-                document.getElementById("input-email").value = "";
-                document.getElementById("input-authNum").value = "";
-                document.getElementById("input-nickname").value = "";
+                inputEmail.value = "";
+                inputAuth.value = "";
+                inputNick.value = "";
             }
+            // 이메일 오류
             else if(!(checkEmail === "checked")) {
-                document.getElementById("warn-email").innerHTML = "이메일이 올바르지 않습니다.";
+                warnEmail.innerHTML = "이메일이 올바르지 않습니다.";
             }
+            // 인증 미완료
             else if(!(checkAuth === "checked")) {
-                document.getElementById("warn-auth").innerHTML = "인증이 완료되지 않았습니다.";
+                warnAuth.innerHTML = "인증이 완료되지 않았습니다.";
             }
+            // 닉네임 오류
             else if(!(checkNick === "checked")) {
-                document.getElementById("warn-nickname").innerHTML = "닉네임을 확인해주세요.";
+                warnNick.innerHTML = "닉네임을 확인해주세요.";
             }
+            // 비밀번호 오류
             else if(!(checkPass1 === "checked")) {
-                document.getElementById("warn-password1").innerHTML = "비밀번호를 바르게 입력해주세요.";
+                warnPass1.innerHTML = "비밀번호를 바르게 입력해주세요.";
             }
+            // 비밀번호 확인 오류
             else if(!(checkPass2 === "checked")) {
-                document.getElementById("warn-password2").innerHTML = "비밀번호를 확인해주세요.";
+                warnPass2.innerHTML = "비밀번호를 확인해주세요.";
             }            
         }
     </script>
