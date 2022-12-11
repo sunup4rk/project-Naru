@@ -15,8 +15,13 @@ export const GlobalStyles = createGlobalStyle`
     }
 
     body {
-        font-family: 'SUIT', '맑은 고딕', 'sans-serif';
+        font-family: 'SUIT-Medium', '맑은 고딕', 'sans-serif';
         overflow-x: hidden;
+    }
+
+    a {
+        text-decoration: none;
+        color: #000000;
     }
 
     ul {

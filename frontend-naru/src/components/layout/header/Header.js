@@ -1,12 +1,15 @@
+import { Link } from 'react-router-dom';
 import './Header.scss';
-import Nav from './../navigation/Nav';
 
-const Header = () => {
-
-    return(
+const Header = ({category, logout, login}) => {
+    return (
         <div className='header'>
-            <img className='header__logo' src='images/logo.svg' alt='naru_logo'/>
-            <Nav />
+            <Link to="/">
+                <img className='header__logo' src='images/logo.svg' alt='naru'/>
+            </Link>
+            {category}
+            {/* {logout} */}
+            {login}
         </div>
     )
 }

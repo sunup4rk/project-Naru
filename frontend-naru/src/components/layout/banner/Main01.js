@@ -1,6 +1,4 @@
-
-
-const MainBanner01 = () => {
+const Main01 = () => {
 
     return(
         <div className='container'>
@@ -9,4 +7,4 @@ const MainBanner01 = () => {
     )
 }
 
-export default MainBanner01;
+export default Main01  ;

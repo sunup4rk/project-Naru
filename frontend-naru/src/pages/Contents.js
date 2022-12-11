@@ -1,5 +1,5 @@
 const Contents = ({ children }) => {
-    return <div className="contents">{children}</div>;
-  };
+  return <div className="contents">{children}</div>;
+};
 
-  export default Contents;
+export default Contents;
