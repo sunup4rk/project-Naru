@@ -1,0 +1,26 @@
+.Nav03 {
+  display: flex;
+  min-width: 240px;
+
+  .Nav03__list {
+    display: flex;
+    align-items: center;
+
+    :not(:first-child) {
+      padding-left: 18px;
+    }
+
+  }
+
+  .Nav03__user {
+    font-size: 20px;
+
+    :first-child {
+      font-family: SUIT-Bold;
+    }
+
+    :last-child {
+      padding-left: 10px;
+    }
+  }
+}

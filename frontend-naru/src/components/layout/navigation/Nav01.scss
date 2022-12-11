@@ -1,0 +1,17 @@
+.Nav01 {
+  width: 60%;
+  min-width: 350px;
+  margin-left: 20px;
+
+  .Nav01__list {
+    display: flex;
+    
+    :not(:last-child) {
+      padding-right: 30px;
+    }
+  }
+
+  .Nav01__menu {
+    font-size: 20px;
+  }
+}

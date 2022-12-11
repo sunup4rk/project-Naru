@@ -1,0 +1,13 @@
+.Nav02 {
+  min-width: 240px;
+
+  .Nav02__list {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .Nav02__menu {
+    padding-left: 20px;
+    font-size: 20px;
+  }
+}
