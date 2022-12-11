@@ -1,0 +1,51 @@
+.footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 280px;
+  background-color: #4461AA;
+
+  .footer-contents {
+    display: flex;
+    color: #ffffff;
+    padding-top: 50px;
+    max-width: 1200px;
+    
+    ul:not(:last-child) {
+      padding-right: 50px;
+    }
+  }
+
+  .footer-contents__list {
+
+    li:nth-child(3) {
+      padding-top: 12px;
+    }
+  }
+
+  .footer-contents__title {
+    font-size: 20px;
+    font-family: SUIT-Bold;
+  }
+
+  .footer-contents__member {
+    display: flex;
+    align-items: center;
+    padding-top: 20px;
+
+    :not(:last-child) {
+      padding-right: 7px;
+    }
+  }
+
+  .footer-contents__icon {
+    padding-top: 20px;
+    text-align: center;
+  }
+
+  img {
+    cursor: pointer;
+  }
+}
