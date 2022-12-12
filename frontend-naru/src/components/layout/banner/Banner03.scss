@@ -1,0 +1,41 @@
+.Banner03 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 1920px;
+  height: 350px;
+
+
+  .Banner03-text {
+    text-align: center;
+
+    h1 {
+      font-size: 32px;
+      font-family: Jalnan;
+    }
+
+    p {
+      font-size: 24px;
+      font-family: SUIT-Light;
+      padding-top: 12px;
+    }
+  }
+}
+
+.explore {
+  background-image: url("../../../assets/images/explore.svg");
+}
+
+.community {
+  background-image: url("../../../assets/images/community.svg");
+}
+
+.point {
+  background-image: url("../../../assets/images/point.svg");
+}
+
+.qna {
+  background-image: url("../../../assets/images/qna.svg");
+}

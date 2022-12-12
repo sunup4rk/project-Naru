@@ -9,8 +9,8 @@ const Header = ({category, logout, login}) => {
                 <img className='header__logo' src={logo} alt='naru'/>
             </Link>
             {category}
-            {/* {logout} */}
-            {login}
+            {logout}
+            {/* {login} */}
         </div>
     )
 }

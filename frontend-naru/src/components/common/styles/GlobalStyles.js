@@ -40,24 +40,24 @@ export const GlobalStyles = createGlobalStyle`
     @font-face {
         font-family: Jalnan;
         src : local('여기어때 잘난체'),
-            url('fonts/Jalnan.woff') format('woff')
+            url('/fonts/Jalnan.woff') format('woff')
     }
 
     @font-face {
         font-family: SUIT-Light;
         src : local('SUIT Light'),
-            url('fonts/SUIT-Light.woff2') format('woff2')
+            url('/fonts/SUIT-Light.woff2') format('woff2')
     }
 
     @font-face {
         font-family: SUIT-Medium;
         src : local('SUIT Medium'),
-            url('fonts/SUIT-Medium.woff2') format('woff2')
+            url('/fonts/SUIT-Medium.woff2') format('woff2')
     }
 
     @font-face {
         font-family: SUIT-Bold;
         src : local('SUIT Bold'),
-            url('fonts/SUIT-Bold.woff2') format('woff2')
+            url('/fonts/SUIT-Bold.woff2') format('woff2')
     }
 `;
