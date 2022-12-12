@@ -7,7 +7,7 @@ import Nav01 from './components/layout/navigation/Nav01';
 import Nav02 from './components/layout/navigation/Nav02';
 import Nav03 from './components/layout/navigation/Nav03';
 import Banner01 from './components/layout/banner/Banner01';
-import { ExploreBanner, CommunityBanner, PointBanner, QnaBanner } from "./components/layout/banner/Banner03"
+import { ExploreBanner, CommunityBanner, PointBanner, QnaBanner, MypageBanner } from "./components/layout/banner/Banner03"
 import Aside01 from "./components/layout/Aside/Aside01"
 import Aside02 from "./components/layout/Aside/Aside02"
 import Cafe from './pages/Cafe';
@@ -31,6 +31,7 @@ function App() {
         <Route path="/community/*" element={<CommunityBanner />} />
         <Route path="/point" element={<PointBanner />} />
         <Route path="/qna" element={<QnaBanner />} />
+        <Route path="/mypage/*" element={<MypageBanner />} />
       </Routes>
 
       <Body>
