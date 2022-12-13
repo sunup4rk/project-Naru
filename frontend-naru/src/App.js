@@ -12,6 +12,7 @@ import Aside01 from "./components/layout/aside/Aside01"
 import Aside02 from "./components/layout/aside/Aside02"
 import Cafe from './pages/Cafe';
 import SignIn from "./pages/signIn/SignIn";
+import SignUp from './pages/signUp/signUp';
 
 const Body = styled.div`
   display: flex;
@@ -43,6 +44,7 @@ function App() {
             {/* <Route path="/" element={<Main category={<A />} top={<B />} banner={<Banner02 />} />} /> */}
             {/* <Route path="/explore/cafe" element={<Cafe />} /> */}
             <Route path="/signIn" element={<SignIn />} />
+            <Route path="/signUp" element={<SignUp />} />
           </Routes>
       </Body>
       
