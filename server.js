@@ -72,13 +72,14 @@ app.get('/', function(req, res) {
     // puppeteer.launch( { headless : true } ).then(async browser => {})
 
     const crawlTime = moment().format('YYYY-MM-DD')
-
+    var test = 0
+    test = 1
     async function CrawlGame () {
         const browser = await puppeteer.launch({
             headless: true
           });
           // 새로운 페이지를 연다.
-          const page = await browser.newPage();
+          const page = await browser.newPage()
           // "https://www.goodchoice.kr/product/search/2" URL에 접속한다. (여기어때 호텔 페이지)
           await page.goto('https://www.thelog.co.kr/index.do');
           // 페이지의 HTML을 가져온다.
