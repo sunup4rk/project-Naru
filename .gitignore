@@ -3,3 +3,5 @@
 
 # AWS Lightsail AccessKey
 config/awsconfig.json
+
+/node_modules
