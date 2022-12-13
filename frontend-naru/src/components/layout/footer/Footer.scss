@@ -7,11 +7,15 @@
   height: 280px;
   background-color: #4461AA;
 
+  .footer__logo {
+    width: 50px;
+  }
+
   .footer-contents {
     display: flex;
     color: #ffffff;
-    padding-top: 50px;
     max-width: 1200px;
+    padding-top: 2rem;
     
     ul:not(:last-child) {
       padding-right: 50px;

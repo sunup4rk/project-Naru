@@ -1,6 +1,11 @@
 import { createGlobalStyle } from 'styled-components'
 import reset from 'styled-reset'
 
+export const breakPoints = {
+    mobile: "screen and (max-width:767px)",
+    tablet: "screen and (min-width:768px) and (max-width:1023px)",
+  };
+
 export const GlobalStyles = createGlobalStyle`
     ${reset}
 
@@ -12,6 +17,13 @@ export const GlobalStyles = createGlobalStyle`
 
     html {
         font-size : 16px;
+
+        @media ${breakPoints.tablet} {
+            font-size: 14px;
+          }
+          @media ${breakPoints.mobile} {
+            font-size: 12px;
+          }
     }
 
     body {
@@ -33,12 +45,7 @@ export const GlobalStyles = createGlobalStyle`
     }
 
     button {
-        font-size: 16px;
         cursor: pointer;
-    }
-
-    input {
-        font-size: 16px;
     }
 
 
