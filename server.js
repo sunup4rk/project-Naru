@@ -31,6 +31,8 @@ MongoClient.connect(process.env.DB_URL, function(err, client) {
 const methodOverride = require('method-override');
 app.use(methodOverride('_method'));
 
+const multer = require('multer');
+
 
 // public 폴더의 내용을 정적파일로 사용
 app.use('/public', express.static('public'));
@@ -68,7 +70,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/explore', function(req, res) {
-    res.render('info.ejs');             // 정보 페이지
+    res.render('explore.ejs');             // 정보 페이지
 });
 
 app.get('/community', function(req, res) {
@@ -126,12 +128,11 @@ app.get('/community/write', function(req, res) {
     res.render('write.ejs');            // 글 작성 페이지
 });
 
-app.post("/add", function(req, res){
-    db.collection('post_count').findOne({name : 'postcnt'}, function(err, result){
-        console.log(result)
-        var totalCount = result.total_post;
+app.post("/add", function(req, res) {
+    db.collection('post_count').findOne({name : 'postcnt'}, function(err, result) {
+        const postId = Number(result.total_post) + 1
         db.collection('post').insertOne({
-            _id : totalCount + 1, 
+            _id : postId,
             user_id : req.user._id,
             writer : req.user.nickname, 
             post_title : req.body.title, 
@@ -139,16 +140,58 @@ app.post("/add", function(req, res){
             like_count : 0, 
             like_user : [],
             post_address : "",
-            post_time : moment().format('YYYY-MM-DD [작성]')}, function(err, result){
-            db.collection('post_count').updateOne({name : 'postcnt'}, {$inc :{total_post : 1}}, function(err, result){
-            }) 
-        })
+            post_time : moment().format('YYYY-MM-DD [작성]')
+            },
+            function(err, result){
+                if (err) return console.log(err);
+                else {
+                    console.log("post_id :", postId, " 등록");
+                    UpdatePostCount();
+                    UpdateUserInfo(req.user._id);
+                    res.status(200).json({post_id: postId});         
+                }
+            }
+        )
     })
-        db.collection('user_info').updateOne({_id : req.user._id}, {$inc : {user_point : 30, posting_count : 1}}, function(err, result){
-        })
-    console.log('글 작성 완료')
-    res.redirect('/community')
 })
+
+function CheckPostCount() {
+    db.collection('post_count').findOne({
+        name : 'postcnt'
+    }, 
+    function(err, result) {
+        if (err) return console.log(err)
+        else {
+            const totalPost = result.total_post
+            return totalPost;
+        }
+    });
+}
+
+function UpdateUserInfo(_id) {
+    db.collection('user_info').updateOne(
+        {_id : _id},
+        {$inc : {user_point : 30, posting_count : 1}},
+        function(err, result) {
+            if (err) return console.log(err);
+            else {
+                console.log("user_point : 업데이트 완료");
+                console.log("posting_count : 업데이트 완료");
+            } 
+        }
+    )
+}
+
+function UpdatePostCount() {
+    db.collection('post_count').updateOne(
+        {name : 'postcnt'},
+        {$inc :{total_post : 1}},
+        function(err, result) {
+            if (err) return console.log(err);
+            else console.log("total_post : 업데이트 완료");
+        }
+    )
+}
 
 app.get('/community/detail/:id', function(req, res) {
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err,result){
@@ -187,13 +230,13 @@ app.put('/edit/post/:id', function(req,res){
 })
 
 app.post('/delete/:id', function(req, res){ 
-    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
-        if (!req.isAuthenticated()){
+    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
+        if (!req.isAuthenticated()) {
             res.send('<script>alert("권한이 없습니다. (로그인 필요)"); history.back();</script>')
         }
         else if(result.user_id.toString() == req.user._id.toString()){
-            db.collection('post').deleteOne({_id : parseInt(req.params.id)}, function(err, result){
-                db.collection('user_info').updateOne({_id : req.user._id}, {$inc : {user_point : -30, posting_count : -1}}, function(err, result){
+            db.collection('post').deleteOne({_id : parseInt(req.params.id)}, function(err, result) {
+                db.collection('user_info').updateOne({_id : req.user._id}, {$inc : {user_point : -30, posting_count : -1}}, function(err, result) {
                 })
                 res.send('<script>alert("삭제가 완료되었습니다."); location.href="/community";</script>')
             })
@@ -257,7 +300,7 @@ passport.use(new localStrategy({
     session: true,
     passReqToCallback: false,
 }, function(inputemail, inputpw, done) {
-    console.log("접속자 : " + inputemail);
+    console.log("Sign in : " + inputemail);
 
     db.collection('user_info').findOne({email: inputemail}, function(err, result) {
         if (err) {return done(err);}
@@ -317,6 +360,7 @@ app.post("/signup", function(req, res){
 
                                         // 마이페이지 - 내정보
 app.get("/mypage", IsLogin, (req, res) => {
+    console.log(req.user)
     res.render("mypage.ejs", {userInfo : req.user});
 });
 function IsLogin (req, res, next) {
@@ -333,15 +377,136 @@ app.get('/mypage/edit', IsLogin, function(req, res) {
 });
 
 const imageRouter = require('./imageRouter.js');
-app.use('/image', imageRouter)
+//////////////////////////////////////////////////////////////////////////////////////////////
+// app.use('/image', imageRouter);
+
+const AWS = require('aws-sdk');
+const multiparty = require('multiparty');
+const sharp = require('sharp');
+AWS.config.loadFromPath(__dirname + "/config/awsconfig.json");
+const BUCKET_NAME = 'bucket-sunu';
+
+app.post('/imageUpload', function(req, res) {
+    console.log("request received :", req.user._id);
+    const form = new multiparty.Form()
+    // 에러 처리
+    form.on('error', function(err) {
+        res.status(500).end()
+    })
+    // form 데이터 처리
+    form.on('part', function(part) {
+        // 이미지 저장 디렉토리
+        const USER_ID = req.user._id;
+        const POST_ID = part.name;
+        const IMAGE_DIR = USER_ID + "/" + POST_ID + "/";
+        if(!part.filename) 
+            return part.resume()
+        else {
+            const filename = part.filename;
+            streamToBufferUpload(part, filename, IMAGE_DIR);
+            db.collection('post').updateOne({_id : POST_ID}, {$set : {post_address : process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename}}, function(err, result){
+                if (err) return console.log(err);
+                else console.log("이미지주소첨부 :", process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename)
+
+            });
+        }
+        
+    })
+    // form 종료
+    form.on('close', function() {
+        res.send(true);
+    });
+    form.parse(req);
+});
+
+function streamToBufferUpload(part, filename, ADR){
+    const chunks = [];
+    return new Promise((resolve, reject) => {
+        part.on('data',   (chunk) => chunks.push(Buffer.from(chunk)));
+        part.on('error',  ( err ) => reject(err));
+        part.on('end',    (     ) => resolve(Buffer.concat(chunks)));
+        uploadToBucket(ADR + filename, part)
+    })
+}
+function uploadToBucket(filename, Body){
+    const params = { Bucket:BUCKET_NAME, Key:filename, Body, ContentType: 'image' }
+    const upload = new AWS.S3.ManagedUpload({ params });
+    return upload.promise()
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 app.get('/upload', function(req, res){
     res.render("upload.ejs")
-	// res.writeHead(200, {"Content-Type": "text/html"});
-	// res.end();
+	res.writeHead(200, {"Content-Type": "text/html"});
+	res.end();
 })
 app.listen(process.env.PORT2, function(){
 	console.log(`running image server on ${process.env.PORT2}`)
 })
+const imageEditRouter = require('./imageEditRouter.js');
+app.use('/imageEdit', function(req, res) {
+    const router = require('express').Router();
+    const AWS = require('aws-sdk');
+    
+    AWS.config.loadFromPath(__dirname + "/config/awsconfig.json");
+    
+    // S3 객체 얻기
+    const s3 = new AWS.S3();
+
+    const BUCKET_NAME = 'bucket-sunu';
+    
+    //* 버켓의 객체 리스트 출력
+
+    console.log("imageEditRouter 접속")
+
+    
+    const objectParams_del = {
+        Bucket: BUCKET_NAME,
+        Key: `639435f18333d6a94d91271e/`,
+    };
+    s3
+        .deleteObject(objectParams_del)
+        .promise()
+        .then((data) => {
+            console.log('success : ', data);
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+});
+
+// const upload = multer({ dest: path.join(__dirname, 'uploads/') });
+// app.get('/test',upload.array('images', 5), async (req, res, next) => {
+//     const test = req.files ?? [];
+//     await utilClass.uploadImageToS3(test);
+//     res.send('OK')
+// });
+// async function uploadImageToS3(images) {
+//     AWS.config.loadFromPath(__dirname + "/config/awsconfig.json");
+//     const s3 = new AWS.S3();
+
+//     const promiseList = images.map((file) => {
+//         const fileStream = fs.createReadStream(file.path);
+
+//         return s3.upload({
+//                 Bucket: 'bucket-sunu',
+//                 // 파일명
+//                 Key: `uploads/${file.originalname}`,
+//                 Body: fileStream,
+//             })
+//             .promise();
+//     });
+
+//     const result = await Promise.all(promiseList);
+
+//     for (let i = 0; i < files.length; i++) {
+//         fs.unlink(files[i].path, (err) => {
+//             if (err) throw err;
+//         });
+//     }
+
+//     return result;
+// }
 
 
 app.get('/mypage/editPW', IsLogin, function(req, res) {
@@ -383,7 +548,6 @@ const ejs = require('ejs');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 const path = require('path');
-const { equal } = require('assert');
 var appDir = path.dirname(require.main.filename);
 
 app.post('/mail',  function(req, res) {
@@ -474,3 +638,4 @@ app.post('/authCheck', function(req, res) {
         else res.send(false);
     });   
 })
+
