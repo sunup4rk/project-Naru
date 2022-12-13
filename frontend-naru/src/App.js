@@ -37,12 +37,13 @@ function App() {
 
       <Body>
           <Routes>
+            <Route path="/explore/*" element={<Aside01 />} />
             <Route path="/mypage/*" element={<Aside02 />} />
           </Routes>
 
           <Routes>
             {/* <Route path="/" element={<Main category={<A />} top={<B />} banner={<Banner02 />} />} /> */}
-            {/* <Route path="/explore/cafe" element={<Cafe />} /> */}
+            <Route path="/explore/cafe" element={<Cafe />} />
             <Route path="/signIn" element={<SignIn />} />
             <Route path="/signUp" element={<SignUp />} />
           </Routes>
