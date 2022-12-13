@@ -66,6 +66,106 @@ moment.tz.setDefault("Asia/Seoul");
 
 // 라우터 설정
 app.get('/', function(req, res) {
+    const puppeteer = require( "puppeteer" );
+    const cheerio = require( "cheerio" );
+
+    // puppeteer.launch( { headless : true } ).then(async browser => {})
+
+    const crawlTime = moment().format('YYYY-MM-DD')
+
+    async function CrawlGame () {
+        const browser = await puppeteer.launch({
+            headless: true
+          });
+          // 새로운 페이지를 연다.
+          const page = await browser.newPage();
+          // "https://www.goodchoice.kr/product/search/2" URL에 접속한다. (여기어때 호텔 페이지)
+          await page.goto('https://www.thelog.co.kr/index.do');
+          // 페이지의 HTML을 가져온다.
+          const content = await page.content();
+          // $에 cheerio를 로드한다.
+          const $ = cheerio.load(content);
+          // 복사한 리스트의 Selector로 리스트를 모두 가져온다.
+          const lists = $("#game_rank > tr");
+          var resultGame = []
+          for (var i = 0; i < lists.length; i++){
+            resultGame[i] = $(lists[i]).find("tr > td.name").text()
+          }
+          // 모든 리스트를 순환한다.
+          db.collection('crawling').insertOne({
+                    sort : 'game',
+                    title : resultGame,
+                    time : crawlTime,
+                }, function(err, result){
+            console.log('게임순위 데이터 입력')
+                })
+          // 브라우저를 종료한다.
+          browser.close();
+    }
+
+
+    async function CrawlMovie () {
+        const browser = await puppeteer.launch({
+            headless: true
+          });
+        
+          // 새로운 페이지를 연다.
+          const page = await browser.newPage();
+          // "https://www.goodchoice.kr/product/search/2" URL에 접속한다. (여기어때 호텔 페이지)
+          await page.goto('https://movie.daum.net/ranking/boxoffice/weekly');
+          // 페이지의 HTML을 가져온다.
+          const content = await page.content();
+          // $에 cheerio를 로드한다.
+          const $ = cheerio.load(content);
+          // 복사한 리스트의 Selector로 리스트를 모두 가져온다.
+          const lists = $("#mainContent > div > div.box_boxoffice > ol > li");
+          var resultMovie = []
+          var resultMovieImg = []
+          // 모든 리스트를 순환한다.
+          for (var i = 0; i < lists.length; i++){
+            resultMovieImg[i] = $(lists[i]).find("div > div.thumb_item > div.poster_movie > img").attr('src')
+            resultMovie[i] = $(lists[i]).find("div > div.thumb_cont > strong > a").text()
+          }
+          db.collection('crawling').insertOne({
+                    sort : 'movie',
+                    title : resultMovie,
+                    titleimg : resultMovieImg,
+                    time : crawlTime,
+                }, function(err, result){
+            console.log('영화순위 데이터 입력')
+                })
+          // 브라우저를 종료한다.
+          browser.close();
+    }
+
+    // ==================== 크롤링 DB구역에 데이터가 없을 때 한번만! =============================
+    // if (true){
+    //     db.collection('crawling').insertOne({
+    //         sort : 'time',
+    //         time : crawlTime,
+    //     }, function(err, result){
+    //         console.log('최초 데이터 입력')
+    //         CrawlGame()
+    //         CrawlMovie()
+    //     })
+    // }
+    // =========================================================================================
+
+    db.collection('crawling').findOne({sort : 'time'}, function(err, result){
+        if(result.time !== crawlTime){
+            console.log('날짜 변경, 크롤링 재실행')
+            db.collection('crawling').updateOne(
+                { sort: 'time'}, { $set : {time : crawlTime}},
+            )
+            db.collection('crawling').deleteOne({sort : 'game'}, function(err, result){})
+            db.collection('crawling').deleteOne({sort : 'movie'}, function(err, result){})
+            CrawlGame()
+            CrawlMovie()
+        }
+        else{
+            console.log('최근 크롤링 날짜 : ', crawlTime, '값이 유효합니다.')
+        }
+    })
     res.render('main.ejs');             // 메인 페이지
 });
 
