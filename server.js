@@ -72,7 +72,8 @@ app.get('/', function(req, res) {
     // puppeteer.launch( { headless : true } ).then(async browser => {})
 
     const crawlTime = moment().format('YYYY-MM-DD')
-
+    var test = 0
+    test = 1
     async function CrawlGame () {
         const browser = await puppeteer.launch({
             headless: true
