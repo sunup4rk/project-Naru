@@ -1,0 +1,27 @@
+.signIn {
+    width: 100%;
+    background-color: #fafafa;
+    padding: 100px 0;
+
+    .signIn-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+
+        svg {
+            margin-bottom: 40px;
+        }
+
+        input + input {
+            margin: 10px;
+        }
+
+        button {
+            margin-top: 30px;
+        }
+
+    }
+}
