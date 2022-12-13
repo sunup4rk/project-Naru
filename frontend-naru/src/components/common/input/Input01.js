@@ -11,7 +11,7 @@ const Input = styled.input`
     border: 1px solid #D1D9DE;
     padding: 20px;
     font-family: "SUIT-Medium";
-
+    font-size: 1rem;
 
     &:focus {
         outline: 1px solid #4461AA;

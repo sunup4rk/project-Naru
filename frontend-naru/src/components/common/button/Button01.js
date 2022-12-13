@@ -16,6 +16,7 @@ const Button = styled.button`
     background-color: #4461AA;
     font-family: "SUIT-Medium";
     color: #ffffff;
+    font-size: 1rem;
 }
 `
 

@@ -1,7 +1,6 @@
 .Nav01 {
   width: 60%;
-  min-width: 350px;
-  margin-left: 20px;
+  // min-width: 350px;
 
   .Nav01__list {
     display: flex;
@@ -12,6 +11,6 @@
   }
 
   .Nav01__menu {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 }
