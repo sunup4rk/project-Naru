@@ -16,7 +16,7 @@ export const GlobalStyles = createGlobalStyle`
 
     body {
         font-family: 'SUIT-Medium', '맑은 고딕', 'sans-serif';
-        overflow-x: hidden;
+        // overflow-x: hidden;
     }
 
     a {
@@ -33,7 +33,12 @@ export const GlobalStyles = createGlobalStyle`
     }
 
     button {
+        font-size: 16px;
         cursor: pointer;
+    }
+
+    input {
+        font-size: 16px;
     }
 
 

@@ -4,8 +4,10 @@ import { ReactComponent as Logo } from '../../../assets/images/logo02.svg';
 const Footer = () => {
 
     return(
-        <div className='footer'>
-            <Logo height="25"/>
+        <div className="footer">
+            <Logo height="25" role="img" aria-labelledby="title">
+                <title id="title">naru</title>
+            </Logo>
                 <div className='footer-contents'>
                     <ul>
                         <li className="footer-contents__title">
