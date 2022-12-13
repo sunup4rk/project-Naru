@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
 const Input = styled.input`
-    width: ${(props) => props.size === 's' && '30%'};
-    width: ${(props) => props.size === 'm' && '50%'};
+    width: ${(props) => props.size === 's' && '25%'};
+    width: ${(props) => props.size === 'm' && '40%'};
     width: ${(props) => props.size === 'l' && '90%'};
     
     min-width: 12.5rem;
