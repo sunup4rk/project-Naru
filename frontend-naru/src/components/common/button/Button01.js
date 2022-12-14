@@ -5,8 +5,8 @@ const Button = styled.button`
     justify-content: center;
     align-items: center;
 
-    width: ${(props) => props.size === 's' && '3rem'};
-    width: ${(props) => props.size === 'm' && '9rem'};
+    width: ${(props) => props.size === 's' && '5rem'};
+    width: ${(props) => props.size === 'm' && '10rem'};
     
     // min-width: 8rem;
     height: 2.8rem;
