@@ -25,7 +25,9 @@
       <h6 class="card-subtitle mb-2 text-muted">작성시간 : <%= data.post_time %></h6>
       <!-- 좋아요 개수 출력 -->
       <h6 class="card-subtitle mb-2 text-muted">좋아요 : <%= data.like_count %></h6>
-      <div id="imgarea-pid" style="height: 200px; width: 200px; background-color: beige; text-align:center;">이미지영역</div>
+      <div id="imgarea-pid" style="height: 200px; width: 200px; background-color: beige; text-align:center;">
+        <img src=<%= data.post_address.url %>>
+      </div>
       <div class="buttons">
         <form action="/like/<%= data._id %>" method="post">
           <button type="submit">좋아요</button>

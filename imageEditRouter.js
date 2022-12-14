@@ -18,21 +18,7 @@ router.get('/*', (req, res) => {
 })
 
 
-router.post('/', function(req, res) {
-    const objectParams_del = {
-        Bucket: BUCKET_NAME,
-        Key: `639435f18333d6a94d91271e/ine.jpg`,
-     };
-    s3
-        .deleteObject(objectParams_del)
-        .promise()
-        .then((data) => {
-            console.log('success : ', data);
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-})
+
 
 
 module.exports = router    

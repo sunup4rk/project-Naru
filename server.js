@@ -16,6 +16,9 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true})); 
 app.use(bodyParser.json())
 
+const cors = require("cors");
+app.use(cors());
+
 var db;
 const MongoClient = require('mongodb').MongoClient;
 MongoClient.connect(process.env.DB_URL, function(err, client) {
@@ -170,6 +173,11 @@ app.get('/', function(req, res) {
     res.render('main.ejs');             // 메인 페이지
 });
 
+// app.use('/', function(req, res) {
+//     console.log(req.body);
+//     res.json({ code: "200", message: "success!" });
+// })
+
 app.get('/explore', function(req, res) {
     res.render('explore.ejs');             // 정보 페이지
 });
@@ -240,7 +248,10 @@ app.post("/add", function(req, res) {
             post_content : req.body.content, 
             like_count : 0, 
             like_user : [],
-            post_address : "",
+            post_address : {
+                key: req.user._id + "/" + postId + "/" + req.body.imageName,
+                url: process.env.IMAGE_SERVER + "/" + req.user._id + "/" + postId + "/" + req.body.imageName,                
+            },
             post_time : moment().format('YYYY-MM-DD [작성]')
             },
             function(err, result){
@@ -339,8 +350,24 @@ app.post('/delete/:id', function(req, res){
             db.collection('post').deleteOne({_id : parseInt(req.params.id)}, function(err, result) {
                 db.collection('user_info').updateOne({_id : req.user._id}, {$inc : {user_point : -30, posting_count : -1}}, function(err, result) {
                 })
-                res.send('<script>alert("삭제가 완료되었습니다."); location.href="/community";</script>')
             })
+            const objectParams_del = {
+                Bucket: BUCKET_NAME,
+                Key: result.post_address.key,
+            };
+            const s3 = new AWS.S3;
+            s3
+                .deleteObject(objectParams_del)
+                .promise()
+                .then((data) => {
+                    console.log('success : ', data);
+                    res.send('<script>alert("삭제가 완료되었습니다."); location.href="/community";</script>')
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+                
+            
         }
         else{
             res.send('<script>alert("권한이 없습니다. (작성자만 삭제 가능)"); history.back();</script>')
@@ -458,6 +485,75 @@ app.post("/signup", function(req, res){
     })
     res.send(`<script type="text/javascript">alert("가입을 환영합니다!"); window.location = "/"; </script>`);
 });
+app.post('/signup/users', function(req, res) {
+    // req.body
+    // {
+    //  email: abc@def.gih
+    // }
+    db.collection('user_info').findOne({email : req.body.email}, function(err, result) {
+        if (err) return console.log(err);
+        if (result !== null) res.json({
+
+        })
+        if (result === null) {
+            let authNum = Math.random().toString().substr(2,6);
+            let emailtemplate;
+            ejs.renderFile(appDir+'/templates/authMail.ejs', {authCode : authNum}, function (err, data) {
+            if (err) {console.log(err)}
+                emailtemplate = data;
+            });
+            
+            db.collection("auth_request").findOne({
+                    email: req.body.email
+                }, 
+                async function(err, result){
+                    if (err) return console.log(err);
+                    if (result === null) {
+                        let transporter = nodemailer.createTransport({
+                            service: 'gmail',
+                            host: 'smtp.gmail.com',
+                            port: 587,
+                            secure: false,
+                            auth: {
+                                user: process.env.NODEMAILER_USER,
+                                pass: process.env.NODEMAILER_PASS,
+                            }
+                        });
+                    
+                        let mailOptions = {
+                            from: `나루`,
+                            to: req.body.email,
+                            subject: '회원가입을 위한 인증번호를 입력해주세요.',
+                            html: emailtemplate
+                        };
+                    
+                        transporter.sendMail(mailOptions, function (err, info) {
+                            if (err) console.log(err);
+                            console.log("Mail sent. " + info.response);
+                            
+                            transporter.close();
+                        });
+                    
+                        db.collection("auth_request").insertOne({
+                            email               : req.body.email,
+                            auth_number         : authNum,
+                            }, 
+                            function(err, result){
+                                if (err) return console.log(err);
+                                console.log("신규 인증 요청 생성");
+                                res.send("send");
+                            }
+                        )
+                    }
+                    else {
+                        console.log(result)
+                        res.send("exist");
+                    }
+                }
+            )
+        }
+    }); 
+})
 
                                         // 마이페이지 - 내정보
 app.get("/mypage", IsLogin, (req, res) => {
@@ -477,9 +573,13 @@ app.get('/mypage/edit', IsLogin, function(req, res) {
     res.render('mypage_edit.ejs', {userInfo : req.user});// └ 개인정보 수정
 });
 
-const imageRouter = require('./imageRouter.js');
+
 //////////////////////////////////////////////////////////////////////////////////////////////
+// const imageRouter = require('./imageRouter.js');
 // app.use('/image', imageRouter);
+// app.listen(process.env.PORT2, function(){
+// 	console.log(`running image server on ${process.env.PORT2}`)
+// })
 
 const AWS = require('aws-sdk');
 const multiparty = require('multiparty');
@@ -536,15 +636,7 @@ function uploadToBucket(filename, Body){
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-app.get('/upload', function(req, res){
-    res.render("upload.ejs")
-	res.writeHead(200, {"Content-Type": "text/html"});
-	res.end();
-})
-app.listen(process.env.PORT2, function(){
-	console.log(`running image server on ${process.env.PORT2}`)
-})
-const imageEditRouter = require('./imageEditRouter.js');
+
 app.use('/imageEdit', function(req, res) {
     const router = require('express').Router();
     const AWS = require('aws-sdk');

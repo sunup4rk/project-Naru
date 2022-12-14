@@ -68,7 +68,7 @@
       data : {
         title: document.getElementById("post-title").value,
         content: document.getElementById("post-content").value,
-        imageName: arrImageName,
+        imageName: arrImageName.at(-1),
       },
       error : function(err) {
         alert("실행중 오류가 발생하였습니다.");
