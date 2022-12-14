@@ -3,7 +3,7 @@ import { ReactComponent as Logo } from "../../assets/images/logo01.svg";
 import Button01 from "../../components/common/button/Button01";
 import Input01 from "../../components/common/input/Input01";
 import './SignUp.scss';
-import axios from 'axios';
+// import axios from 'axios';
 
 const SignUp = () => {
     const [Inputs, setInputs] = useState({

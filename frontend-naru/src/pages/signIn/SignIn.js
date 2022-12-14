@@ -11,7 +11,7 @@ const SignIn = () => {
 
             <div className="signIn-wrapper --top">
                 <Logo height="55" role="img"/>
-                <Input01 type={"text"} placeholder={"아이디"} size={"s"}/>
+                <Input01 type={"text"} placeholder={"이메일"} size={"s"}/>
                 <Input01 type={"password"} placeholder={"비밀번호"} size={"s"}/>
                 <Button01 text={"로그인"} size={"m"}/>
             </div>

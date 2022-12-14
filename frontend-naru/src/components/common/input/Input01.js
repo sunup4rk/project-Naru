@@ -21,7 +21,7 @@ const Input = styled.input`
 
 const Input01 = (props) => {
     return (
-        <Input type={props.type} placeholder={props.placeholder} size={props.size}/>
+        <Input type={props.type} placeholder={props.placeholder} size={props.size} onChange={props.onChange}/>
     );
 };
 
