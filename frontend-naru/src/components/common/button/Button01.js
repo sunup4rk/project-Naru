@@ -24,7 +24,6 @@ const Button = styled.button`
         color: #ffffff;
         background-color: #4461AA;
     }
-}
 `
 
 const Button01 = (props) => {
