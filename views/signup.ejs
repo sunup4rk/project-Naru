@@ -113,7 +113,7 @@
             if(inputEmail.getAttribute("checked") === "checked") {
                 $.ajax({
                     type : 'POST',
-                    url : "/mail",
+                    url : "/authmail",
                     data : {
                         input   : "email",
                         email: inputEmail.value,
