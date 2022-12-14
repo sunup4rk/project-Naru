@@ -3,7 +3,7 @@ import { ReactComponent as Logo } from "../../assets/images/logo01.svg";
 import Button01 from "../../components/common/button/Button01";
 import Input01 from "../../components/common/input/Input01";
 import './SignUp.scss';
-// import axios from 'axios';
+import axios from 'axios';
 
 const SignUp = () => {
     const [Inputs, setInputs] = useState({
@@ -23,18 +23,18 @@ const SignUp = () => {
     const onClickSubmit = () => {
         console.log(Inputs)
 
-    //     axios.post("/signUp", {
-    //         email: Inputs.email,
-    //         nickname: Inputs.nickname,
-    //         password: Inputs.password
-    //     })
-    //     .then((response) => {
-    //          // response
-    //         console.log(response)
-    //     }).catch((error) => {
-    //         // 오류발생시 실행
-    //         console.log(error)
-    //     })
+        axios.post("http://localhost:8080/signUp", {
+            email: Inputs.email,
+            nickname: Inputs.nickname,
+            password: Inputs.password
+        })
+        .then((response) => {
+             // response
+            console.log(response.data.message)
+        }).catch((error) => {
+            // 오류발생시 실행
+            console.log(error)
+        })
     }
 
 
