@@ -13,7 +13,6 @@ import Aside02 from "./components/layout/aside/Aside02"
 import Cafe from './pages/Cafe';
 import SignIn from "./pages/signIn/SignIn";
 import SignUp from './pages/signUp/signUp';
-import Example3 from './Example3';
 
 const Body = styled.div`
   display: flex;
@@ -47,7 +46,6 @@ function App() {
             <Route path="/explore/cafe" element={<Cafe />} />
             <Route path="/signIn" element={<SignIn />} />
             <Route path="/signUp" element={<SignUp />} />
-            <Route path="/" element={<Example3 />} />
 
           </Routes>
       </Body>
