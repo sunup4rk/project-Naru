@@ -27,7 +27,7 @@ MongoClient.connect(process.env.DB_URL, function(err, client) {
     app.db = db;
 
     http.listen(process.env.PORT, function() {
-        console.log('listening on 8080');
+        console.log('listening on', process.env.PORT);
     })
 })
 
@@ -413,44 +413,74 @@ app.get('/qna', function(req, res) {
     res.render('qna.ejs');              // 문의 페이지
 });
 
-app.get('/signin', function(req, res) {
-    res.render('signin.ejs');           // 로그인 페이지
+app.get('/signIn', function(req, res) {
+    res.render('signin.ejs')
+})
+// 로그인 페이지
+// app.post('/signIn', passport.authenticate('local', {
+//     // failureMessage: true,
+//     }), (req, res) => {
+//         // console.log(req)
+//     res.redirect('/signIn');
+// });
+app.post('/signIn', function(req, res, next) {
+    passport.authenticate('local', function(err, user, info) {
+        if(err) { return next(err) }     
+        if(user) { // 로그인 성공
+            console.log("req.user : "+ JSON.stringify(user))
+        
+            // customCallback 사용시 req.logIn()메서드 필수
+            req.logIn(user, function(err) {
+                if(err) { return next(err) }
+                return res.send(user)
+            })
+        }
+        else {	// 로그인 실패
+            console.log("/login fail!!!");
+            res.send();
+        }
+    })(req, res, next);
 });
-app.post('/signin', passport.authenticate('local', {
-    successRedirect: '/', 
-    failureRedirect: '/fail'
-    }), (req, res) => {
-    res.redirect('/');
-});
+
 passport.use(new localStrategy({
-    usernameField: 'email',
+    usernameField: '_id',
     passwordField: 'password',
     session: true,
     passReqToCallback: false,
 }, function(inputemail, inputpw, done) {
-    console.log("Sign in : " + inputemail);
+    console.log("Sign in 시도: " + inputemail);
 
     db.collection('user_info').findOne({email: inputemail}, function(err, result) {
-        if (err) {return done(err);}
-        if (!result) {return done(null, false, {message: "존재하지 않는 아이디입니다."});}
-        // 로그인 성공 -> passport.serializeUser 로 전달
-        if (result.password === inputpw) {return done(null, result);}
-        return done(null, false, {message: "올바르지않은 비밀번호."});
+        if (err) { return done(err) }
+        if (!result) { return done(null, false, {message: "존재하지 않는 아이디입니다."}) }
+        if (result.password === inputpw) { return done(null, result) }
+        return done(null, false, { message: "올바르지않은 비밀번호." })
     })
 }));
+
 // 로그인 성공시 세션을 생성
-passport.serializeUser(function(user, done) {
-    done(null, user.email);
-});
-passport.deserializeUser((useremail, done) => {
-    db.collection("user_info").findOne({email: useremail}, function(err, result) {
-        done(null, result);
-    })
-});
-// 로그인 실패
-app.get("/fail", (req, res) => {
-    res.send("로그인 해주세요.");
-});
+// passport.serializeUser(function(user, done) {
+//     console.log("serialize done.")
+//     console.log(user._id)
+//     done(null, user._id)
+// })
+// passport.deserializeUser((userid, done) => {
+//     console.log("in deserialize")
+//     db.collection("user_info").findOne({
+//         _id: userid
+//     }, 
+//     function(err, result) {
+//         if(err) return next(err)
+//         console.log("deserialize done.")
+//         console.log(result)
+//         done(null, result)
+//     })
+// })
+
+// // 로그인 실패
+// app.get("/fail", (req, res) => {
+//     res.send("로그인 해주세요.");
+// });
 
 // 로그아웃
 app.get("/signout", function(req, res){
@@ -460,100 +490,150 @@ app.get("/signout", function(req, res){
     res.redirect('/')
 });
 
-app.get('/signup', function(req, res) {
-    res.render('signup.ejs');           // 회원가입 페이지
-});
 
-app.post("/signup", function(req, res){
-    db.collection("user_info").insertOne({
-        email               : req.body.email,
-        nickname            : req.body.nickname,
-        password            : req.body.password1,
-        profile_image_path  : process.env.DEFAULT_PROFILE,
-        posting_count       : 0,
-        user_point          : 0,
-        user_level          : 1,
-        daily_point         : 0,
+// signUp 시작 //////////////////////////////////////////////
+// 중복검사 요청
+app.post('/signUp/users', function(req, res) {
+    console.log("/signUp/users request :", req.body.email)   // params 확인은 req.query
+    if(req.body.email) {
+        db.collection('user_info').findOne({
+            email : req.body.email
         }, 
-        function(err, result){
-            if (err) return console.log(err);
-            console.log("신규회원 등록 : ", req.body.email);
+        function(err, result) {
+            if(err) return console.log(err)
+            if(result !== null) res.json({message: "중복"})
+            if(result === null) res.json({message: "사용가능"})
+        })
+    }
+    else {
+        console.log("Bad Request")
+        res.json({message: "잘못된 요청"})
+    }
+})
+
+// 인증번호 메일 요청
+const ejs = require('ejs')
+const router = express.Router()
+const nodemailer = require('nodemailer')
+const path = require('path')
+var appDir = path.dirname(require.main.filename)
+
+app.post('/authmail',  function(req, res) {
+    console.log("authmail request received")
+
+    let authNum = Math.random().toString().substr(2,6)
+    let emailtemplate;
+
+    ejs.renderFile(appDir + '/templates/authMail.ejs', {
+        authCode : authNum
+    }, 
+    function(err, data) {
+        if(err) console.log(err)
+        else emailtemplate = data
+    });
+    
+    db.collection("auth_request").findOne({
+        email: req.body.email
+    },
+    async function(err, result) {
+        if(err) return console.log(err)
+        if(result === null) {
+            let transporter = nodemailer.createTransport({
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
+                auth: {
+                    user: process.env.NODEMAILER_USER,
+                    pass: process.env.NODEMAILER_PASS
+                }
+            })
+        
+            let mailOptions = {
+                from: `나루`,
+                to: req.body.email,
+                subject: '회원가입을 위한 인증번호를 입력해주세요.',
+                html: emailtemplate
+            }
+        
+            transporter.sendMail(mailOptions, function(err, info) {
+                if(err) console.log(err)
+                else console.log("Mail sent. " + info.response)
+                
+                transporter.close()
+            })
+        
+            db.collection("auth_request").insertOne({
+                email      : req.body.email,
+                auth_number: Number(authNum),
+            }, 
+            function(err, result) {
+                if(err) return console.log(err)
+                else {
+                    console.log(result)
+                    res.json({message: "전송성공"})
+                } 
+            })
+        }
+        else {
+            console.log(result)
+            res.json({message: "전송실패"})
+        }
+    })
+})
+
+// 인증번호 확인 요청
+app.post('/authcheck', function(req, res) {
+    console.log("authnum request received")
+
+    db.collection("auth_request").findOne({email: req.body.email},
+        function(err, result) {
+            if(err) console.log(err)
+            if(result.auth_number === Number(req.body.authnumber))
+                res.json({message: "인증완료"})
+            else res.json({message: "인증실패"})
         }
     )
-    db.collection("auth_request").deleteOne({
-        email: req.body.email,
-    })
-    res.send(`<script type="text/javascript">alert("가입을 환영합니다!"); window.location = "/"; </script>`);
-});
-app.post('/signup/users', function(req, res) {
-    // req.body
-    // {
-    //  email: abc@def.gih
-    // }
-    db.collection('user_info').findOne({email : req.body.email}, function(err, result) {
-        if (err) return console.log(err);
-        if (result !== null) res.json({
-
-        })
-        if (result === null) {
-            let authNum = Math.random().toString().substr(2,6);
-            let emailtemplate;
-            ejs.renderFile(appDir+'/templates/authMail.ejs', {authCode : authNum}, function (err, data) {
-            if (err) {console.log(err)}
-                emailtemplate = data;
-            });
-            
-            db.collection("auth_request").findOne({
-                    email: req.body.email
-                }, 
-                async function(err, result){
-                    if (err) return console.log(err);
-                    if (result === null) {
-                        let transporter = nodemailer.createTransport({
-                            service: 'gmail',
-                            host: 'smtp.gmail.com',
-                            port: 587,
-                            secure: false,
-                            auth: {
-                                user: process.env.NODEMAILER_USER,
-                                pass: process.env.NODEMAILER_PASS,
-                            }
-                        });
-                    
-                        let mailOptions = {
-                            from: `나루`,
-                            to: req.body.email,
-                            subject: '회원가입을 위한 인증번호를 입력해주세요.',
-                            html: emailtemplate
-                        };
-                    
-                        transporter.sendMail(mailOptions, function (err, info) {
-                            if (err) console.log(err);
-                            console.log("Mail sent. " + info.response);
-                            
-                            transporter.close();
-                        });
-                    
-                        db.collection("auth_request").insertOne({
-                            email               : req.body.email,
-                            auth_number         : authNum,
-                            }, 
-                            function(err, result){
-                                if (err) return console.log(err);
-                                console.log("신규 인증 요청 생성");
-                                res.send("send");
-                            }
-                        )
-                    }
-                    else {
-                        console.log(result)
-                        res.send("exist");
-                    }
-                }
-            )
-        }
-    }); 
 })
+
+// 회원가입 요청
+app.post('/signUp', function(req, res) {
+    console.log("signUp request received")
+
+    // nickname 중복검사
+    db.collection('user_info').findOne({
+        nickname : req.body.nickname
+    }, 
+    function(err, result) {
+        if(err) return console.log(err)
+        if(result !== null) res.json({message: "닉네임중복"})
+        if(result === null) {
+            db.collection("user_info").insertOne({
+                email               : req.body.email,
+                nickname            : req.body.nickname,
+                password            : req.body.password,
+                profile_image_path  : process.env.DEFAULT_PROFILE,
+                posting_count       : 0,
+                user_point          : 0,
+                user_level          : 1,
+                daily_point         : 0,
+            }, 
+            function(err, result) {
+                if(err) {
+                    console.log("signUp error", err)
+                    res.json({message: "가입오류"})
+                }
+                // 가입완료 후 해당 회원의 인증요청 삭제
+                db.collection("auth_request").deleteOne({
+                    email: req.body.email
+                })
+                console.log("signUp 신규회원 : ", req.body.email)
+                res.json({message: "가입완료"})
+            })            
+        }
+    }) 
+})
+// signUp 끝 /////////////////////////////////////////////////
 
                                         // 마이페이지 - 내정보
 app.get("/mypage", IsLogin, (req, res) => {
@@ -734,101 +814,4 @@ app.get('/mypage/post', IsLogin, function(req, res) {
 app.get('/mypage/qna', IsLogin, function(req, res) {
     res.render('mypage_qna.ejs', {userInfo : req.user});     // └ 문의내역
 });
-
- 
-////////// 회원가입 인증메일 //////////
-const ejs = require('ejs');
-const router = express.Router();
-const nodemailer = require('nodemailer');
-const path = require('path');
-var appDir = path.dirname(require.main.filename);
-
-app.post('/mail',  function(req, res) {
-    let authNum = Math.random().toString().substr(2,6);
-    let emailtemplate;
-    ejs.renderFile(appDir+'/templates/authMail.ejs', {authCode : authNum}, function (err, data) {
-      if(err){console.log(err)}
-      emailtemplate = data;
-    });
-    
-    db.collection("auth_request").findOne({
-            email: req.body.email
-        }, 
-        async function(err, result){
-            if (err) return console.log(err);
-            if (result === null) {
-                let transporter = nodemailer.createTransport({
-                    service: 'gmail',
-                    host: 'smtp.gmail.com',
-                    port: 587,
-                    secure: false,
-                    auth: {
-                        user: process.env.NODEMAILER_USER,
-                        pass: process.env.NODEMAILER_PASS,
-                    }
-                });
-            
-                let mailOptions = {
-                    from: `나루`,
-                    to: req.body.email,
-                    subject: '회원가입을 위한 인증번호를 입력해주세요.',
-                    html: emailtemplate
-                };
-            
-                transporter.sendMail(mailOptions, function (err, info) {
-                    if (err) console.log(err);
-                    console.log("Mail sent. " + info.response);
-                    
-                    transporter.close();
-                });
-            
-                db.collection("auth_request").insertOne({
-                    email               : req.body.email,
-                    auth_number         : authNum,
-                    }, 
-                    function(err, result){
-                        if (err) return console.log(err);
-                        console.log("신규 인증 요청 생성");
-                        res.send("send");
-                    }
-                )
-            }
-            else {
-                console.log(result)
-                res.send("exist");
-            }
-        }
-    )
-
-
-});
-
-////////// 닉네임 중복 검사 //////////
-app.post('/isDuplicate', function(req, res) {
-    if (req.body.input === "email") {
-        db.collection('user_info').findOne({email : req.body.email}, function(err, result){
-            if (err) return console.log(err);
-            if (!(result === null)) res.send(true)
-            if (result === null) res.send(false)
-        });   
-    } 
-    if (req.body.input === "nickname") {
-        db.collection('user_info').findOne({nickname : req.body.nickname}, function(err, result){
-            if (err) return console.log(err);
-            if (result) res.send(true);
-            else res.send(false);
-        });   
-    }    
-});
-
-app.post('/authCheck', function(req, res) {
-    db.collection('auth_request').findOne({email : req.body.email}, function(err, result){
-        if (err) return console.log(err);
-        if (result) {
-            if(req.body.authNum == result.auth_number) res.send(true);
-            else res.send(result.email);
-        }
-        else res.send(false);
-    });   
-})
 
