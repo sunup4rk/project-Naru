@@ -9,7 +9,7 @@ import {Modal} from './../../components/common/modal/modal';
 
 const SignUp = () => {
     const navigate = useNavigate();
-    const {Success, Failure} = Modal();
+    const {Success, Warning, Failure} = Modal();
 
 
     const emailPattern = "[a-zA-Z0-9]+[@][a-zA-Z0-9]+[.]+[a-zA-Z]+[.]*[a-zA-Z]*";
@@ -43,44 +43,62 @@ const SignUp = () => {
     }
 
     const onClickEmailCheck = () => {
-        axios.post("http://localhost:8080/signUp", {
+        axios.post("http://localhost:8080/signup/mail", {
+            req: "email",
             email: Inputs.email
         })
         .then((response) => {
-            Success("인증메일 발송", "인증메일이 발송되었습니다.");
-            setInputs({ ...Inputs, emailCheck : "true"});
+            if(response.data.message === "인증메일이 발송되었습니다.") {
+                Success("인증메일 발송", response.data.message)
+                setInputs({ ...Inputs, emailCheck : "true"});
+            } else {
+                Warning("인증메일 발송 실패", response.data.message)
+            }
+
         }).catch((error) => {
             Failure("인증메일 발송 실패", "인증메일 발송에 실패했습니다.")
         })
     }
 
     const onClickAuth = () => {
-        axios.post("http://localhost:8080/signUp", {
+        console.log("보낸거",Inputs.authNum)
+        axios.post("http://localhost:8080/signup/auth", {
+            email: Inputs.email,
             authNum: Inputs.authNum
         })
         .then((response) => {
-            Success("인증 확인", "인증되었습니다.");
-            setInputs({ ...Inputs, authCheck : "true"});
-
+            if(response.data.message === "인증되었습니다.") {
+                Success("인증 확인",response.data.message);
+                setInputs({ ...Inputs, authCheck : "true"});
+            } else {
+                Warning("인증 실패", response.data.message);
+            }
         }).catch((error) => {
-            Failure("인증 실패","인증에 실패했습니다.")
+            Failure("인증 실패", "인증에 실패했습니다.")
         })
     }
-    
 
     const onClickSignUp = () => {
         if(Inputs.password === Inputs.passwordCheck && Inputs.emailCheck === "true" && Inputs.authCheck === "true") {
-            axios.post("http://localhost:8080/signUp", {
+            axios.post("http://localhost:8080/signup", {
                 email: Inputs.email,
                 nickname: Inputs.nickname,
                 password: Inputs.password
             })
             .then((response) => {
-                Success("가입 성공", "가입되었습니다.🎉");
-                navigate('/signIn')
+                if(response.data.message === "가입되었습니다.🎉") {
+                    Success("가입 성공", response.data.message);
+                    navigate('/signIn')
+                }
+                else {
+                    Warning("가입 실패", response.data.message);
+                }
             }).catch((error) => {
                 Failure("가입 실패", "회원가입에 실패했습니다.")
             })
+        }
+        else {
+            Failure("가입 실패", "회원가입에 실패했습니다.")
         }
     }
 
@@ -108,7 +126,7 @@ const SignUp = () => {
                     <Input01 type={"password"} placeholder={"비밀번호 확인 (숫자 12~64자)"} size={"m"} onChange={onChangeInputs("passwordCheck")} required
                     pattern={passwordPattern} title={"숫자 12자~64자"} onInvalid={onInvalid('비밀번호를 한번 더 입력해주세요.')} onInput={onInput} />
 
-                    <Button01 type="submit" text={"회원가입"} size={"m"} onClick={onClickSignUp}/>
+                    <Button01 type="button" text={"회원가입"} size={"m"} onClick={onClickSignUp}/>
             </form>
         </div>
     );
