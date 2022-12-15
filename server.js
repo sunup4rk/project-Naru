@@ -426,10 +426,15 @@ app.post('/isAuth', function(req, res) {
 })
 
 // 로그인 페이지
-app.post('/signin', passport.authenticate('local', (req, res) => {
-    
-    // res.redirect('/islogin'); => res.json({}) 으로 변경
-}))
+app.post('/signin', passport.authenticate('local', {
+    // successRedirect: '/mypage', 
+    // failureRedirect: '/community',
+    failureMessage: true,
+    successMessage: '성공성공'
+    }), (req, res) => {
+    // console.log(req.user)
+    res.json({message: "성공"});
+});
 
 passport.use(new localStrategy({
         usernameField: 'email',
