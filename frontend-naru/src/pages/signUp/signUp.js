@@ -7,7 +7,7 @@ import Input01 from "../../components/common/input/Input01";
 import './SignUp.scss';
 import axios from 'axios';
 import { Modal } from './../../components/common/modal/modal';
-import { schema } from '../signIn/validation';
+import { schema } from './validation'
 import  styled from 'styled-components';
 
 const Error = styled.p`
