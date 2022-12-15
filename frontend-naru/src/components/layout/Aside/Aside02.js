@@ -4,7 +4,6 @@ import './Aside02.scss';
 const Aside02 = () => {
   const location = useLocation();
   const path = location.pathname;
-  console.log(path)
 
   const category = [
     {name: "내 정보", page: "/mypage"},
