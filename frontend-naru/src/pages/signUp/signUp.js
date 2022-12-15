@@ -23,7 +23,6 @@ const SignUp = () => {
         resolver: yupResolver(schema),
         mode : 'onChange',
         defaultValues : {
-            authNum : 0,
             emailCheck : false,
             authCheck : false,
             disabled : false
