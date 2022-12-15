@@ -7,7 +7,7 @@ import Input01 from "../../components/common/input/Input01";
 import './SignUp.scss';
 import axios from 'axios';
 import { Modal } from '../../components/common/modal/modal';
-import { schema } from './validation'
+import { schema } from './Validation'
 import  styled from 'styled-components';
 
 const Error = styled.p`
@@ -100,14 +100,14 @@ const SignUp = () => {
 
 
     return (
-        <div className="signUp">
-            <form className="signUp-wrapper" onSubmit={handleSubmit(onClickSignUp)}>
+        <div className="signup">
+            <form className="signup-wrapper" onSubmit={handleSubmit(onClickSignUp)}>
                 <Logo height="55" role="img"/>
-                    <div className="signUp__auth">
+                    <div className="signup__auth">
                         <Input01 type={"text"} placeholder={"이메일"} size={"s"} register={register("email")} disabled={watch("disabled")}/>
                         <Button01 type={"button"} text={"인증메일 발송"} size={"m"} onClick={onClickEmail} />
                     </div>
-                    <div className="signUp__auth">
+                    <div className="signup__auth">
                         <Input01 type={"number"} placeholder={"인증번호"} size={"s"} register={register("authNum")}/>
                         <Button01 type={"button"} text={"인증번호 확인"} size={"m"} onClick={onClickAuth} />
                     </div>
