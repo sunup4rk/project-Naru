@@ -7,10 +7,10 @@ const Nav02 = () => {
         <div className="Nav02">
             <ul className="Nav02__list">
                 <li className="Nav02__menu">
-                    <Link to="/signIn" >로그인</Link>
+                    <Link to="/signin" >로그인</Link>
                 </li>
                 <li className="Nav02__menu">
-                    <Link to="/signUp" >회원가입</Link>
+                    <Link to="/signup" >회원가입</Link>
                 </li>
             </ul>
         </div>

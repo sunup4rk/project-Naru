@@ -1,12 +1,8 @@
 import './Cafe.scss'
 
-const Cafe = () => {
-  
-  return (
-    <div className='cafe01'>
-      
-    </div>
-  );
-};
+const Contents = () => (
+  <div className='cafe01'>
+  </div>
+);
 
-export default Cafe;
+export default Contents;
