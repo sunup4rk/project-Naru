@@ -6,7 +6,7 @@ import Button01 from "../../components/common/button/Button01";
 import Input01 from "../../components/common/input/Input01";
 import './SignUp.scss';
 import axios from 'axios';
-import { Modal } from './../../components/common/modal/modal';
+import { Modal } from '../../components/common/modal/modal';
 import { schema } from './validation'
 import  styled from 'styled-components';
 
@@ -16,10 +16,8 @@ const Error = styled.p`
 `
 
 const SignUp = () => {
-    const emailPattern = /\S+@\S+\.\S+/;
-
     const navigate = useNavigate();
-    const { register, handleSubmit, formState: { errors }, watch, setValue} = useForm ({
+    const { register, handleSubmit, formState: { errors }, setValue, getValues, watch} = useForm ({
         resolver: yupResolver(schema),
         mode : 'onChange',
         defaultValues : {
@@ -30,11 +28,12 @@ const SignUp = () => {
     });
     const { Success, Warning, Failure } = Modal();
 
+    const emailPattern = /\S+@\S+\.\S+/;
 
     const onClickEmail = () => {
-        if(emailPattern.test(watch("email"))) {
+        if(emailPattern.test(getValues("email"))) {
             axios.post("http://localhost:8080/signup/mail", {
-                email: watch("email")
+                email: getValues("email")
             })
             .then((response) => {
                 if(response.data.message === "인증메일이 발송되었습니다.") {
@@ -56,20 +55,18 @@ const SignUp = () => {
 
     const onClickAuth = () => {
         axios.post("http://localhost:8080/signup/auth", {
-            email: watch("email"),
-            authNum: watch("authNum")
+            email: getValues("email"),
+            authNum: getValues("authNum")
         })
         .then((response) => {
             if(response.data.message === "인증되었습니다.") {
                 Success("인증 확인",response.data.message);
                 setValue("authCheck", true);
                 setValue("disabled", true);
-
             } else {
                 Warning("인증 실패", response.data.message);
                 setValue("authCheck", false);
                 setValue("disabled", false);
-
             }
         }).catch((error) => {
             Failure("인증 실패", "인증에 실패했습니다.")
