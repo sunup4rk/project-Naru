@@ -5,7 +5,8 @@ import { Pane, Dialog } from 'evergreen-ui';
 import { useForm } from 'react-hook-form';
 import { Modal } from './../../components/common/modal/modal';
 import './Write.scss';
-import { schema } from './../signUp/Validation';
+import axios from 'axios';
+import { schema } from './Validation'
 
 const Write = (props) => {
   const [isShown, setIsShown] = useState(false)
@@ -26,6 +27,21 @@ const Write = (props) => {
 
   const onClickSubmit = (data) => {
     console.log(data)
+    axios.post("http://localhost:8080/community/write", {
+            title: getValues("title"),
+            address: getValues("address"),
+            addressDetail: getValues("addressDetail"),
+            content: getValues("content")
+        })
+        .then((response) => {
+            if(response.data.message === "등록 성공") {
+                Success("등록 성공", response.data.message);
+            } else {
+                Warning("등록 실패", response.data.message);
+            }
+        }).catch((error) => {
+            Failure("등록 실패", "등록에 실패했습니다.")
+        })
   }
 
   return (
@@ -45,14 +61,15 @@ const Write = (props) => {
     <div className="write">
       <form className="write-wrapper" onSubmit={handleSubmit(onClickSubmit)}>
         제목<input type="text" {...register("title")}/>
-        {errors.title?.message}
+        <br/>{errors.title?.message}<br/>
         주소<input type="text" {...register("address")}/>
+        <br/>{errors.address?.message}<br/>
         <button type="button" onClick={onClickAddressSearch}>주소입력</button>
         상세주소<input type="text" {...register("addressDetail")}/>
         이미지<button type="file">+</button>
-        내용<textarea cols="50" rows="10" {...register("contents")} style={{resize:"none"}}/>
-      <button>{props.isEdit ? "수정" : "등록"}</button>
-      
+        내용<textarea cols="50" rows="10" {...register("content")} style={{resize:"none"}}/>
+        <br/>{errors.content?.message}<br/>
+        <button type="submit"> {props.isEdit ? "수정" : "등록"}</button>
       </form>
     </div>
     </>
