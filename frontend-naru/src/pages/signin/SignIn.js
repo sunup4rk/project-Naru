@@ -1,4 +1,4 @@
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import { ReactComponent as Logo } from "../../assets/images/logo01.svg";
 import { Modal } from './../../components/common/modal/Modal';
@@ -25,8 +25,7 @@ const SignIn = () => {
         .then((response) => {
             if(response.data.message === "로그인 성공") {
                 setCookie('sessionID', response.data.sessionID)
-                console.log(response.data)
-                navigate('/')
+                window.location.replace("/")
             }
             else {
                 Warning("로그인 실패", response.data.message);
