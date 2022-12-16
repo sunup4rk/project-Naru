@@ -15,37 +15,40 @@ import Layout from './components/layout/Layout';
 import MypageLayout from './components/layout/MypageLayout';
 import CommunityLayout from "./components/layout/CommunityLayout";
 import Write from './pages/community/Write';
+import { CookiesProvider } from "react-cookie";
 
 
 function App() {
   return (
     <BrowserRouter>
-      <GlobalStyles />
-      <Header category={<Nav01 />} logout={<Nav02 />} login={<Nav03 />} />
-      <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<MainBanner />} />
-            <Route path="point" element={<PointBanner />} />
-            <Route path="qna" element={<QnaBanner />} />
-            <Route path="signIn" element={<SignIn />} />
-            <Route path="signUp" element={<SignUp />} />
-          </Route>
+      <CookiesProvider>
+          <GlobalStyles />
+          <Header category={<Nav01 />} />
+          <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<MainBanner />} />
+                <Route path="point" element={<PointBanner />} />
+                <Route path="qna" element={<QnaBanner />} />
+                <Route path="signIn" element={<SignIn />} />
+                <Route path="signUp" element={<SignUp />} />
+              </Route>
 
-          <Route path="community/*" element={<CommunityLayout />}>
-              <Route path="write" element={<Write />} />
-            </Route>
+              <Route path="community/*" element={<CommunityLayout />}>
+                  <Route path="write" element={<Write />} />
+                </Route>
 
-          <Route path="explore/*" element={<ExploreLayout />}>
-            <Route path="cafe" element={<Cafe />} />
-            <Route path="entertainment" element={<Cafe />} />
-            <Route path="culture" element={<Cafe />} />
-          </Route>
+              <Route path="explore/*" element={<ExploreLayout />}>
+                <Route path="cafe" element={<Cafe />} />
+                <Route path="entertainment" element={<Cafe />} />
+                <Route path="culture" element={<Cafe />} />
+              </Route>
 
-          <Route path="mypage/*" element={<MypageLayout />}>
-            <Route index element={<Cafe />} />
-          </Route>
-      </Routes>
-      <Footer />
+              <Route path="mypage/*" element={<MypageLayout />}>
+                <Route index element={<Cafe />} />
+              </Route>
+          </Routes>
+          <Footer />
+      </CookiesProvider>
     </BrowserRouter>
   );
 }

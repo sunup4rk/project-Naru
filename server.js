@@ -10,6 +10,7 @@ const io = new Server(http);
 
 
 // 미들웨어 설정
+app.use(express.json());
 app.set('view engine', 'ejs');
 
 const bodyParser = require('body-parser');
@@ -17,7 +18,10 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json())
 
 const cors = require("cors");
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+}));
 
 var db;
 const MongoClient = require('mongodb').MongoClient;
@@ -47,12 +51,17 @@ app.use(cookieParser());
 
 // 세션 미들웨어
 const session = require('express-session');
+const FileStore = require('session-file-store')(session);
 app.use(session({
     secret: process.env.COOKIE_SECRET,
-    resave: false,
+    resave: true,
     saveUninitialized: true,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7},
+        httpOnly: true,
+        secure: false,
+        maxAge: 1000 * 60 * 10  // 1분
+    },
+    store: new FileStore()
 }));
 
 // 패스포트 passport 미들웨어
@@ -434,23 +443,14 @@ app.get('/signin', function(req, res) {
     res.render('signin.ejs')//삭제예정
 })
 
-app.post('/isAuth', function(req, res) {
-    if (req.isAuthenticated()) 
-        res.json({message: true})
-    else
-        res.json({message: false})
-})
+
 
 // 로그인 페이지
 app.post('/signin', passport.authenticate('local', {
-    // successRedirect: '/mypage', 
-    // failureRedirect: '/community',
-    failureMessage: true,
-    successMessage: '성공성공'
     }), (req, res) => {
-    // console.log(req.user)
-    res.json({message: "성공"});
-});
+    console.log("session created :", req.session)
+    res.send({message: "로그인 성공", sessionID: req.sessionID})
+})
 
 passport.use(new localStrategy({
         usernameField: 'email',
@@ -461,31 +461,48 @@ passport.use(new localStrategy({
         console.log("signin : " + inputemail)
         db.collection('user_info').findOne({email: inputemail}, function(err, user) {
             if (err) { return done(err) }
-            if (!user) { return done(null, false, {message: "존재하지 않는 아이디입니다."}) }
+            if (!user) { return done(null, false, console.log({message: "존재하지 않는 아이디입니다."})) }
             if (user.password === inputpw) { return done(null, user) }
-            return done(null, false, {message: "올바르지않은 비밀번호."})
+            return done(null, false, console.log({message: "올바르지않은 비밀번호."}))
         })
 }))
 passport.serializeUser((user, done) => {
-    done(null, user._id)
+    console.log("serialize :", user)
+    done(null, user.email)
 })
-passport.deserializeUser((userid, done) => {
-    db.collection("user_info").findOne({_id: userid}, function(err, result) {
+passport.deserializeUser((usermail, done) => {
+    console.log("deserialize :", usermail)
+    db.collection("user_info").findOne({email: usermail}, function(err, user) {
         if (err) { return next(err) }
-        done(null, result)
-        // 여기의 result 가 req.user 로 저장된다.
+        console.log("deserialize req.user :", user)
+        done(null, user)        
     })
 })
 
+app.post('/islogin', function(req, res) {
+    console.log("Client SID :", req.body.sessionID)
+    console.log("Server SID :", req.sessionID)
+    if (req.body.sessionID === req.sessionID) {
+        // console.log("req.user :", req.user) // 확인용
+        res.json({message: "로그인 성공"})
+    }        
+    else
+        res.json({message: "로그인 실패"})
+})
+
 // 로그아웃
-app.post("/signout", function(req, res){
+app.post("/signout", function(req, res) {
     console.log("/signout :", req.user.email);
     req.session.destroy();
 });
 
 app.get('/signup', function(req, res) {
-    res.render('signup.ejs')
+    res.render('signup.ejs')// 삭제 예정
 })
+
+
+
+
 // signup 시작 //////////////////////////////////////////////////////////////////////////////////////
 // 인증메일 요청
 app.post('/signup/mail', function(req, res) {
@@ -635,16 +652,7 @@ function IsLogin (req, res, next) {
     if (req.user) {
         next();
     }
-    else {
-        req.user = {
-            _id: new ObjectId("639aab79c280d56878bbf389"),
-            nickname: 'guest',
-            profile_image_path: "https://bucket-sunu.s3.ap-northeast-2.amazonaws.com/src/profile/arona.jpeg",
-            user_point: 0,
-            user_level: 1,
-        }        
-        next();
-    }
+    else res.redirect('/signin')
 }
 
 app.get('/mypage/edit', IsLogin, function(req, res) {
