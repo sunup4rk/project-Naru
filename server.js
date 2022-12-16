@@ -20,6 +20,7 @@ app.use(bodyParser.json())
 const cors = require("cors");
 app.use(cors({
     origin: "http://localhost:3000",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
 }));
 
@@ -54,12 +55,12 @@ const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 app.use(session({
     secret: process.env.COOKIE_SECRET,
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     cookie: {
         httpOnly: true,
         secure: false,
-        maxAge: 1000 * 60 * 10  // 1분
+        maxAge: 1000 * 60 * 0.5  // 1분
     },
     store: new FileStore()
 }));
@@ -474,7 +475,7 @@ passport.deserializeUser((usermail, done) => {
     console.log("deserialize :", usermail)
     db.collection("user_info").findOne({email: usermail}, function(err, user) {
         if (err) { return next(err) }
-        console.log("deserialize req.user :", user)
+        // console.log("deserialize req.user :", user)
         done(null, user)        
     })
 })
@@ -482,9 +483,13 @@ passport.deserializeUser((usermail, done) => {
 app.post('/islogin', function(req, res) {
     console.log("Client SID :", req.body.sessionID)
     console.log("Server SID :", req.sessionID)
+
     if (req.body.sessionID === req.sessionID) {
-        // console.log("req.user :", req.user) // 확인용
-        res.json({message: "로그인 성공"})
+        res.send({
+            message: "로그인 성공", 
+            nickname: req.user.nickname,
+            user_level: req.user.user_level,
+        })
     }        
     else
         res.json({message: "로그인 실패"})
@@ -494,14 +499,12 @@ app.post('/islogin', function(req, res) {
 app.post("/signout", function(req, res) {
     console.log("/signout :", req.user.email);
     req.session.destroy();
+    res.json({message: "로그아웃"})
 });
 
 app.get('/signup', function(req, res) {
     res.render('signup.ejs')// 삭제 예정
 })
-
-
-
 
 // signup 시작 //////////////////////////////////////////////////////////////////////////////////////
 // 인증메일 요청
