@@ -3,7 +3,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import DaumPostcode from "react-daum-postcode";
 import { Pane, Dialog } from 'evergreen-ui';
 import { useForm } from 'react-hook-form';
-import { Modal } from './../../components/common/modal/modal';
+import { Modal } from './../../components/common/modal/Modal';
 import './Write.scss';
 import axios from 'axios';
 import { schema } from './Validation'

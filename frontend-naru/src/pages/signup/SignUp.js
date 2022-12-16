@@ -6,7 +6,7 @@ import Button01 from "../../components/common/button/Button01";
 import Input01 from "../../components/common/input/Input01";
 import './SignUp.scss';
 import axios from 'axios';
-import { Modal } from '../../components/common/modal/modal';
+import { Modal } from '../../components/common/modal/Modal';
 import { schema } from './Validation'
 import  styled from 'styled-components';
 
