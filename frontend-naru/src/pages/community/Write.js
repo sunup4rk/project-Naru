@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useCookies } from 'react-cookie';
 import { yupResolver } from "@hookform/resolvers/yup";
 import DaumPostcode from "react-daum-postcode";
 import { Pane, Dialog } from 'evergreen-ui';
@@ -8,13 +9,39 @@ import './Write.scss';
 import axios from 'axios';
 import { schema } from './Validation'
 
+
 const Write = (props) => {
   const [isShown, setIsShown] = useState(false)
   const { register, handleSubmit, formState: { errors }, setValue, getValues} = useForm({ 
     resolver: yupResolver(schema),
     mode : 'onChange' 
   });
+  const [user, setUser] = useState()
+  const [cookie, ] = useCookies();
   const { Success, Warning, Failure } = Modal();
+
+  useEffect(() => {
+    const fetchData = async () => {
+       try {
+           const response = await axios.post("http://localhost:8080/islogin", {
+           sessionID : cookie.sessionID
+       })
+       if(response.data.message === "로그인 성공") {
+           setUser(response.data)
+           console.log('?')
+       } else {
+         window.location.replace("/community")
+       }
+       } catch(error) {
+           Failure("로그인 오류", "로그인 정보를 불러올 수 없습니다.")
+       }}
+          fetchData();
+   }, []);
+
+
+   useEffect(() => {
+   }, [user])
+
 
   const onClickAddressSearch = () => {
     setIsShown(true)
@@ -24,6 +51,8 @@ const Write = (props) => {
     setValue("address", postcode.address)
     setIsShown(false)
   }
+
+
 
   const onClickSubmit = (data) => {
     console.log(data)

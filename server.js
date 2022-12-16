@@ -265,8 +265,8 @@ app.post("/community/write", function(req, res) {
         const postId = Number(result.total_post) + 1
         db.collection('post').insertOne({
             _id : postId,
-            // user_id : req.user._id,
-            // writer : req.user.nickname, 
+            user_id : req.user._id,
+            writer : req.user.nickname, 
             post_title : req.body.title, 
             post_content : req.body.content, 
             like_count : 0, 

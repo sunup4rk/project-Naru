@@ -9,7 +9,6 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
 const SignIn = () => {
-    const navigate = useNavigate();
     const { register, handleSubmit} = useForm();
     const { Warning, Failure } = Modal();
     const [ , setCookie ] = useCookies();
