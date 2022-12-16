@@ -115,7 +115,7 @@ app.get('/', function(req, res) {
         
           // 새로운 페이지를 연다.
           const page = await browser.newPage();
-          // "https://www.goodchoice.kr/product/search/2" URL에 접속한다. (여기어때 호텔 페이지)
+          // 해당 URL에 접속한다.
           await page.goto('https://movie.daum.net/ranking/boxoffice/weekly');
           // 페이지의 HTML을 가져온다.
           const content = await page.content();
@@ -136,7 +136,13 @@ app.get('/', function(req, res) {
                     titleimg : resultMovieImg,
                     time : crawlTime,
                 }, function(err, result){
-            console.log('영화순위 데이터 입력')
+                    if(err){
+                        console.log("크롤링 실패! 대상 웹페이지를 확인해보세요")
+                    }
+                    else{
+                        console.log('영화순위 데이터 입력 완료')
+                    }
+            
                 })
           // 브라우저를 종료한다.
           browser.close();
@@ -182,12 +188,18 @@ app.get('/explore', function(req, res) {
     res.render('explore.ejs');             // 정보 페이지
 });
 
-app.get('/community', function(req, res) {
+app.get('/community', function(req, res) {  //list로 수정부분
     db.collection('post').find().toArray(function(err, result){
+        result.reverse()
         res.render('community.ejs', {posts : result});        // 게시판 페이지
     });
 })
 
+app.get('/best', function(req, res) {
+    db.collection('post').find({ 'like_count' : { '$gt' : 0 } }).sort({'like_count' : -1}).toArray(function(err, result){
+        res.render('best.ejs', {posts : result});        // 베스트 게시물 페이지 (좋아요 1개 이상, 내림차순)
+    });
+})
 
 // 좋아요 구현
 app.post("/like/:id", function(req, res){
@@ -238,30 +250,34 @@ app.get('/community/write', function(req, res) {
     res.render('write.ejs');            // 글 작성 페이지
 });
 
-app.post("/add", function(req, res) {
+app.post("/community/write", function(req, res) {
     db.collection('post_count').findOne({name : 'postcnt'}, function(err, result) {
         const postId = Number(result.total_post) + 1
         db.collection('post').insertOne({
             _id : postId,
-            user_id : req.user._id,
-            writer : req.user.nickname, 
+            // user_id : req.user._id,
+            // writer : req.user.nickname, 
             post_title : req.body.title, 
             post_content : req.body.content, 
             like_count : 0, 
             like_user : [],
-            post_address : {
-                key: req.user._id + "/" + postId + "/" + req.body.imageName,
-                url: process.env.IMAGE_SERVER + "/" + req.user._id + "/" + postId + "/" + req.body.imageName,                
-            },
-            post_time : moment().format('YYYY-MM-DD [작성]')
+            post_address : req.body.address,
+            post_address_detail : req.body.addressDetail,
+            // image_address : {
+            //     key: req.user._id + "/" + postId + "/" + req.body.imageName,
+            //     url: process.env.IMAGE_SERVER + "/" + req.user._id + "/" + postId + "/" + req.body.imageName,                
+            // },
+            post_time : moment().format('YYYY-MM-DD')
             },
             function(err, result){
-                if (err) return console.log(err);
+                if (err) {
+                    res.json({message : "등록 실패"})
+                }
                 else {
                     console.log("post_id :", postId, " 등록");
                     UpdatePostCount();
-                    UpdateUserInfo(req.user._id);
-                    res.status(200).json({post_id: postId});         
+                    // UpdateUserInfo(req.user._id);
+                    res.status(200).json({message : "등록 성공"});         
                 }
             }
         )
@@ -647,6 +663,7 @@ const AWS = require('aws-sdk');
 const multiparty = require('multiparty');
 const sharp = require('sharp');
 const { ObjectId } = require('mongodb');
+const { response } = require('express');
 AWS.config.loadFromPath(__dirname + "/config/awsconfig.json");
 const BUCKET_NAME = 'bucket-sunu';
 
