@@ -16,12 +16,15 @@ import MypageLayout from './components/layout/MypageLayout';
 import CommunityLayout from "./components/layout/CommunityLayout";
 import Write from './pages/community/Write';
 import { CookiesProvider } from "react-cookie";
+import { RecoilRoot } from 'recoil';
+
 
 
 function App() {
   return (
     <BrowserRouter>
       <CookiesProvider>
+        <RecoilRoot>
           <GlobalStyles />
           <Header category={<Nav01 />} />
           <Routes>
@@ -48,6 +51,7 @@ function App() {
               </Route>
           </Routes>
           <Footer />
+        </RecoilRoot>
       </CookiesProvider>
     </BrowserRouter>
   );
