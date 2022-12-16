@@ -6,27 +6,34 @@ import Button01 from "../../components/common/button/Button01";
 import Input01 from "../../components/common/input/Input01";
 import './SignIn.scss';
 import axios from 'axios';
+import { useCookies } from 'react-cookie';
 
 const SignIn = () => {
     const navigate = useNavigate();
-    const { register, handleSubmit} = useForm ();
+    const { register, handleSubmit} = useForm();
     const { Warning, Failure } = Modal();
+    const [ , setCookie ] = useCookies();
+    
+    axios.defaults.withCredentials = true;
 
     const onClickSignIn = (data) =>{
-            axios.post("http://localhost:8080/signin", {
-                email: data.email,
-                password: data.password
-            })
-            .then((response) => {
-                if(response.data.message === "로그인 성공") {
-                    navigate('/')
-                }
-                else {
-                    Warning("로그인 실패", response.data.message);
-                }
-            }).catch((error) => {
-                Failure("로그인 실패", "로그인에 실패했습니다.")
-            })
+
+        axios.post("http://localhost:8080/signin", {
+            email: data.email,
+            password: data.password
+        })
+        .then((response) => {
+            if(response.data.message === "로그인 성공") {
+                setCookie('sessionID', response.data.sessionID)
+                console.log(response.data.sessionID)
+                navigate('/')
+            }
+            else {
+                Warning("로그인 실패", response.data.message);
+            }
+        }).catch((error) => {
+            Failure("로그인 실패", "로그인에 실패했습니다.")
+        })
     }
 
     return (
