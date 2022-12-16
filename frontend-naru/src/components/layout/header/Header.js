@@ -9,8 +9,11 @@ import { Cookies, useCookies } from 'react-cookie';
 
 const Header = ({category}) => {
     const [login, setLogin] = useState(false);
+    const [user, setUser] = useState()
     const [cookie, ] = useCookies();
     
+    axios.defaults.withCredentials = true;
+
     useEffect(() => {
         axios.post("http://localhost:8080/islogin", {
             sessionID : cookie.sessionID
@@ -22,14 +25,25 @@ const Header = ({category}) => {
             }
             else {
             console.log(response.data.message)
-                
             }
-        }).catch((error) => {
-            console.log(error)
         })
-
       },[]);
-    
+
+
+    useEffect(() => {
+         const fetchData = async () => {
+            try {
+                const response = await axios.post("http://localhost:8080/islogin", {
+                sessionID : cookie.sessionID
+            })
+            setUser(response.data)
+            console.log(user)
+
+            } catch(error) {
+                console.log(error);
+            }}
+               fetchData();
+        }, []);
 
 
     return (

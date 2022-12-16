@@ -8,8 +8,8 @@ import Nav03 from './components/layout/navigation/Nav03';
 import MainBanner from './components/layout/banner/Banner01';
 import { PointBanner, QnaBanner } from "./components/layout/banner/Banner03"
 import Cafe from './pages/Cafe';
-import SignIn from "./pages/signIn/SignIn";
-import SignUp from './pages/signUp/SignUp';
+import SignIn from "./pages/signin/SignIn";
+import SignUp from './pages/signup/SignUp';
 import ExploreLayout from './components/layout/ExploreLayout';
 import Layout from './components/layout/Layout';
 import MypageLayout from './components/layout/MypageLayout';
