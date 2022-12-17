@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { yupResolver } from "@hookform/resolvers/yup";
-import DaumPostcode from "react-daum-postcode";
 import { Pane, Dialog } from 'evergreen-ui';
 import { useForm } from 'react-hook-form';
 import { Modal } from './../../components/common/modal/Modal';
+import { schema } from './Validation'
+import DaumPostcode from "react-daum-postcode";
 import './Write.scss';
 import axios from 'axios';
-import { schema } from './Validation'
 
 
 const Write = (props) => {
@@ -56,7 +56,7 @@ const Write = (props) => {
 
   const onClickSubmit = (data) => {
     console.log(data)
-    axios.post("http://localhost:8080/community/write", {
+    axios.post("http://localhost:8080/community/edit/:id", {
             title: getValues("title"),
             address: getValues("address"),
             addressDetail: getValues("addressDetail"),
