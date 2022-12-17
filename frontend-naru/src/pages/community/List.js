@@ -4,8 +4,8 @@ const Detail = () => {
 
   return (
     <>
-    <div className="write">
-      <form className="write-wrapper">
+    <div className="detail">
+      <form className="detail-wrapper">
         제목<input type="text" />
         주소<input type="text" />
         상세주소<input type="text" />
