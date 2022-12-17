@@ -4,4 +4,9 @@
 # AWS Lightsail AccessKey
 config/awsconfig.json
 
+# modules
 /node_modules
+/frontend-naru/node_modules
+
+# sessions
+/sessions

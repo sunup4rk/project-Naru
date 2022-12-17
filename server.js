@@ -60,7 +60,7 @@ app.use(session({
     cookie: {
         httpOnly: true,
         secure: false,
-        maxAge: 1000 * 60 * 0.5  // 1분
+        maxAge: 1000 * 60 * 60 * 3  // 3시간
     },
     store: new FileStore()
 }));
@@ -297,14 +297,15 @@ app.post("/community/write", function(req, res) {
 function CheckPostCount() {
     db.collection('post_count').findOne({
         name : 'postcnt'
-    }, 
-    function(err, result) {
-        if (err) return console.log(err)
-        else {
-            const totalPost = result.total_post
-            return totalPost;
+        }, 
+        function(err, result) {
+            if (err) return console.log(err)
+            else {
+                const totalPost = result.total_post
+                return totalPost;
+            }
         }
-    });
+    )
 }
 
 function UpdateUserInfo(_id) {
@@ -458,7 +459,8 @@ passport.use(new localStrategy({
         passwordField: 'password',
         session: true,
         passReqToCallback: false,
-    }, function(inputemail, inputpw, done) {
+    }, 
+    function(inputemail, inputpw, done) {
         console.log("signin : " + inputemail)
         db.collection('user_info').findOne({email: inputemail}, function(err, user) {
             if (err) { return done(err) }
@@ -466,9 +468,10 @@ passport.use(new localStrategy({
             if (user.password === inputpw) { return done(null, user) }
             return done(null, false, console.log({message: "올바르지않은 비밀번호."}))
         })
-}))
+    }
+))
 passport.serializeUser((user, done) => {
-    console.log("serialize :", user)
+    console.log("serialize :", user.email)
     done(null, user.email)
 })
 passport.deserializeUser((usermail, done) => {
@@ -497,8 +500,8 @@ app.post('/islogin', function(req, res) {
 
 // 로그아웃
 app.post("/signout", function(req, res) {
-    console.log("/signout :", req.user.email);
-    req.session.destroy();
+    console.log("/signout :", req.user.email)
+    req.session.destroy()
     res.json({message: "로그아웃"})
 });
 
