@@ -28,11 +28,9 @@ const Header = ({category}) => {
                 }
             })
         }
-        isLogin(); 
+        isLogin();
     }, []);
 
-
-        
     return (
         <div className='header'>
             <Link to="/">

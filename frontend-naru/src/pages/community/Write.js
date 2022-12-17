@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import { useCookies } from 'react-cookie';
+import { useState } from 'react';
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Pane, Dialog } from 'evergreen-ui';
 import { useForm } from 'react-hook-form';
 import { Modal } from './../../components/common/modal/Modal';
 import { schema } from './Validation'
 import DaumPostcode from "react-daum-postcode";
-import './Write.scss';
 import axios from 'axios';
+import './Write.scss';
+import { useNavigate, useParams } from 'react-router-dom';
 
 
 const Write = (props) => {
@@ -17,31 +17,9 @@ const Write = (props) => {
     mode : 'onChange' 
   });
   const [user, setUser] = useState()
-  const [cookie, ] = useCookies();
   const { Success, Warning, Failure } = Modal();
-
-  useEffect(() => {
-    const fetchData = async () => {
-       try {
-           const response = await axios.post("http://localhost:8080/islogin", {
-           sessionID : cookie.sessionID
-       })
-       if(response.data.message === "로그인 성공") {
-           setUser(response.data)
-           console.log('?')
-       } else {
-         window.location.replace("/community")
-       }
-       } catch(error) {
-           Failure("로그인 오류", "로그인 정보를 불러올 수 없습니다.")
-       }}
-          fetchData();
-   }, []);
-
-
-   useEffect(() => {
-   }, [user])
-
+  const navigate = useNavigate()
+  const params = useParams()
 
   const onClickAddressSearch = () => {
     setIsShown(true)
@@ -52,11 +30,10 @@ const Write = (props) => {
     setIsShown(false)
   }
 
-
-
   const onClickSubmit = (data) => {
-    console.log(data)
-    axios.post("http://localhost:8080/community/edit/:id", {
+    axios.post("http://localhost:8080/community/write", {
+            // user_id:
+            // writer :
             title: getValues("title"),
             address: getValues("address"),
             addressDetail: getValues("addressDetail"),
@@ -71,6 +48,26 @@ const Write = (props) => {
         }).catch((error) => {
             Failure("등록 실패", "등록에 실패했습니다.")
         })
+  }
+
+  const onClickEdit = () => {
+    axios.put("http://localhost:8080/community/edit", {
+      // user_id:
+      // writer :
+      title: getValues("title"),
+      address: getValues("address"),
+      addressDetail: getValues("addressDetail"),
+      content: getValues("content")
+    })
+    .then((response) => {
+        if(response.data.message === "수정 성공") {
+          navigate(`/community/detail/${params.id}`)
+        } else {
+            Warning("수정 실패", response.data.message);
+        }
+    }).catch((error) => {
+        Failure("수정 실패", "수정에 실패했습니다.")
+    })
   }
 
   return (
@@ -88,6 +85,23 @@ const Write = (props) => {
     </Pane>  
 
     <div className="write">
+
+      {props.isEdit ?
+        <form className="write-wrapper" onSubmit={handleSubmit(onClickEdit)}>
+          제목<input type="text" {...register("title")} defaultValue={"제목"}/>
+          <br/>{errors.title?.message}<br/>
+          주소<input type="text" {...register("address")} defaultValue={"주소"}/>
+          <br/>{errors.address?.message}<br/>
+          <button type="button" onClick={onClickAddressSearch}>주소입력</button>
+          상세주소<input type="text" {...register("addressDetail")} defaultValue={"상세주소"}/>
+          이미지<button type="file">+</button>
+          내용<textarea cols="50" rows="10" {...register("content")} style={{resize:"none"}} defaultValue={"내용"}/>
+          <br/>{errors.content?.message}<br/>
+          <button type="submit">수정</button>
+        </form>
+
+      :
+
       <form className="write-wrapper" onSubmit={handleSubmit(onClickSubmit)}>
         제목<input type="text" {...register("title")}/>
         <br/>{errors.title?.message}<br/>
@@ -98,8 +112,10 @@ const Write = (props) => {
         이미지<button type="file">+</button>
         내용<textarea cols="50" rows="10" {...register("content")} style={{resize:"none"}}/>
         <br/>{errors.content?.message}<br/>
-        <button type="submit"> {props.isEdit ? "수정" : "등록"}</button>
+        <button type="submit">등록</button>
       </form>
+      }
+
     </div>
     </>
   );
