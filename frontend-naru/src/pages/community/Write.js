@@ -4,6 +4,8 @@ import { Pane, Dialog } from 'evergreen-ui';
 import { useForm } from 'react-hook-form';
 import { Modal } from './../../components/common/modal/Modal';
 import { schema } from './Validation'
+import uuid from 'react-uuid'
+import Upload01 from '../../components/common/upload/Upload01';
 import DaumPostcode from "react-daum-postcode";
 import axios from 'axios';
 import './Write.scss';
@@ -18,8 +20,10 @@ const Write = (props) => {
   });
   const [user, setUser] = useState()
   const { Success, Warning, Failure } = Modal();
+
   const navigate = useNavigate()
   const params = useParams()
+
 
   const onClickAddressSearch = () => {
     setIsShown(true)
@@ -50,24 +54,13 @@ const Write = (props) => {
         })
   }
 
-  const onClickEdit = () => {
-    axios.put("http://localhost:8080/community/edit", {
-      // user_id:
-      // writer :
-      title: getValues("title"),
-      address: getValues("address"),
-      addressDetail: getValues("addressDetail"),
-      content: getValues("content")
-    })
-    .then((response) => {
-        if(response.data.message === "수정 성공") {
-          navigate(`/community/detail/${params.id}`)
-        } else {
-            Warning("수정 실패", response.data.message);
-        }
-    }).catch((error) => {
-        Failure("수정 실패", "수정에 실패했습니다.")
-    })
+
+  const [images, setImages] = useState(["","","",""])
+
+  const onChangeImages = (img, index) => {
+    const newImages = [...images];
+    newImages[index] = img;
+    setImages(newImages);
   }
 
   return (
@@ -109,7 +102,10 @@ const Write = (props) => {
         <br/>{errors.address?.message}<br/>
         <button type="button" onClick={onClickAddressSearch}>주소입력</button>
         상세주소<input type="text" {...register("addressDetail")}/>
-        이미지<button type="file">+</button>
+        이미지
+        {images.map((el, index) => (
+          <Upload01 key={uuid()} onChangeImages={onChangeImages} index={index} images={el}/>
+        ))}
         내용<textarea cols="50" rows="10" {...register("content")} style={{resize:"none"}}/>
         <br/>{errors.content?.message}<br/>
         <button type="submit">등록</button>
