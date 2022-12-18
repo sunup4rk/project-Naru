@@ -18,7 +18,6 @@ const Write = (props) => {
     resolver: yupResolver(schema),
     mode : 'onChange' 
   });
-  const [user, setUser] = useState()
   const { Success, Warning, Failure } = Modal();
 
   const navigate = useNavigate()
@@ -36,8 +35,6 @@ const Write = (props) => {
 
   const onClickSubmit = (data) => {
     axios.post("http://localhost:8080/community/write", {
-            // user_id:
-            // writer :
             title: getValues("title"),
             address: getValues("address"),
             addressDetail: getValues("addressDetail"),
@@ -46,6 +43,7 @@ const Write = (props) => {
         .then((response) => {
             if(response.data.message === "등록 성공") {
                 Success("등록 성공", response.data.message);
+                navigate("/community")
             } else {
                 Warning("등록 실패", response.data.message);
             }
@@ -54,6 +52,23 @@ const Write = (props) => {
         })
   }
 
+  const onClickEdit = () => {
+    axios.put(`http://localhost:8080/community/edit/${params.id}`, {
+      title: getValues("title"),
+      address: getValues("address"),
+      addressDetail: getValues("addressDetail"),
+      content: getValues("content")
+    })
+    .then((response) => {
+        if(response.data.message === "수정 성공") {
+          navigate(`/community/detail/${params.id}`)
+        } else {
+            Warning("수정 실패", response.data.message);
+        }
+    }).catch((error) => {
+        Failure("수정 실패", "수정에 실패했습니다.")
+    })
+  }
 
   const [images, setImages] = useState(["","","",""])
 
@@ -81,14 +96,14 @@ const Write = (props) => {
 
       {props.isEdit ?
         <form className="write-wrapper" onSubmit={handleSubmit(onClickEdit)}>
-          제목<input type="text" {...register("title")} defaultValue={"제목"}/>
+          제목<input type="text" {...register("title")} defaultValue={props.editPost?.post_title}/>
           <br/>{errors.title?.message}<br/>
-          주소<input type="text" {...register("address")} defaultValue={"주소"}/>
+          주소<input type="text" {...register("address")} defaultValue={props.editPost?.post_address}/>
           <br/>{errors.address?.message}<br/>
           <button type="button" onClick={onClickAddressSearch}>주소입력</button>
-          상세주소<input type="text" {...register("addressDetail")} defaultValue={"상세주소"}/>
+          상세주소<input type="text" {...register("addressDetail")} defaultValue={props.editPost?.post_address_detail}/>
           이미지<button type="file">+</button>
-          내용<textarea cols="50" rows="10" {...register("content")} style={{resize:"none"}} defaultValue={"내용"}/>
+          내용<textarea cols="50" rows="10" {...register("content")} style={{resize:"none"}} defaultValue={props.editPost?.post_content}/>
           <br/>{errors.content?.message}<br/>
           <button type="submit">수정</button>
         </form>
