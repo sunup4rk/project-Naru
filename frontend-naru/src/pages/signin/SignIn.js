@@ -1,37 +1,38 @@
 import { Link } from 'react-router-dom';
 import { useForm } from "react-hook-form";
+import { useCookies } from 'react-cookie';
 import { ReactComponent as Logo } from "../../assets/images/logo01.svg";
 import { Modal } from './../../components/common/modal/Modal';
 import Button01 from "../../components/common/button/Button01";
 import Input01 from "../../components/common/input/Input01";
-import './SignIn.scss';
 import axios from 'axios';
-import { useCookies } from 'react-cookie';
+import './SignIn.scss';
 
 const SignIn = () => {
-    const { register, handleSubmit} = useForm();
+    const { register, handleSubmit } = useForm();
     const { Warning, Failure } = Modal();
     const [ , setCookie ] = useCookies();
-    
+
     axios.defaults.withCredentials = true;
 
-    const onClickSignIn = (data) =>{
-
-        axios.post("http://localhost:8080/signin", {
-            email: data.email,
-            password: data.password
-        })
-        .then((response) => {
-            if(response.data.message === "로그인 성공") {
-                setCookie('sessionID', response.data.sessionID)
-                window.location.replace("/")
-            }
-            else {
-                Warning("로그인 실패", response.data.message);
-            }
-        }).catch((error) => {
-            Failure("로그인 실패", "로그인에 실패했습니다.")
-        })
+    const onClickSignIn = (data) => {
+        if(!data.email) Warning("로그인 실패", "이메일을 입력하세요.")
+        else if(!data.password) Warning("로그인 실패", "비밀번호를 입력하세요.")
+        else {
+            axios.post("http://localhost:8080/signin", {
+                email: data.email,
+                password: data.password
+            })
+            .then((response) => {
+                if(response.data.message === "로그인 성공") {
+                    setCookie('sessionID', response.data.sessionID)
+                    window.location.replace("/")
+                }
+            })
+            .catch((error) => {
+                Failure("로그인 실패", "로그인에 실패했습니다.")
+            })
+        }
     }
 
     return (

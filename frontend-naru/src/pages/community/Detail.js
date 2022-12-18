@@ -1,63 +1,44 @@
-import { useState } from 'react';
-import DaumPostcode from "react-daum-postcode";
-import { Pane, Dialog } from 'evergreen-ui';
-import { useForm } from 'react-hook-form';
-import { Modal } from '../../components/common/modal/modal';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 import './Write.scss';
 
-const Write = () => {
-  const [isShown, setIsShown] = useState(false)
-  const { register, handleSubmit, formState: { errors }, setValue, getValues, watch} = useForm ({ mode : 'onChange' });
-  const { Success, Warning, Failure } = Modal();
+const Detail = () => {
+  const params = useParams()
+  const navigate = useNavigate();
+  const [detail, setDetail] = useState()
 
-  const onClickAddressSearch = () => {
-    setIsShown(true)
-  }
+  useEffect(() => {
+    const fetchData = () => {
+      axios.get("http://localhost:8080/detail/:id")
+      .then((response) => {
+          if(response.data.message === "로그인 성공") {
+            setDetail()
+          }
+      })
+    };
+    fetchData();
+  }, [])
 
-  const onCompleteSearch = (postcode) => {
-    setValue("address", postcode.address)
-    setIsShown(false)
-  }
-
-  const onKeyPressEnter = (e) => {
-    // if(e.target.keyCode === 13) {
-    //   let text = getValues("contents").replaceAll(/(\n|\r\n)/g, "<br>");
-    //   setValue("contents", text);
-    // }
-  }
-
-  const onClickSubmit = (data) => {
-    console.log(data)
+  const onClickEdit = () => {
+    navigate(`/community/edit/${params.id}`)
   }
 
   return (
     <>
-    <Pane>
-      <Dialog
-        isShown={isShown}
-        title="주소 검색"
-        onCloseComplete={() => setIsShown(false)}
-        hasFooter={false}
-        minHeightContent={"400px"}
-      >
-        <DaumPostcode onComplete={onCompleteSearch} style={{height:465}}/>
-      </Dialog>
-    </Pane>
-
     <div className="write">
-      <form className="write-wrapper" onSubmit={handleSubmit(onClickSubmit)}>
-        제목<input type="text" {...register("title")}/>
-        주소<input type="text" {...register("address")}/>
-        <button type="button" onClick={onClickAddressSearch}>주소입력</button>
-        상세주소<input type="text" {...register("addressDetail")}/>
+      <div className="write-wrapper">
+        제목<input type="text" defaultValue={"제목"}/>
+        주소<input type="text" defaultValue={"주소"}/>
+        상세주소<input type="text" defaultValue={"상세주소"}/>
         이미지<button type="file" >+</button>
-        내용<textarea cols="50" rows="10" {...register("contents")} style={{resize:"none"}} onKeyUp={onKeyPressEnter}/>
-      <button>등록</button>
-      <button>수정</button>
-      </form>
+        내용<textarea cols="50" rows="10"  style={{resize:"none"}} defaultValue={"내용"}/>
+      <button>삭제</button>
+      <button onClick={onClickEdit}>수정</button>
+      </div>
     </div>
     </>
   );
 };
 
-export default Write;
+export default Detail;

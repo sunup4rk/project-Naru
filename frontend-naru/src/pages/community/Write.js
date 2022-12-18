@@ -1,38 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useCookies } from 'react-cookie';
+import { useState } from 'react';
 import { yupResolver } from "@hookform/resolvers/yup";
-import DaumPostcode from "react-daum-postcode";
 import { Pane, Dialog } from 'evergreen-ui';
 import { useForm } from 'react-hook-form';
 import { Modal } from './../../components/common/modal/Modal';
-import './Write.scss';
-import axios from 'axios';
 import { schema } from './Validation'
 import uuid from 'react-uuid'
-
-// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-import styled from "styled-components";
 import Upload01 from '../../components/common/upload/Upload01';
-
-const ImgPreview = styled.img`
-  border-style: solid;
-  border-color: black;
-  width: 250px;
-  height: 250px;
-  margin: 30px;
-  position: absolute;
-  left: 41%;
-  right: 50%;
-`;
-
-const UploadImage = styled.input`
-  height: 30px;
-  left: 50%;
-  right: 30%;
-  margin-top: 300px;
-`
-// ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-
+import DaumPostcode from "react-daum-postcode";
+import axios from 'axios';
+import './Write.scss';
+import { useNavigate, useParams } from 'react-router-dom';
 
 
 const Write = (props) => {
@@ -42,8 +19,11 @@ const Write = (props) => {
     mode : 'onChange' 
   });
   const [user, setUser] = useState()
-  const [cookie, ] = useCookies();
   const { Success, Warning, Failure } = Modal();
+
+  const navigate = useNavigate()
+  const params = useParams()
+
 
   const onClickAddressSearch = () => {
     setIsShown(true)
@@ -54,11 +34,10 @@ const Write = (props) => {
     setIsShown(false)
   }
 
-
-
   const onClickSubmit = (data) => {
-    console.log(data)
     axios.post("http://localhost:8080/community/write", {
+            // user_id:
+            // writer :
             title: getValues("title"),
             address: getValues("address"),
             addressDetail: getValues("addressDetail"),
@@ -75,7 +54,7 @@ const Write = (props) => {
         })
   }
 
-  // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+
   const [images, setImages] = useState(["","","",""])
 
   const onChangeImages = (img, index) => {
@@ -84,7 +63,6 @@ const Write = (props) => {
     setImages(newImages);
   }
 
-  
   return (
     <>
       <Pane>
@@ -100,6 +78,23 @@ const Write = (props) => {
     </Pane>  
 
     <div className="write">
+
+      {props.isEdit ?
+        <form className="write-wrapper" onSubmit={handleSubmit(onClickEdit)}>
+          제목<input type="text" {...register("title")} defaultValue={"제목"}/>
+          <br/>{errors.title?.message}<br/>
+          주소<input type="text" {...register("address")} defaultValue={"주소"}/>
+          <br/>{errors.address?.message}<br/>
+          <button type="button" onClick={onClickAddressSearch}>주소입력</button>
+          상세주소<input type="text" {...register("addressDetail")} defaultValue={"상세주소"}/>
+          이미지<button type="file">+</button>
+          내용<textarea cols="50" rows="10" {...register("content")} style={{resize:"none"}} defaultValue={"내용"}/>
+          <br/>{errors.content?.message}<br/>
+          <button type="submit">수정</button>
+        </form>
+
+      :
+
       <form className="write-wrapper" onSubmit={handleSubmit(onClickSubmit)}>
         제목<input type="text" {...register("title")}/>
         <br/>{errors.title?.message}<br/>
@@ -113,8 +108,10 @@ const Write = (props) => {
         ))}
         내용<textarea cols="50" rows="10" {...register("content")} style={{resize:"none"}}/>
         <br/>{errors.content?.message}<br/>
-        <button type="submit"> {props.isEdit ? "수정" : "등록"}</button>
+        <button type="submit">등록</button>
       </form>
+      }
+
     </div>
     </>
   );

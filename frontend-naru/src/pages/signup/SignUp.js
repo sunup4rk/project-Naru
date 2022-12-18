@@ -27,7 +27,7 @@ const SignUp = () => {
         }
     });
     const { Success, Warning, Failure } = Modal();
-
+    
     const emailPattern = /\S+@\S+\.\S+/;
 
     const onClickEmail = () => {
@@ -43,11 +43,11 @@ const SignUp = () => {
                     Warning("인증메일 발송 실패", response.data.message);
                     setValue("emailCheck", true);
                 }
-    
-            }).catch((error) => {
+            })
+            .catch((error) => {
                 Failure("인증메일 발송 실패", "인증메일 발송에 실패했습니다.")
             })
-        }
+        } 
         else {
             Warning("인증메일 발송 실패", "올바른 이메일 형식이 아닙니다.")
         }
@@ -60,7 +60,7 @@ const SignUp = () => {
         })
         .then((response) => {
             if(response.data.message === "인증되었습니다.") {
-                Success("인증 확인",response.data.message);
+                Success("인증 확인", response.data.message);
                 setValue("authCheck", true);
                 setValue("disabled", true);
             } else {
@@ -68,17 +68,18 @@ const SignUp = () => {
                 setValue("authCheck", false);
                 setValue("disabled", false);
             }
-        }).catch((error) => {
+        })
+        .catch((error) => {
             Failure("인증 실패", "인증에 실패했습니다.")
         })
     }
 
-    const onClickSignUp = (data) =>{
+    const onClickSignUp = (data) => {
         if(data.emailCheck === false || data.authCheck === false) {
             Warning("가입 실패", "이메일 인증이 필요합니다.")
         } else if (data.password !== data.passwordCheck) {
             Warning("가입 실패", "비밀번호가 일치하지 않습니다.")
-        } else if (data.password === data.passwordCheck && data.emailCheck === true && data.authCheck === true) {
+        } else {
             axios.post("http://localhost:8080/signup", {
                 email: data.email,
                 nickname: data.nickname,
@@ -86,13 +87,14 @@ const SignUp = () => {
             })
             .then((response) => {
                 if(response.data.message === "가입되었습니다.🎉") {
-                    Success("가입 성공", response.data.message);
-                    navigate('/signIn')
+                    Success("가입 완료", response.data.message);
+                    navigate('/signin')
                 }
                 else {
                     Warning("가입 실패", response.data.message);
                 }
-            }).catch((error) => {
+            })
+            .catch((error) => {
                 Failure("가입 실패", "회원가입에 실패했습니다.")
             })
         }
