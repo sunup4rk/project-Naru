@@ -8,6 +8,31 @@ import { Modal } from './../../components/common/modal/Modal';
 import './Write.scss';
 import axios from 'axios';
 import { schema } from './Validation'
+import uuid from 'react-uuid'
+
+// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+import styled from "styled-components";
+import Upload01 from '../../components/common/upload/Upload01';
+
+const ImgPreview = styled.img`
+  border-style: solid;
+  border-color: black;
+  width: 250px;
+  height: 250px;
+  margin: 30px;
+  position: absolute;
+  left: 41%;
+  right: 50%;
+`;
+
+const UploadImage = styled.input`
+  height: 30px;
+  left: 50%;
+  right: 30%;
+  margin-top: 300px;
+`
+// ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
 
 
 const Write = (props) => {
@@ -19,29 +44,6 @@ const Write = (props) => {
   const [user, setUser] = useState()
   const [cookie, ] = useCookies();
   const { Success, Warning, Failure } = Modal();
-
-  useEffect(() => {
-    const fetchData = async () => {
-       try {
-           const response = await axios.post("http://localhost:8080/islogin", {
-           sessionID : cookie.sessionID
-       })
-       if(response.data.message === "로그인 성공") {
-           setUser(response.data)
-           console.log('?')
-       } else {
-         window.location.replace("/community")
-       }
-       } catch(error) {
-           Failure("로그인 오류", "로그인 정보를 불러올 수 없습니다.")
-       }}
-          fetchData();
-   }, []);
-
-
-   useEffect(() => {
-   }, [user])
-
 
   const onClickAddressSearch = () => {
     setIsShown(true)
@@ -73,6 +75,16 @@ const Write = (props) => {
         })
   }
 
+  // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+  const [images, setImages] = useState(["","","",""])
+
+  const onChangeImages = (img, index) => {
+    const newImages = [...images];
+    newImages[index] = img;
+    setImages(newImages);
+  }
+
+  
   return (
     <>
       <Pane>
@@ -95,7 +107,10 @@ const Write = (props) => {
         <br/>{errors.address?.message}<br/>
         <button type="button" onClick={onClickAddressSearch}>주소입력</button>
         상세주소<input type="text" {...register("addressDetail")}/>
-        이미지<button type="file">+</button>
+        이미지
+        {images.map((el, index) => (
+          <Upload01 key={uuid()} onChangeImages={onChangeImages} index={index} images={el}/>
+        ))}
         내용<textarea cols="50" rows="10" {...register("content")} style={{resize:"none"}}/>
         <br/>{errors.content?.message}<br/>
         <button type="submit"> {props.isEdit ? "수정" : "등록"}</button>
