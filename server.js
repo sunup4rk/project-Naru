@@ -295,10 +295,7 @@ app.post("/community/write", function(req, res) {
             like_user : [],
             post_address : req.body.address,
             post_address_detail : req.body.addressDetail,
-            // image_address : {
-            //     key: req.user._id + "/" + postId + "/" + req.body.imageName,
-            //     url: process.env.IMAGE_SERVER + "/" + req.user._id + "/" + postId + "/" + req.body.imageName,                
-            // },
+            image_address : [],
             post_time : moment().format('YYYY-MM-DD')
             },
             function(err, result){
@@ -311,6 +308,7 @@ app.post("/community/write", function(req, res) {
                     UpdateUserInfo(req.user._id);
                     res.status(200).json({message : "등록 성공"});         
                 }
+                RenameFolder(req.user._id.toString(), postId);
             }
         )
     })
@@ -724,7 +722,9 @@ function IsLogin (req, res, next) {
 //////////////////////////////////////////////////////////////////////////////////////////////
 async function RenameFolder(uid, pid) {
     const folderToMove = uid + '/temp/';   // old folder name
-    pid = 13;
+    const awsAddress = "https://bucket-sunu.s3.ap-northeast-2.amazonaws.com";
+    console.log(pid)
+    let imageAddress = [];
 
     try {
         const listObjectsResponse = await s3.listObjects({
@@ -742,14 +742,30 @@ async function RenameFolder(uid, pid) {
                 CopySource: `${BUCKET_NAME}/${folderContentInfo[i].Key}`,  // old file Key
                 Key: `${uid}/${pid}/${divide[2]}`, // new file Key
             }).promise();
-            
+
+            imageAddress[i] = awsAddress + "/" + BUCKET_NAME + "/" + String(uid) + "/" + String(pid) + "/" + divide[2];
+            console.log(awsAddress);
+            console.log(BUCKET_NAME);
+            console.log(uid);
+            console.log(pid);
+            console.log(divide[2]);
+
             await s3.deleteObject({
                 Bucket: BUCKET_NAME,
                 Key: folderContentInfo[i].Key,
             }).promise();
-        }        
+        }
+        db.collection('post').updateOne(
+            {_id : pid}, 
+            {$set : {image_address : imageAddress}}, 
+            function(err, result) {
+                if (err) { return console.log(err); }
+                else { console.log("맞나?", imageAddress[0]); } 
+            }
+        )    
 
     } catch (err) { console.error(err); }
+    
 }
 
 app.delete('/image/delete', function(req, res) {
@@ -765,7 +781,6 @@ app.delete('/image/delete', function(req, res) {
         .promise()
         .then((data) => {
             res.json({message: "삭제 성공"});
-            // RenameFolder((req.query.url).substr(52, 24), req.body._id); /////////////////// 
         })
         .catch((error) => {
             console.error(error);
