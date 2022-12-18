@@ -209,7 +209,16 @@ app.get('/explore', function(req, res) {
 app.get('/community', function(req, res) {  //list로 수정부분
     db.collection('post').find().toArray(function(err, result){
         result.reverse()
-        res.render('community.ejs', {posts : result});        // 게시판 페이지
+        if (err) {
+            res.json({message : "전송 실패"})
+        }
+        else {
+            console.log("전송");
+            res.status(200).send({
+                message : "조회 성공",
+                result : result,
+            });         
+        }
     });
 })
 
@@ -220,36 +229,42 @@ app.get('/best', function(req, res) {
 })
 
 // 좋아요 구현
-app.post("/like/:id", function(req, res){
+app.post("/community/detail/like/:id", function(req, res){
+    
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
         var chk = false
         if (!req.isAuthenticated()){
             // req.isAuth() 가 true를 반환하면 비 로그인 상태
-            res.send('<script>alert("회원만 좋아요가 가능합니다."); history.back();</script>')
+            res.json({message : "비회원"})
         }
-        else{
-            if(result.like_count == 0){
-                db.collection('post').updateOne(
-                    { _id: parseInt(req.params.id)},
-                    { $inc : {like_count : 1} , $push: { like_user: req.user._id.toString()}},
+        else if(result.like_count == 0){
+            db.collection('post').updateOne(
+                { _id: parseInt(req.params.id)},
+                { $inc : {like_count : 1} , $push: { like_user: req.user._id.toString()}},
                 )
                 console.log('좋아요 완료')
-                res.redirect(req.get('referer'))
+                res.send({
+                    message : "좋아요",
+                    like_count : result.like_count,
+                }); 
             }
-            else{
-                for (var i = 0; i <= result.like_count; i++){
-                    if(result.like_user[i] == req.user._id.toString()){
-                        chk = true
-                        break
-                    }
+        else{
+            for (var i = 0; i <= result.like_count; i++){
+                if(result.like_user[i] == req.user._id.toString()){
+                    chk = true
+                    break
                 }
+            }
                 if(!chk){
                     console.log('좋아요 완료')
                     db.collection('post').updateOne(
                         { _id: parseInt(req.params.id)},
                         { $inc : {like_count : 1} , $push: { like_user: req.user._id.toString()}},
                     )
-                     res.redirect(req.get('referer'))
+                    res.send({
+                        message : "좋아요",
+                        like_count : result.like_count,
+                    }); 
                 }
                 else{
                     console.log('좋아요 취소')
@@ -257,11 +272,14 @@ app.post("/like/:id", function(req, res){
                         { _id: parseInt(req.params.id)},
                         { $inc : {like_count : -1} , $pull: { like_user: req.user._id.toString()}},
                     )
-                    res.redirect(req.get('referer'))
+                    res.send({
+                        message : "좋아요",
+                        like_count : result.like_count,
+                    }); 
                 }
             }
         }
-    })
+    )
 })
 
 app.post("/community/write", function(req, res) {
@@ -290,7 +308,7 @@ app.post("/community/write", function(req, res) {
                 else {
                     console.log("post_id :", postId, " 등록");
                     UpdatePostCount();
-                    // UpdateUserInfo(req.user._id);
+                    UpdateUserInfo(req.user._id);
                     res.status(200).json({message : "등록 성공"});         
                 }
             }
@@ -339,8 +357,34 @@ function UpdatePostCount() {
 
 app.get('/community/detail/:id', function(req, res) {
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err,result){
-        if(err) return err;
-        res.render('detail.ejs',{data : result}) // 글 조회 페이지
+        if (err) {
+            res.json({message : "글 전송 실패"})
+        }
+        else{
+            if (!req.isAuthenticated()){
+                console.log("전송, 비로그인");
+                res.status(200).send({
+                    message : "비로그인",
+                    result : result,
+                }); 
+            }
+            else if (result.user_id.toString() === req.user._id.toString()){
+                console.log("전송, 일치");
+                res.status(200).send({
+                    message : "일치",
+                    result : result,
+                });         
+            }
+            else{
+                console.log("전송, 불일치");
+                res.status(200).send({
+                    message : "불일치",
+                    result : result,
+                });  
+            }
+        }
+        
+        
     })
 })
 
@@ -349,59 +393,75 @@ app.get('/community/detail/:id', function(req, res) {
 app.get("/community/edit/:id", function(req, res){
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
         if (err) return err;
-        if (!req.isAuthenticated()){
-            res.send('<script>alert("작성자만 수정할 수 있습니다. (로그인 필요)"); history.back();</script>')
-        }
-        else if(result.user_id.toString() === req.user._id.toString()){
-           res.render('edit.ejs', {post : result})
-        }
-        else{
-            res.send('<script>alert("작성자만 수정할 수 있습니다."); history.back();</script>')
-        }
+        // if (!req.isAuthenticated()){
+        //     res.send('<script>alert("작성자만 수정할 수 있습니다. (로그인 필요)"); history.back();</script>')
+        // }
+        console.log("수정할 글 전송");
+            res.status(200).send({
+                message : "전송",
+                result : result,
+            }); 
+        
     })
 })
 
-app.put('/edit/post/:id', function(req,res){
-    console.log(req)
+app.put('/community/edit/:id', function(req,res){
     db.collection('post').updateOne(
         {_id : parseInt(req.params.id)}, 
-        {$set : {post_title : req.body.title, post_content : req.body.content}}, 
+        {$set : {
+            post_title : req.body.title, 
+            post_content : req.body.content,
+            // image_address : {
+            //     key: req.user._id + "/" + postId + "/" + req.body.imageName,
+            //     url: process.env.IMAGE_SERVER + "/" + req.user._id + "/" + postId + "/" + req.body.imageName,                
+            // },
+            post_address : req.body.address,
+            post_address_detail : req.body.addressDetail,
+            }}, 
         function(err, result){
-        if (err) return err;
-        res.send('<script>alert("수정이 완료되었습니다."); location.href="/community";</script>')
-        console.log('수정 완료')
+            if (err) {
+                res.json({message : "수정 실패"})
+            }
+            else{
+                console.log("전송");
+                res.status(200).send({
+                    message : "수정 성공",
+                });
+            }
     })
 })
 
-app.post('/delete/:id', function(req, res){ 
+app.delete('/community/delete/:id', function(req, res){ 
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
-        if (!req.isAuthenticated()) {
-            res.send('<script>alert("권한이 없습니다. (로그인 필요)"); history.back();</script>')
+        if (err) {
+            res.json({message : "삭제 실패"})
         }
         else if(result.user_id.toString() == req.user._id.toString()){
             db.collection('post').deleteOne({_id : parseInt(req.params.id)}, function(err, result) {
                 db.collection('user_info').updateOne({_id : req.user._id}, {$inc : {user_point : -30, posting_count : -1}}, function(err, result) {
+                    res.json({message : "삭제 완료"})
                 })
             })
-            const objectParams_del = {
-                Bucket: BUCKET_NAME,
-                Key: result.post_address.key,
-            };
-            s3
-                .deleteObject(objectParams_del)
-                .promise()
-                .then((data) => {
-                    console.log('success : ', data);
-                    res.send('<script>alert("삭제가 완료되었습니다."); location.href="/community";</script>')
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
+            // const objectParams_del = {
+            //     Bucket: BUCKET_NAME,
+            //     Key: result.post_address.key,
+            // };
+            // const s3 = new AWS.S3;
+            // s3
+            //     .deleteObject(objectParams_del)
+            //     .promise()
+            //     .then((data) => {
+            //         console.log('success : ', data);
+            //         res.send('<script>alert("삭제가 완료되었습니다."); location.href="/community";</script>')
+            //     })
+            //     .catch((error) => {
+            //         console.error(error);
+            //     });
                 
             
         }
         else{
-            res.send('<script>alert("권한이 없습니다. (작성자만 삭제 가능)"); history.back();</script>')
+            res.json({message : "삭제 실패"})
         }
        
     })

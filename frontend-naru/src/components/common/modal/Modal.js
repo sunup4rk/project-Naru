@@ -8,7 +8,7 @@ export const Modal = () => {
             title: title,
             text: text,
             confirmButtonColor: "#4461AA",
-            showConfirmButton: false,
+            showConfirmButton: true,
             timer: 1700,
           })
     }
@@ -42,6 +42,7 @@ export const Modal = () => {
           text: text,
           confirmButtonColor: "#4461AA",
           showConfirmButton: true,
+          showCancelButton: true,
         });
       };
 

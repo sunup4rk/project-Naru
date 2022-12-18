@@ -3,13 +3,28 @@ import { useCookies } from 'react-cookie';
 import { Modal } from './../../components/common/modal/Modal';
 import axios from 'axios';
 import './Write.scss';
+import { useEffect, useState } from 'react';
 
 const Detail = () => {
-  console.log('디테일');
-  
   const [cookie, ] = useCookies();
   const navigate = useNavigate();
-  const { Warning } = Modal();
+  const { Warning, Failure } = Modal();
+  const [post, setPost] = useState([])
+
+  useEffect(() => {
+    const fetchPost = () => {
+        axios.get("http://localhost:8080/community")
+        .then((response) => {
+            if(response.data.message === "조회 성공") {
+                setPost(response.data.result)
+            }
+        })
+        .catch((error) => {
+          Failure("게시글 조회 실패", "게시글 조회에 실패했습니다.")
+        })
+    }
+    fetchPost();
+}, []);
 
   const onClickWrite = () => {
     axios.post("http://localhost:8080/islogin", {
@@ -34,10 +49,14 @@ const Detail = () => {
     <>
     <div className="write">
       <div className="write-wrapper">
-        <div>이미지</div>
-        <div id={"아이디"} onClick={onClickMoveDetail("el")}>타이틀</div>
-        <div>날짜</div>
-        <div>좋아요 수</div>
+        {post.map((el) => (
+          <div key={el._id}>
+            <div>이미지</div>
+            <div id={el._id} onClick={onClickMoveDetail(el)}>{el.post_title}</div>
+            <div>{el.post_time}</div>
+            <div>{el.like_count}</div>
+          </div>
+        ))}
       <button onClick={onClickWrite}>글 작성</button>
       </div>
     </div>
