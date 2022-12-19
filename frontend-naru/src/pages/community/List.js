@@ -36,7 +36,11 @@ const Detail = () => {
           navigate("/community/write")
         }
         else {
-          Warning("게시글 작성", "로그인이 필요합니다.")
+          Warning("게시글 작성", "로그인이 필요합니다.").then((result) => {
+            if(result.isConfirmed) {
+              navigate("/signup")
+            }
+          })
         }
     })
   }

@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Bestpost = () => {
-    const [post, setPost] = useState([])
-
     useEffect(() => {
         const fetchPost = () => {
             axios.get("http://localhost:8080/best")
@@ -16,9 +15,19 @@ const Bestpost = () => {
         fetchPost();
     }, []);
 
+
+    const [post, setPost] = useState([])
+    const navigate = useNavigate();
+
+
+    const onClickMoveDetail = (el) => (e) => {
+        navigate(`/community/detail/${e.target.id}`)
+  }
+    
+
     return (
         <div>
-            인기글
+            <h1>인기글</h1>
             {post?.map((el) => (
                 <div key={el._id}>
                     <img src={el?.image_address} alt="post_img" />
