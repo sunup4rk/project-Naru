@@ -314,20 +314,6 @@ app.post("/community/write", function(req, res) {
     })
 })
 
-function CheckPostCount() {
-    db.collection('post_count').findOne({
-        name : 'postcnt'
-        }, 
-        function(err, result) {
-            if (err) return console.log(err)
-            else {
-                const totalPost = result.total_post
-                return totalPost;
-            }
-        }
-    )
-}
-
 function UpdateUserInfo(_id) {
     db.collection('user_info').updateOne(
         {_id : _id},
@@ -356,7 +342,7 @@ function UpdatePostCount() {
 app.get('/community/detail/:id', function(req, res) {
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err,result){
         if (err) {
-            res.json({message : "글 전송 실패"})
+            res.json({message : "글 전송 실패"});
         }
         else{
             if (!req.isAuthenticated()){
@@ -522,7 +508,7 @@ passport.use(new localStrategy({
         passReqToCallback: false,
     }, 
     function(inputemail, inputpw, done) {
-        console.log("signin :" + inputemail)
+        console.log("signin : " + inputemail)
         db.collection('user_info').findOne({email: inputemail}, function(err, user) {
             if (err) { return done(err) }
             if (!user) { return done(null, false, console.log({message: "존재하지 않는 아이디입니다."})) }
@@ -649,6 +635,7 @@ const ejs = require('ejs');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const { Console } = require('console');
+const { AppIntegrations } = require('aws-sdk');
 let appDir = path.dirname(require.main.filename) + '/templates/authMail.ejs';
 
 // 인증번호 확인 요청
@@ -702,21 +689,6 @@ app.post('/signup', function(req, res) {
     });
 })
 // signup 끝 ///////////////////////////////////////////////////////////////////////////////////////
-
-                                        // 마이페이지 - 내정보
-app.get("/mypage", IsLogin, (req, res) => {
-    res.send(req.user);
-});
-function IsLogin (req, res, next) {
-    if (req.body.sessionID === req.sessionID) {
-        next();
-    }
-    else res.json({message: "로그인 해주세요"});
-}
-
-// app.get('/mypage/edit', IsLogin, function(req, res) {
-//     res.render('mypage_edit.ejs', {userInfo : req.user});// └ 개인정보 수정
-// });
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -847,36 +819,77 @@ function uploadToBucket(filename, Body){
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-// app.get('/mypage/editPW', IsLogin, function(req, res) {
-//     res.render('mypage_editPW.ejs', {userInfo : req.user});  // └ 비밀번호 변경
-// });
+// 내 정보
+app.get("/userinfo", (req, res) => {
+    res.send({
+        message: "불러오기",
+        nickname: req.user.nickname,
+        user_level: req.user.user_level,
+        user_point: req.user.user_point,
+        posting_count: req.user.posting_count,
+    })
+})
 
-app.post('/password/check', function(req, res) {
+// 회원정보 수정
+app.get("/mypage", (req, res) => {
+    res.send({
+        message: "불러오기",
+        email: req.user.email,
+        nickname: req.user.nickname,
+    })
+})
+
+app.post("/mypage/edit", (req, res) => {
+    // 닉네임
+    db.collection('user_info').findOne({nickname : req.body.nickname}, function(err, result) {
+        if (err) {return console.log(err)}
+        if (result) {res.json({message: "사용중인 닉네임입니다."})}
+        else {
+            db.collection('user_info').updateOne(
+                {_id : req.user._id},
+                {$set : {nickname : req.body.nickname}},
+                function(err, result) {
+                    if (err) { return console.log(err); }
+                    console.log("닉네임변경 : ", req.user.nickname, " => ", req.body.nickname);
+                    res.json({message: "수정 성공"});
+            });
+        }
+    })    
+})
+
+// 비밀번호 수정
+app.get("/mypage/editPW", (req, res) => {
+    res.send({message: "editPW"})
+})
+
+app.post('/mypage/editPW/check', function(req, res) {
     db.collection('user_info').findOne({_id : req.user._id}, function(err, result){
         if (err) { return console.log(err); }
-        if (result.password == req.body.password) { res.json({message: "비밀번호 일치"}); }
+        if (result.password == req.body.password) { 
+            res.json({message: "비밀번호 일치"}); 
+        }
         else { res.json({message: "비밀번호 불일치"}); }
     });
 })
 
-app.put('/password/change', function(req, res) {
+app.put('/mypage/editPW/change', function(req, res) {
     db.collection('user_info').updateOne(
         {_id : req.user._id},
         {$set : {password : req.body.password}},
         function(err, result) {
-            if (err) return console.log(err);
+            if (err) { return console.log(err); }
             console.log("변경내역 : ", req.user.password, " => ", req.body.password);
     });
     res.json({message: "비밀번호 변경완료"});
 })
 
-app.get('/mypage/like', IsLogin, function(req, res) {
-    res.render('mypage_like.ejs', {userInfo : req.user});  // └ 좋아요 한 게시글
-}); 
-app.get('/mypage/post', IsLogin, function(req, res) {
-    res.render('mypage_post.ejs', {userInfo : req.user}); // └ 작성한 게시글
-});
-app.get('/mypage/qna', IsLogin, function(req, res) {
-    res.render('mypage_qna.ejs', {userInfo : req.user});     // └ 문의내역
-});
+// app.get('/mypage/like', function(req, res) {
+//     res.render('mypage_like.ejs', {userInfo : req.user});  // └ 좋아요 한 게시글
+// }); 
+// app.get('/mypage/post', function(req, res) {
+//     res.render('mypage_post.ejs', {userInfo : req.user}); // └ 작성한 게시글
+// });
+// app.get('/mypage/qna', function(req, res) {
+//     res.render('mypage_qna.ejs', {userInfo : req.user});     // └ 문의내역
+// });
 
