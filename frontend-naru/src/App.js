@@ -7,6 +7,8 @@ import Footer from "./components/layout/footer/Footer";
 import Nav01 from "./components/layout/navigation/Nav01";
 import { PointBanner, QnaBanner } from "./components/layout/banner/Banner03";
 import Cafe from "./pages/explore/Cafe";
+import Entertainment from "./pages/explore/Entertainment";
+import Culture from "./pages/explore/Culture";
 import SignIn from "./pages/signin/SignIn";
 import SignUp from "./pages/signup/SignUp";
 import ExploreLayout from "./components/layout/ExploreLayout";
@@ -50,8 +52,8 @@ function App() {
 
             <Route path="explore/*" element={<ExploreLayout />}>
               <Route path="cafe" element={<Cafe />} />
-              <Route path="entertainment" element={<Cafe />} />
-              <Route path="culture" element={<Cafe />} />
+              <Route path="entertainment" element={<Entertainment />} />
+              <Route path="culture" element={<Culture />} />
             </Route>
 
             <Route path="mypage/*" element={<MypageLayout />}>
