@@ -8,7 +8,7 @@ export const Modal = () => {
             title: title,
             text: text,
             confirmButtonColor: "#4461AA",
-            showConfirmButton: true,
+            showConfirmButton: false,
             timer: 1700,
           })
     }

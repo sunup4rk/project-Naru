@@ -48,6 +48,10 @@ export const GlobalStyles = createGlobalStyle`
         cursor: pointer;
     }
 
+    h1 {
+        font-size: 2rem;
+    }
+
 
     @font-face {
         font-family: Jalnan;
