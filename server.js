@@ -820,9 +820,10 @@ function uploadToBucket(filename, Body){
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 // 내 정보
-app.get("/userinfo", (req, res) => {
+app.get("/mypage", (req, res) => {
     res.send({
         message: "불러오기",
+        profile: req.user.profile_image_path,
         nickname: req.user.nickname,
         user_level: req.user.user_level,
         user_point: req.user.user_point,
@@ -831,9 +832,10 @@ app.get("/userinfo", (req, res) => {
 })
 
 // 회원정보 수정
-app.get("/mypage", (req, res) => {
+app.get("/mypage/edit", (req, res) => {
     res.send({
         message: "불러오기",
+        profile: req.user.profile_image_path,
         email: req.user.email,
         nickname: req.user.nickname,
     })
@@ -858,21 +860,23 @@ app.post("/mypage/edit", (req, res) => {
 })
 
 // 비밀번호 수정
-app.get("/mypage/editPW", (req, res) => {
+app.get("/mypage/editpw", (req, res) => {
     res.send({message: "editPW"})
 })
 
-app.post('/mypage/editPW/check', function(req, res) {
+app.post('/mypage/editpw/check', function(req, res) {
     db.collection('user_info').findOne({_id : req.user._id}, function(err, result){
         if (err) { return console.log(err); }
+        console.log("result.password", result.password)
+        console.log("req.body.password", req.body.password)
         if (result.password == req.body.password) { 
             res.json({message: "비밀번호 일치"}); 
         }
-        else { res.json({message: "비밀번호 불일치"}); }
+        else { res.json({message: "비밀번호가 일치하지 않습니다."}); }
     });
 })
 
-app.put('/mypage/editPW/change', function(req, res) {
+app.put('/mypage/editpw/change', function(req, res) {
     db.collection('user_info').updateOne(
         {_id : req.user._id},
         {$set : {password : req.body.password}},
@@ -880,7 +884,7 @@ app.put('/mypage/editPW/change', function(req, res) {
             if (err) { return console.log(err); }
             console.log("변경내역 : ", req.user.password, " => ", req.body.password);
     });
-    res.json({message: "비밀번호 변경완료"});
+    res.json({message: "비밀번호가 변경되었습니다."});
 })
 
 // app.get('/mypage/like', function(req, res) {
