@@ -333,7 +333,11 @@ app.get('/search', function(req, res){
 
 
 app.get('/best', function(req, res) {
-    db.collection('post').find({ 'like_count' : { '$gt' : 0 } }).sort({'like_count' : -1}).toArray(function(err, result){
+    db.collection('post').find({ 
+        'like_count' : { '$gt' : 0 } 
+    }).sort({
+        'like_count' : -1
+    }).limit(3).toArray(function(err, result){
         if (err) {
             res.json({message : "전송 실패"})
         }
