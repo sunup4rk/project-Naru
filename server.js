@@ -101,7 +101,7 @@ app.get('/', function(req, res) {
           });
           // 새로운 페이지를 연다.
           const page = await browser.newPage()
-          // "https://www.goodchoice.kr/product/search/2" URL에 접속한다. (여기어때 호텔 페이지)
+          // 해당 URL에 접속한다.
           await page.goto('https://www.thelog.co.kr/index.do');
           // 페이지의 HTML을 가져온다.
           const content = await page.content();
@@ -222,6 +222,59 @@ app.get('/community', function(req, res) {  //list로 수정부분
     });
 })
 
+// ======================================= 검색기능 테스트 영역 ===================================================== //
+
+app.get('/test', function(req, res){
+    db.collection('post').find().toArray(function(err, result){
+        res.render('community.ejs', {posts : result})
+    })
+    
+})
+
+app.get('/search', function(req, res){
+    console.log(req.query.value)
+    let condition = [
+        {
+            $search : {
+                index : 'postSearch',
+                text : {
+                    query : req.query.value,
+                }
+            }
+        },
+        {$sort : {_id : 1}},
+        // {$limit : 10}
+    ]
+    db.collection('post').aggregate(condition).toArray(function(err, result){
+        console.log("결과 : ", result)
+        if(result === undefined){
+            res.json({message : "검색 결과 없음"})
+        }
+        else{
+            res.json({message : result})
+        }
+        // if (err) {
+        //     res.json({message : "검색 오류"})
+        // }
+        // else if(result !== undefined){
+        //     console.log("검색 완료");
+        //     res.status(200).send({
+        //         message : "검색 완료",
+        //         result : result,
+        //     });         
+        // }
+        // else{
+        //     console.log("검색 완료, 결과값 없음")
+        //     res.status(200).send({
+        //         message : "검색 결과 없음",
+        //         result : result,
+        //     });  
+        // }
+    })
+})
+// ======================================= 검색기능 테스트 영역 끝 =================================================== //
+
+
 app.get('/best', function(req, res) {
     db.collection('post').find({ 'like_count' : { '$gt' : 0 } }).sort({'like_count' : -1}).toArray(function(err, result){
         res.render('best.ejs', {posts : result});        // 베스트 게시물 페이지 (좋아요 1개 이상, 내림차순)
@@ -230,7 +283,7 @@ app.get('/best', function(req, res) {
 
 // 좋아요 구현
 app.post("/community/detail/like/:id", function(req, res){
-    
+    console.log("접속자 : ",req.user._id)
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
         var chk = false
         if (!req.isAuthenticated()){
@@ -242,12 +295,16 @@ app.post("/community/detail/like/:id", function(req, res){
                 { _id: parseInt(req.params.id)},
                 { $inc : {like_count : 1} , $push: { like_user: req.user._id.toString()}},
                 )
-                console.log('좋아요 완료')
-                res.send({
-                    message : "좋아요",
-                    like_count : result.like_count,
-                }); 
-            }
+            db.collection('user_info').updateOne(
+                { _id: req.user._id},
+                { $push: { like_post: parseInt(req.params.id)}},
+            )
+            console.log('좋아요 완료')
+            res.send({
+                message : "좋아요",
+                like_count : result.like_count,
+            }); 
+        }
         else{
             for (var i = 0; i <= result.like_count; i++){
                 if(result.like_user[i] == req.user._id.toString()){
@@ -261,6 +318,10 @@ app.post("/community/detail/like/:id", function(req, res){
                         { _id: parseInt(req.params.id)},
                         { $inc : {like_count : 1} , $push: { like_user: req.user._id.toString()}},
                     )
+                    db.collection('user_info').updateOne(
+                        { _id: req.user._id},
+                        { $push: { like_post: parseInt(req.params.id)}},
+                    )
                     res.send({
                         message : "좋아요",
                         like_count : result.like_count,
@@ -271,6 +332,10 @@ app.post("/community/detail/like/:id", function(req, res){
                     db.collection('post').updateOne(
                         { _id: parseInt(req.params.id)},
                         { $inc : {like_count : -1} , $pull: { like_user: req.user._id.toString()}},
+                    )
+                    db.collection('user_info').updateOne(
+                        { _id: req.user._id},
+                        { $pull: { like_post: parseInt(req.params.id)}},
                     )
                     res.send({
                         message : "좋아요",
@@ -635,6 +700,7 @@ const ejs = require('ejs');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const { Console } = require('console');
+const { query } = require('express');
 const { AppIntegrations } = require('aws-sdk');
 let appDir = path.dirname(require.main.filename) + '/templates/authMail.ejs';
 
@@ -671,6 +737,7 @@ app.post('/signup', function(req, res) {
                 password            : req.body.password,
                 profile_image_path  : process.env.DEFAULT_PROFILE,
                 posting_count       : 0,
+                like_post           : [],
                 user_point          : 0,
                 user_level          : 1,
                 daily_point         : 0,
