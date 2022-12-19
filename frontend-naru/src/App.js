@@ -5,9 +5,8 @@ import { RecoilRoot } from "recoil";
 import Header from "./components/layout/header/Header";
 import Footer from "./components/layout/footer/Footer";
 import Nav01 from "./components/layout/navigation/Nav01";
-import MainBanner from "./components/layout/banner/Banner01";
 import { PointBanner, QnaBanner } from "./components/layout/banner/Banner03";
-import Cafe from "./pages/Cafe";
+import Cafe from "./pages/explore/Cafe";
 import SignIn from "./pages/signin/SignIn";
 import SignUp from "./pages/signup/SignUp";
 import ExploreLayout from "./components/layout/ExploreLayout";
@@ -20,6 +19,10 @@ import Detail from "./pages/community/Detail";
 import Edit from "./pages/community/Edit";
 import MyInfo from "./pages/mypage/MyInfo";
 import MyEdit from "./pages/mypage/MyEdit";
+import MyLike from "./pages/mypage/MyLike";
+import MyPost from "./pages/mypage/MyPost";
+import MyEditpw from "./pages/mypage/MyEditpw";
+import Contents from './pages/main/Contents';
 
 function App() {
   return (
@@ -30,13 +33,14 @@ function App() {
           <Header category={<Nav01 />} />
           <Routes>
             <Route path="/" element={<Layout />}>
-              <Route index element={<MainBanner />} />
-              <Route path="point" element={<PointBanner />} />
-              <Route path="qna" element={<QnaBanner />} />
-              <Route path="signin" element={<SignIn />} />
-              <Route path="signup" element={<SignUp />} />
+              <Route index element={<Contents />} />
             </Route>
 
+            <Route path="point" element={<PointBanner />} />
+            <Route path="qna" element={<QnaBanner />} />
+            <Route path="signin" element={<SignIn />} />
+            <Route path="signup" element={<SignUp />} />
+              
             <Route path="community/*" element={<CommunityLayout />}>
               <Route index element={<List />} />
               <Route path="write" element={<Write />} />
@@ -53,6 +57,9 @@ function App() {
             <Route path="mypage/*" element={<MypageLayout />}>
               <Route index element={<MyInfo />} />
               <Route path="edit" element={<MyEdit />} />
+              <Route path="editpw" element={<MyEditpw />} />
+              <Route path="like" element={<MyLike />} />
+              <Route path="post" element={<MyPost />} />
             </Route>
           </Routes>
           <Footer />
