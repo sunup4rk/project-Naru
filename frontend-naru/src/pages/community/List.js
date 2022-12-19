@@ -4,6 +4,7 @@ import { Modal } from './../../components/common/modal/Modal';
 import axios from 'axios';
 import './Write.scss';
 import { useEffect, useState } from 'react';
+import Bestpost from '../../components/common/bestpost/BestPost';
 
 const Detail = () => {
   const [cookie, ] = useCookies();
@@ -48,6 +49,7 @@ const Detail = () => {
   return (
     <>
     <div className="write">
+      <Bestpost />
       <div className="write-wrapper">
         {post.map((el) => (
           <div key={el._id}>

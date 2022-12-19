@@ -5,7 +5,7 @@ import { useCookies } from 'react-cookie';
 import { useForm } from 'react-hook-form';
 
 
-const MyEdit = () => {
+const MyEditpw = () => {
   const [user, setUser] = useState();
   const [cookie, ] = useCookies();
   const { Success, Warning, Failure } = Modal();
@@ -34,6 +34,10 @@ const MyEdit = () => {
           setUser(response.data)
         }
     })
+  };
+
+  const onClickCheck = () => {
+
   }
 
   const onClickEdit = () => {
@@ -42,24 +46,29 @@ const MyEdit = () => {
     })
     .then((response) => {
         if(response.data.message === "수정 성공") {
-          Success("회원정보 수정 완료", "회원정보가 수정되었습니다.")
+          Success("수정 완료", "회원정보가 수정되었습니다.")
         } else {
-            Warning("회원정보 수정 실패", response.data.message);
+            Warning("수정 실패", response.data.message);
         }
     }).catch((error) => {
-        Failure("회원정보 수정 실패", "회원정보 수정에 실패했습니다.")
+        Failure("수정 실패", "회원정보 수정에 실패했습니다.")
     })
   }
 
   return (
     <div>
-      <form style={{display: "flex", flexDirection:"column"}} onSubmit={handleSubmit(onClickEdit)}>
-        이메일 <input type="text" defaultValue={"이메일"} disabled/>
-        닉네임<input type={"text"} {...register("nickname")}/>
-        <button>수정</button>
+      <form style={{display: "flex", flexDirection:"column"}} onSubmit={handleSubmit(onClickCheck)}>
+        비밀번호 재확인<input type={"text"} {...register("password")}/>
+        <input type={"text"} />
+        <button>확인</button>
       </form>
-    </div>
+
+      <form style={{display: "flex", flexDirection:"column"}} onSubmit={handleSubmit(onClickEdit)}>
+        비밀번호 변경<input type={"text"} {...register("password")}/>
+        <input type={"text"} />
+        <button>변경</button>
+      </form>    </div>
   );
 };
 
-export default MyEdit;
+export default MyEditpw;
