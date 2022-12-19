@@ -8,7 +8,7 @@ const Aside02 = () => {
   const category = [
     {name: "내 정보", page: "/mypage"},
     {name: "회원정보 수정", page: "/mypage/edit"},
-    {name: "비밀번호 변경", page: "/mypage/editPW"},
+    {name: "비밀번호 변경", page: "/mypage/editpw"},
     {name: "좋아요 한 게시글", page: "/mypage/like"},
     {name: "내가 쓴 게시글", page: "/mypage/post"},
     {name: "문의내역", page: "/mypage/qna"},

@@ -1,9 +1,13 @@
 import { Outlet } from 'react-router-dom';
+import MainBanner from "./banner/Banner01";
 
 const Layout = () => {
     return(
-      <Outlet />
+      <>
+        <MainBanner />
+        <Outlet />
+      </>
     )
   }
 
-export default Layout;
+export default Layout; 

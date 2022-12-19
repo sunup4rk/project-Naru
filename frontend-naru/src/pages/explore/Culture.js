@@ -1,8 +1,8 @@
 import './Cafe.scss'
 
-const Contents = () => (
+const Culture = () => (
   <div className='cafe01'>
   </div>
 );
 
-export default Contents;
+export default Culture;
