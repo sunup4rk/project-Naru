@@ -1,20 +1,18 @@
 import { useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { ReactComponent as Logo } from "../../assets/images/logo01.svg";
-import Button01 from "../../components/common/button/Button01";
-import Input01 from "../../components/common/input/Input01";
-import './SignUp.scss';
-import axios from 'axios';
 import { Modal } from '../../components/common/modal/Modal';
 import { schema } from './Validation'
-import  styled from 'styled-components';
+import Button01 from "../../components/common/button/Button01";
+import Input01 from "../../components/common/input/Input01";
+import styled from 'styled-components';
+import axios from 'axios';
+import './SignUp.scss';
 
 const Error = styled.p`
     color: red;
     padding: 3px;
 `
-
 const SignUp = () => {
     const navigate = useNavigate();
     const { register, handleSubmit, formState: { errors }, setValue, getValues, watch} = useForm ({
@@ -100,11 +98,10 @@ const SignUp = () => {
         }
     }
 
-
     return (
-        <div className="signup">
+        <div className="signup-container">
             <form className="signup-wrapper" onSubmit={handleSubmit(onClickSignUp)}>
-                <Logo height="55" role="img"/>
+                <img src="/images/icon/logo01.svg" alt="naru" />
                     <div className="signup__auth">
                         <Input01 type={"text"} placeholder={"이메일"} size={"s"} register={register("email")} disabled={watch("disabled")}/>
                         <Button01 type={"button"} text={"인증메일 발송"} size={"m"} onClick={onClickEmail} />

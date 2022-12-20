@@ -3,7 +3,6 @@ import { useCookies } from 'react-cookie';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { loginState } from '../../../assets/State';
-import logo from '../../../assets/images/logo01.svg';
 import Nav03 from '../navigation/Nav03';
 import Nav02 from '../navigation/Nav02';
 import axios from 'axios';
@@ -34,7 +33,7 @@ const Header = ({category}) => {
     return (
         <div className='header'>
             <Link to="/">
-                <img className='header__logo' src={logo} alt='naru'/>
+                <img className='header__logo' src="/images/icon/logo01.svg" alt='naru'/>
             </Link>
             {category}
             {login ?

@@ -1,17 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import { Modal } from './../../components/common/modal/Modal';
-import axios from 'axios';
-import './Write.scss';
 import { useEffect, useState } from 'react';
 import Bestpost from '../../components/common/bestpost/BestPost';
+import Button01 from './../../components/common/button/Button01';
+import axios from 'axios';
+import Swal from 'sweetalert2'
+import './List.scss';
 
-const Detail = () => {
+const List = () => {
   const [cookie, ] = useCookies();
   const navigate = useNavigate();
-  const { Warning, Failure } = Modal();
+  const { Failure } = Modal();
   const [post, setPost] = useState([])
-
+  
   useEffect(() => {
     const fetchPost = () => {
         axios.get("http://localhost:8080/community")
@@ -36,38 +38,58 @@ const Detail = () => {
           navigate("/community/write")
         }
         else {
-          Warning("게시글 작성", "로그인이 필요합니다.").then((result) => {
-            if(result.isConfirmed) {
-              navigate("/signup")
-            }
-          })
-        }
+          Swal.fire({
+            title: '게시글 작성',
+            text: "로그인이 필요합니다.",
+            icon: 'warning',
+            showConfirmButton: false,
+          }).then((result) => {
+            navigate("/signin");
+        })
+      }
     })
   }
 
-  const onClickMoveDetail = (el) => (e) => {
+  const onClickMoveDetail = () => (e) => {
     navigate(`/community/detail/${e.target.id}`)
   }
 
-
   return (
     <>
-    <div className="write">
-      <Bestpost />
-      <div className="write-wrapper">
-        {post.map((el) => (
-          <div key={el._id}>
-            <div>이미지</div>
-            <div id={el._id} onClick={onClickMoveDetail(el)}>{el.post_title}</div>
-            <div>{el.post_time}</div>
-            <div>{el.like_count}</div>
-          </div>
-        ))}
-      <button onClick={onClickWrite}>글 작성</button>
+    <Bestpost />
+    <div className="list">
+      <h1>전체글</h1>
+      <div className="list__wrapper">
+        <div className="list__posts">
+          {post?.map((el) => (
+            <div className="list__post" key={el._id}>
+              <div className="list__post__img" id={el._id} onClick={onClickMoveDetail(el)}>
+                {el?.image_address[0] ?
+                <img id={el._id} src={el?.image_address[0]} alt="post image" />
+                :
+                <img id={el._id} className='list__post__img--default' src="/images/icon/logo02.svg" alt="post image" />
+                }
+              </div>
+              <div className="list__post__content">
+                <h2 id={el._id} onClick={onClickMoveDetail(el)}>{el?.post_title}</h2>
+                <div className="list__post__content__bottom">
+                  <span>{el?.post_time}</span>
+                    <div>
+                        <img src={"/images/icon/full_heart.svg"} alt="like" />
+                        {el?.like_count}
+                    </div>
+                </div>
+              </div>
+            </div>
+            ))}
+        </div>
+        <div className="list__button">
+          <Button01 text={"작성"} onClick={onClickWrite} size={"s"}/>
+        </div>
       </div>
     </div>
     </>
   );
 };
 
-export default Detail;
+export default List;

@@ -1,13 +1,31 @@
 import { useRef } from "react";
 import axios from "axios";
 import styled from "styled-components";
+import { Modal } from "../modal/Modal";
 
 const UploadImage = styled.input`
     display: none;
 `
 
+const Button = styled.button`
+    width: 8rem;
+    height: 8rem;
+    background-color: #D1D9DE;
+    border: none;
+    border-radius: 10px;
+    margin: 5px;
+`
+
+const Image = styled.img`
+    width: 8rem;
+    height: 8rem;
+    border-radius: 10px;
+    margin: 5px;
+`
+
 const Upload01 = (props) => {
     const fileRef = useRef(null)
+    const { Failure } = Modal();
 
 const onClickUpload = () => {
     fileRef.current?.click();
@@ -22,10 +40,9 @@ const onChangeFile = (e) => {
     axios.post("http://localhost:8080/image/upload", formData)
     .then(res => {
         props.onChangeImages(res.data.location, props.index)
-        console.log(res.data.location, props.index)
-        alert('성공')
+        // console.log(res.data.location, props.index)
     }).catch(err => {
-        alert('실패')
+        Failure("이미지 업로드 실패", "이미지 업로드에 실패했습니다.")
     })
     }
 
@@ -49,21 +66,11 @@ const imageDelete = (e) => {
     return(
         <>
         {props.images ?
-        (<img src={props.images} onClick={imageDelete}/>)
+        (<Image src={props.images} onClick={imageDelete} alt="upload image" />)
         :
-        ( <button type="button" onClick={onClickUpload}>이미지 버튼</button> )
+        (<Button type="button" onClick={onClickUpload}>+</Button> )
         }
-        <UploadImage type={"file"} ref={fileRef} onChange={onChangeFile}/>
-
-        {/* <div className="img-preview">
-            <ImgPreview id="img-preview" src={img} onClick={imageDelete} />
-            <UploadImage 
-              type='file' 
-              accept='image/*' 
-              id='img' 
-              onChange={formSubmit}>
-            </UploadImage>
-          </div> */}
+        <UploadImage type={"file"} ref={fileRef} onChange={onChangeFile} />
         </>
     )
 }

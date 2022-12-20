@@ -1,7 +1,6 @@
 import Swal from 'sweetalert2'
 
 export const Modal = () => {
-
     const Success = (title, text) => {
         Swal.fire({
             icon: 'success',
@@ -45,8 +44,6 @@ export const Modal = () => {
           showCancelButton: true,
         });
       };
-
-
 
     return (
         {Success, Warning, Failure, Question}
