@@ -140,26 +140,50 @@ async function CrawlMovie () {
         var resultMovie = []
         var resultMovieImg = []
 
-        for (var i = 0; i < lists.length; i++){
-        resultMovieImg[i] = $(lists[i]).find("div > div.thumb_item > div.poster_movie > img").attr('src')
-        resultMovie[i] = $(lists[i]).find("div > div.thumb_cont > strong > a").text()
-        }
-        db.collection('crawling').insertOne({
-                sort : 'movie',
-                title : resultMovie,
-                titleimg : resultMovieImg,
-                time : crawlTime,
-            }, function(err, result){
+        var name;
+        var titleimg;
+
+        lists.each((index, lists) => {
+            name = $(lists).find("div > div.thumb_cont > strong > a").text();
+            titleimg = $(lists).find("div > div.thumb_item > div.poster_movie > img").attr('src')
+            db.collection('crawling').updateOne(
+                {num : index}, 
+                {$set : {
+                    title : name,
+                    titleimg : titleimg,
+                    time : crawlTime,
+                    }}, function(err, result    ){
                 if(err){
                     console.log("크롤링 실패, 대상 웹페이지를 확인해보세요")
-                }
+                }   
                 else{
-                    console.log('영화순위 데이터 입력 완료')
+                    console.log(index + 1,'번째 영화순위 데이터 입력 완료')
                 }
         
             })
+        })
+  
+        // for (var i = 0; i < lists.length; i++){
+        // resultMovieImg[i] = $(lists[i]).find("div > div.thumb_item > div.poster_movie > img").attr('src')
+        // resultMovie[i] = $(lists[i]).find("div > div.thumb_cont > strong > a").text()
+        // }
+        // db.collection('crawling').insertOne({
+        //         sort : 'movie',
+        //         title : resultMovie,
+        //         titleimg : resultMovieImg,
+        //         time : crawlTime,
+        //     }, function(err, result){
+        //         if(err){
+        //             console.log("크롤링 실패, 대상 웹페이지를 확인해보세요")
+        //         }
+        //         else{
+        //             console.log('영화순위 데이터 입력 완료')
+        //         }
+        
+        //     })
         browser.close();
 }
+
 function CrawlCheck(){
     db.collection('crawling').findOne({sort : 'time'}, function(err, result){
         if(result.time !== crawlTime){
@@ -168,14 +192,11 @@ function CrawlCheck(){
                 { sort: 'time'}, { $set : {time : crawlTime}},
             )
             db.collection('crawling').deleteOne({sort : 'game'}, function(err, result){})
-            db.collection('crawling').deleteOne({sort : 'movie'}, function(err, result){})
             CrawlMovie()
             CrawlGame()
         }
         else{
             console.log('크롤링 최신 버전 : ', crawlTime)
-            // CrawlMovie()
-            // CrawlGame()
         }
     })
 }
@@ -200,23 +221,41 @@ app.get('/explore/ent', function(req, res){
     })
 })
 
+// app.get('/explore/culture', function(req, res){
+//     CrawlCheck()
+//     db.collection('crawling').findOne({sort : 'movie'}, function(err, result){
+//         res.send({
+//             message : "영화",
+//             result : result.title,
+//             image : result.titleimg
+//         }); 
+//     })
+// })
+
 app.get('/explore/culture', function(req, res){
     CrawlCheck()
-    db.collection('crawling').findOne({sort : 'movie'}, function(err, result){
+    console.log("result")
+    db.collection('crawling').find({
+        sort : 'movietest'
+    }).sort({
+        'num' : 1
+    }).toArray(function(err, result){
+        console.log(result)
         res.send({
             message : "영화",
-            result : result.title,
-            image : result.titleimg
+            result : result
         }); 
     })
 })
 
-    // ================================= 크롤링 ================================================== //
+    
 
-    // 라우터 설정
+// ================================= 크롤링 끝 ================================================== //
+
+
+    
 app.get('/', function(req, res) {
-    CrawlCheck()
-
+    CrawlMovie()
     // ==================== 크롤링 DB구역에 데이터가 없을 때 한번만! =============================
     // if (true){
     //     db.collection('crawling').insertOne({
@@ -228,14 +267,20 @@ app.get('/', function(req, res) {
     //     })
     // }
     // =========================================================================================
-    res.render('main.ejs');             // 메인 페이지
+    res.render('main.ejs');   
 });
+
+
+
 
 app.get('/explore', function(req, res) {
     res.render('explore.ejs');             // 정보 페이지
 });
 
-app.get('/community', function(req, res) {  //list로 수정부분
+
+
+
+app.get('/community', function(req, res) { 
     db.collection('post').find().toArray(function(err, result){
         result.reverse()
         if (err) {
@@ -257,49 +302,55 @@ app.get('/test', function(req, res){
     db.collection('post').find().toArray(function(err, result){
         res.render('community.ejs', {posts : result})
     })
-    
 })
 
 app.get('/search', function(req, res){
-    console.log(req.query.value)
-    let condition = [
+    const nullArr = []
+    let condition = 
+    [
         {
-            $search : {
-                index : 'postSearch',
-                text : {
-                    query : req.query.value,
-                }
+          $search: {
+            index: 'postSearch',
+            text: {
+              query: req.query.value,
+              path: {
+                'wildcard': '*'
+              }
             }
-        },
-        {$sort : {_id : 1}},
-        // {$limit : 10}
-    ]
+          }
+        }
+      ]
     db.collection('post').aggregate(condition).toArray(function(err, result){
-        console.log("결과 : ", result)
-        if(result === undefined){
+        if(result.toString() == nullArr.toString()){
             res.json({message : "검색 결과 없음"})
         }
         else{
-            res.json({message : result})
+            res.send({
+                message : '검색 성공',
+                result : result,
+            })
         }
-        // if (err) {
-        //     res.json({message : "검색 오류"})
-        // }
-        // else if(result !== undefined){
-        //     console.log("검색 완료");
-        //     res.status(200).send({
-        //         message : "검색 완료",
-        //         result : result,
-        //     });         
-        // }
-        // else{
-        //     console.log("검색 완료, 결과값 없음")
-        //     res.status(200).send({
-        //         message : "검색 결과 없음",
-        //         result : result,
-        //     });  
-        // }
     })
+    // db.collection('post').aggregate(condition).toArray(function(err, result){
+        
+    //     // if (err) {
+    //     //     res.json({message : "검색 오류"})
+    //     // }
+    //     // else if(result !== undefined){
+    //     //     console.log("검색 완료");
+    //     //     res.status(200).send({
+    //     //         message : "검색 완료",
+    //     //         result : result,
+    //     //     });         
+    //     // }
+    //     // else{
+    //     //     console.log("검색 완료, 결과값 없음")
+    //     //     res.status(200).send({
+    //     //         message : "검색 결과 없음",
+    //     //         result : result,
+    //     //     });  
+    //     // }
+    // })
 })
 // ======================================= 검색기능 테스트 영역 끝 =================================================== //
 
