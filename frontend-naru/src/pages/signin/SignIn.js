@@ -1,15 +1,18 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import { useCookies } from 'react-cookie';
-import { ReactComponent as Logo } from "../../assets/images/logo01.svg";
 import { Modal } from './../../components/common/modal/Modal';
+import { useRecoilState } from 'recoil';
+import { loginState } from '../../assets/State'; 
 import Button01 from "../../components/common/button/Button01";
 import Input01 from "../../components/common/input/Input01";
 import axios from 'axios';
 import './SignIn.scss';
 
 const SignIn = () => {
+    const navigate = useNavigate();
     const { register, handleSubmit } = useForm();
+    const [ , setLogin ] = useRecoilState(loginState)
     const { Warning, Failure } = Modal();
     const [ , setCookie ] = useCookies();
 
@@ -26,6 +29,7 @@ const SignIn = () => {
             .then((response) => {
                 if(response.data.message === "로그인 성공") {
                     setCookie('sessionID', response.data.sessionID)
+                    setLogin(true)
                     window.location.replace("/")
                 }
             })
@@ -36,15 +40,15 @@ const SignIn = () => {
     }
 
     return (
-        <div className="signIn">
-            <form className="signIn-wrapper --top" onSubmit={handleSubmit(onClickSignIn)}>
-                <Logo height="55" role="img"/>
+        <div className="signin-container">
+            <form className="signin-wrapper --top" onSubmit={handleSubmit(onClickSignIn)}>
+                <img src="/images/icon/logo01.svg" alt="naru" />
                 <Input01 type={"text"} placeholder={"이메일"} size={"m"} register={register("email")} />
                 <Input01 type={"password"} placeholder={"비밀번호"} size={"m"} register={register("password")}/>
                 <Button01 text={"로그인"} size={"m"}/>
             </form>
 
-            <div className="signIn-wrapper --bottom">
+            <div className="signin-wrapper --bottom">
                 <span>회원이 아니신가요?</span>
                 <Link to={"/signUp"}>
                     <Button01 text={"회원가입"} size={"m"}/>

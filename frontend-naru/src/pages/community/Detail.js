@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
-import './Write.scss';
 import { Modal } from '../../components/common/modal/Modal';
 import Swal from 'sweetalert2'
+import axios from 'axios';
+import './Write.scss';
 
 const Detail = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState();
   const [myPost, setMyPost] = useState("불일치");
-  const { Warning, Failure } = Modal();
+  const { Success, Warning, Failure } = Modal();
 
   useEffect(() => {
     const fetchPost = () => {
@@ -64,22 +64,15 @@ const Detail = () => {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#4461AA',
-      cancelButtonColor: '#d33',
+      cancelButtonColor: '##D1D9DE',
       confirmButtonText: 'Delete'
     }).then((result) => {
       if (result.isConfirmed) {
         axios.delete(`http://localhost:8080/community/delete/${params.id}`)
         .then((response) => {
             if(response.data.message === "삭제 완료") {
-              Swal.fire({
-                title: '게시글 삭제 완료',
-                text: "게시글이 삭제되었습니다.",
-                icon: 'success',
-                confirmButtonColor: '#4461AA',
-                confirmButtonText: 'OK'
-              }).then((result) => {
-                navigate("/community");
-              })
+              Success("삭제 완료", "게시글이 삭제되었습니다.");
+              navigate("/community");
             }
         })
         .catch((error) => {

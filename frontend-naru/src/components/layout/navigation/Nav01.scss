@@ -1,12 +1,12 @@
 .Nav01 {
-  width: 60%;
-  // min-width: 350px;
+  width: 50%;
 
   .Nav01__list {
     display: flex;
+    margin: 0 2rem;
     
     :not(:last-child) {
-      padding-right: 30px;
+      padding-right: 1.9rem;
     }
   }
 

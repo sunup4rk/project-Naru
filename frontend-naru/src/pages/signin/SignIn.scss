@@ -1,8 +1,8 @@
-.signIn {
+.signin-container {
     width: 100%;
     background-color: #fafafa;
 
-    .signIn-wrapper {
+    .signin-wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -11,7 +11,8 @@
         margin: 0 auto;
         padding: 100px 0;
 
-        svg {
+        img {
+            width: 7rem;
             margin-bottom: 40px;
         }
 
@@ -30,7 +31,6 @@
 
     .--bottom {
         padding-top: 100px;
-
 
         span {
             font-size: 1.4rem;

@@ -1,8 +1,12 @@
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import './BestPost.scss';
 
-const Bestpost = () => {
+const BestPost = () => {
+    const [post, setPost] = useState([])
+    const navigate = useNavigate();
+
     useEffect(() => {
         const fetchPost = () => {
             axios.get("http://localhost:8080/best")
@@ -15,32 +19,38 @@ const Bestpost = () => {
         fetchPost();
     }, []);
 
-
-    const [post, setPost] = useState([])
-    const navigate = useNavigate();
-
-
     const onClickMoveDetail = (el) => (e) => {
         navigate(`/community/detail/${e.target.id}`)
-  }
-    
+    }
 
     return (
-        <div>
+        <div className="best">
             <h1>인기글</h1>
+            <div className="best__posts">
             {post?.map((el) => (
-                <div key={el._id}>
-                    <img src={el?.image_address} alt="post_img" />
-                    <div>제목</div>{el?.post_title}
-                    <div>날짜</div>{el?.post_time}
-                    <div>좋아요</div>{el?.like_count}
+                <div className="best__post" key={el._id}>
+                    <div className="best__post__img" id={el._id} onClick={onClickMoveDetail(el)}>
+                        {el?.image_address[0] ?
+                        <img id={el._id} src={el?.image_address[0]} alt="post image" />
+                        :
+                        <img id={el._id} className='best__post__img--default' src="/images/icon/logo02.svg" alt="post image" />
+                        }
+                    </div>
+                    <div className="best__post__content">
+                        <h2 id={el._id} onClick={onClickMoveDetail(el)}>{el?.post_title}</h2>
+                        <div className="best__post__content__bottom">
+                            <span>{el?.post_time}</span>
+                            <div>
+                                <img src={"/images/icon/full_heart.svg"} alt="like" />
+                                {el?.like_count}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             ))}
-            <hr/>
-            <hr/>
-            <hr/>
+            </div>
         </div>
     );
 };
 
-export default Bestpost;
+export default BestPost;

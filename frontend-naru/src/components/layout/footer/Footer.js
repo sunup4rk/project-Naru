@@ -1,11 +1,10 @@
 import './Footer.scss'
-import logo from '../../../assets/images/logo02.svg';
 
 const Footer = () => {
 
     return(
         <div className="footer">
-                <img src={logo} alt="naru" className="footer__logo"/>
+                <img src="/images/icon/logo02.svg" alt="naru" className="footer__logo"/>
                 <div className='footer-contents'>
                     <ul>
                         <li className="footer-contents__title">

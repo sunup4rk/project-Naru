@@ -11,7 +11,7 @@ const Button = styled.button`
     // min-width: 8rem;
     height: 2.8rem;
     border-radius: 2rem;
-    border: 2px solid #4461AA;
+    border: 2px solid #D1D9DE;
     padding: 20px;
     background-color: #fafafa;
     font-family: "SUIT-Medium";
@@ -21,12 +21,12 @@ const Button = styled.button`
     word-break: keep-all;
 
     &:hover {
-        color: #ffffff;
-        background-color: #4461AA;
+        color: #000000;
+        background-color: #D1D9DE;
     }
 `
 
-const Button01 = (props) => {
+const Button02 = (props) => {
     return (
         <Button type={props.type} size={props.size} onClick={props.onClick}>
             {props.text}
@@ -34,4 +34,4 @@ const Button01 = (props) => {
     );
 };
 
-export default Button01;
+export default Button02;
