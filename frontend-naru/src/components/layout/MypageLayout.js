@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import  styled  from 'styled-components';
 import { MypageBanner } from './banner/Banner03';
-import Aside02 from './Aside/Aside02';
+import Aside02 from './aside/Aside02';
 
 const Body = styled.div`
 display: flex;
