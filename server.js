@@ -283,7 +283,7 @@ app.get('/best', function(req, res) {
 
 // 좋아요 구현
 app.post("/community/detail/like/:id", function(req, res){
-    console.log("접속자 : ",req.user._id)
+    console.log("접속자 : ", req.user._id)
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
         var chk = false
         if (!req.isAuthenticated()){
@@ -760,55 +760,68 @@ app.post('/signup', function(req, res) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 async function RenameFolder(uid, pid) {
-    const folderToMove = uid + '/temp/';   // old folder name
-    const awsAddress = "https://bucket-sunu.s3.ap-northeast-2.amazonaws.com";
-    console.log(pid)
+    console.log("RenameFolder(", uid, ",", pid, ")")
+    const tempFolder = uid + '/temp/';   // old folder name
+    const awsAddress = "https://bucket-sunu.s3.ap-northeast-2.amazonaws.com"
+    
     let imageAddress = [];
 
-    try {
-        const listObjectsResponse = await s3.listObjects({
-            Bucket: BUCKET_NAME,
-            Prefix: folderToMove,
-        }).promise();
+    const listObjectsResponse = await s3.listObjects({
+        Bucket: BUCKET_NAME,
+        Prefix: tempFolder,
+    }).promise()
 
-        const folderContentInfo = listObjectsResponse.Contents;  
-        
-        for (let i = 0; i < folderContentInfo.length; i++) {
-            const divide = folderContentInfo[i].Key.split('/');
+    const folderContentInfo = listObjectsResponse.Contents
 
-            await s3.copyObject({
-                Bucket: BUCKET_NAME,
-                CopySource: `${BUCKET_NAME}/${folderContentInfo[i].Key}`,  // old file Key
-                Key: `${uid}/${pid}/${divide[2]}`, // new file Key
-            }).promise();
+    for (let i = 0; i < folderContentInfo.length; i++) {
+        const divide = folderContentInfo[i].Key.split('/');
 
-            imageAddress[i] = awsAddress + "/" + BUCKET_NAME + "/" + String(uid) + "/" + String(pid) + "/" + divide[2];
-            console.log(awsAddress);
-            console.log(BUCKET_NAME);
-            console.log(uid);
-            console.log(pid);
-            console.log(divide[2]);
+        s3.copyObject({
+            Bucket: BUCKET_NAME, 
+            CopySource: `${BUCKET_NAME}/${folderContentInfo[i].Key}`, 
+            Key: `${uid}/${pid}/${divide[2]}`
+        }).promise()
 
-            await s3.deleteObject({
-                Bucket: BUCKET_NAME,
-                Key: folderContentInfo[i].Key,
-            }).promise();
-        }
+        imageAddress[i] = awsAddress + "/" + String(uid) + "/" + String(pid) + "/" + divide[2];        
+
         db.collection('post').updateOne(
             {_id : pid}, 
             {$set : {image_address : imageAddress}}, 
             function(err, result) {
                 if (err) { return console.log(err); }
-                else { console.log("맞나?", imageAddress[0]); } 
             }
-        )    
-
-    } catch (err) { console.error(err); }
-    
+        )
+    }
 }
 
+app.delete("/temp/delete", async function(req, res) {
+    const tempFolder = req.user._id + '/temp';
+
+    const listObjectsResponse = await s3.listObjects({
+        Bucket: BUCKET_NAME,
+        Prefix: tempFolder,
+    }).promise()
+
+    const folderContentInfo = listObjectsResponse.Contents
+
+    let count = 0;
+    for (i = 0; i < folderContentInfo.length; i++) {
+        s3.deleteObject({
+            Bucket: BUCKET_NAME,
+            Key: `${folderContentInfo[i].Key}`,
+        }, (err, data) => {
+            if (err) throw err
+        })
+        count++
+        if (count == folderContentInfo.length) {
+            res.json({message: "초기화"})
+        }
+    }
+    
+})
+
 app.delete('/image/delete', function(req, res) {
-    console.log("query :", req.query.url)
+    console.log("query :", (req.query.url).substr(52))
     
     const objectParams_del = {
         Bucket: BUCKET_NAME,
