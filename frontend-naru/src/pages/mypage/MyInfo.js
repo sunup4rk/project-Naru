@@ -31,6 +31,7 @@ const MyInfo = () => {
     axios.get("http://localhost:8080/mypage")
     .then((response) => {
         if(response.data.message === "불러오기") {
+          console.log(response.data)
           setUser(response.data)
         }
     })

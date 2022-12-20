@@ -1092,4 +1092,242 @@ app.post('/signup', (req, res) => {
     });
 })
 
+// signup 끝 ///////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+async function RenameFolder(uid, pid) {
+    console.log("RenameFolder(", uid, ",", pid, ")")
+    const tempFolder = uid + '/temp/';   // old folder name
+    const awsAddress = "https://bucket-sunu.s3.ap-northeast-2.amazonaws.com"
+    
+    let imageAddress = [];
+
+    const listObjectsResponse = await s3.listObjects({
+        Bucket: BUCKET_NAME,
+        Prefix: tempFolder,
+    }).promise()
+
+    const folderContentInfo = listObjectsResponse.Contents
+
+    for (let i = 0; i < folderContentInfo.length; i++) {
+        const divide = folderContentInfo[i].Key.split('/');
+
+        s3.copyObject({
+            Bucket: BUCKET_NAME, 
+            CopySource: `${BUCKET_NAME}/${folderContentInfo[i].Key}`, 
+            Key: `${uid}/${pid}/${divide[2]}`
+        }).promise()
+
+        imageAddress[i] = awsAddress + "/" + String(uid) + "/" + String(pid) + "/" + divide[2];        
+
+        db.collection('post').updateOne(
+            {_id : pid}, 
+            {$set : {image_address : imageAddress}}, 
+            function(err, result) {
+                if (err) { return console.log(err); }
+            }
+        )
+    }
+}
+
+app.delete("/temp/delete", async function(req, res) {
+    const tempFolder = req.user._id + '/temp';
+
+    const listObjectsResponse = await s3.listObjects({
+        Bucket: BUCKET_NAME,
+        Prefix: tempFolder,
+    }).promise()
+
+    const folderContentInfo = listObjectsResponse.Contents
+
+    let count = 0;
+    for (i = 0; i < folderContentInfo.length; i++) {
+        s3.deleteObject({
+            Bucket: BUCKET_NAME,
+            Key: `${folderContentInfo[i].Key}`,
+        }, (err, data) => {
+            if (err) throw err
+        })
+        count++
+        if (count == folderContentInfo.length) {
+            res.json({message: "초기화"})
+        }
+    }
+    
+})
+
+app.delete('/image/delete', function(req, res) {
+    console.log("query :", (req.query.url).substr(52))
+    
+    const objectParams_del = {
+        Bucket: BUCKET_NAME,
+        Key: (req.query.url).substr(52),
+    };
+
+    s3
+        .deleteObject(objectParams_del)
+        .promise()
+        .then((data) => {
+            res.json({message: "삭제 성공"});
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+})
+
+app.post('/image/upload', function(req, res) {
+    console.log("request received :", req.user._id);
+    console.log("POST_ID :", req.body._id);
+    const form = new multiparty.Form();
+
+    const USER_ID = req.user._id;
+    const POST_ID = req.body._id ? "POST_ID" : "temp";
+    const IMAGE_DIR = USER_ID + "/" + POST_ID + "/";
+    let filename;
+    
+    // err 처리
+    form.on('error', function(err) { res.status(500).end(); })
+    
+    // form 데이터 처리
+    form.on('part', async function(part) {
+        filename = part.filename;
+        // 이미지 저장 디렉토리
+        if (!part.filename) { return part.resume(); }
+        else {
+            streamToBufferUpload(part, filename, IMAGE_DIR);
+            db.collection('post').updateOne(
+                {_id : POST_ID}, 
+                {$set : {image_address : process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename}}, 
+                function(err, result) {
+                    if (err) { return console.log(err); }
+                    else { console.log(process.env.IMAGE_SERVER + "/" + IMAGE_DIR + part.filename); } 
+                }
+            );
+        }
+    })
+
+    // form 종료
+    form.on('close', function() {
+        res.send({
+            location: process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename,
+            filename: filename
+        });
+    });
+
+    form.parse(req);
+});
+
+function streamToBufferUpload(part, filename, ADR){
+    const chunks = [];
+    return new Promise((resolve, reject) => {
+        part.on('data',   (chunk) => chunks.push(Buffer.from(chunk)));
+        part.on('error',  ( err ) => reject(err));
+        part.on('end',    (     ) => resolve(Buffer.concat(chunks)));
+        uploadToBucket(ADR + filename, part);
+    });
+}
+
+function uploadToBucket(filename, Body){
+    const params = { Bucket:BUCKET_NAME, Key:filename, Body, ContentType: 'image' }
+    const upload = new AWS.S3.ManagedUpload({ params });
+    return upload.promise();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+// 내 정보
+app.get("/mypage", (req, res) => { 
+    const testArr = []
+    db.collection('user_info').findOne({_id : req.user._id}, function(err, result){
+        const UserResult = result
+        if(err){
+            {res.json({message: "로그인 필요"})}
+        }
+        else{
+            db.collection('post').find({like_user : req.user._id.toString()}).toArray(function (err, result){
+                res.send({
+                    message: "불러오기",
+                    profile: UserResult.profile_image_path,
+                    nickname: UserResult.nickname,
+                    user_level: UserResult.user_level,
+                    user_point: UserResult.user_point,
+                    posting_count: UserResult.posting_count,
+                    like_user: result,
+                })
+            })
+            
+            
+        }
+
+    })
+})
+
+// 회원정보 수정
+app.get("/mypage/edit", (req, res) => {
+    res.send({
+        message: "불러오기",
+        profile: req.user.profile_image_path,
+        email: req.user.email,
+        nickname: req.user.nickname,
+    })
+})
+
+app.post("/mypage/edit", (req, res) => {
+    // 닉네임
+    db.collection('user_info').findOne({nickname : req.body.nickname}, function(err, result) {
+        if (err) {return console.log(err)}
+        if (result) {res.json({message: "사용중인 닉네임입니다."})}
+        else {
+            db.collection('user_info').updateOne(
+                {_id : req.user._id},
+                {$set : {nickname : req.body.nickname}},
+                function(err, result) {
+                    if (err) { return console.log(err); }
+                    console.log("닉네임변경 : ", req.user.nickname, " => ", req.body.nickname);
+                    res.json({message: "수정 성공"});
+            });
+        }
+    })    
+})
+
+// 비밀번호 수정
+app.get("/mypage/editpw", (req, res) => {
+    res.send({message: "editPW"})
+})
+
+app.post('/mypage/editpw/check', function(req, res) {
+    db.collection('user_info').findOne({_id : req.user._id}, function(err, result){
+        if (err) { return console.log(err); }
+        console.log("result.password", result.password)
+        console.log("req.body.password", req.body.password)
+        if (result.password == req.body.password) { 
+            res.json({message: "비밀번호 일치"}); 
+        }
+        else { res.json({message: "비밀번호가 일치하지 않습니다."}); }
+    });
+})
+
+app.put('/mypage/editpw/change', function(req, res) {
+    db.collection('user_info').updateOne(
+        {_id : req.user._id},
+        {$set : {password : req.body.password}},
+        function(err, result) {
+            if (err) { return console.log(err); }
+            console.log("변경내역 : ", req.user.password, " => ", req.body.password);
+    });
+    res.json({message: "비밀번호가 변경되었습니다."});
+})
+
+// app.get('/mypage/like', function(req, res) {
+//     res.render('mypage_like.ejs', {userInfo : req.user});  // └ 좋아요 한 게시글
+// }); 
+// app.get('/mypage/post', function(req, res) {
+//     res.render('mypage_post.ejs', {userInfo : req.user}); // └ 작성한 게시글
+// });
+// app.get('/mypage/qna', function(req, res) {
+//     res.render('mypage_qna.ejs', {userInfo : req.user});     // └ 문의내역
+// });
+
+
 // service - auth 끝 ////////////////////////////////////////////////////////////////////////////////
