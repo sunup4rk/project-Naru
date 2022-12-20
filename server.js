@@ -439,12 +439,41 @@ app.post("/community/detail/like/:id", function(req, res){
         }
     )
 })
-
-app.post("/community/write", function(req, res) {
+app.get("/community/write/", function(req, res) {
+    console.log(req.query.message)
     db.collection('post_count').findOne({name : 'postcnt'}, function(err, result) {
         const postId = Number(result.total_post) + 1
         db.collection('post').insertOne({
             _id : postId,
+            user_id : req.user._id,
+            writer : "", 
+            post_title : "", 
+            post_content : "", 
+            like_count : 0, 
+            like_user : [],
+            post_address : "",
+            post_address_detail : "",
+            image_address : [],
+            post_time : moment().format('YYYY-MM-DD')
+            },
+            function(err, result){
+                if (err) {
+                    res.json({message : "다시 시도해주세요."})
+                }
+                else {
+                    console.log("post_id :", postId, " 발급");
+                    UpdatePostCount();
+                    res.status(200).json({postId : postId});         
+                }
+            }
+        )
+    })
+})
+app.post("/community/write/:id", function(req, res) {
+    db.collection('post').updateOne(
+        {_id: req.body.params},
+        {$set: {
+            _id : req.params.id,
             user_id : req.user._id,
             writer : req.user.nickname, 
             post_title : req.body.title, 
@@ -453,23 +482,21 @@ app.post("/community/write", function(req, res) {
             like_user : [],
             post_address : req.body.address,
             post_address_detail : req.body.addressDetail,
-            image_address : [],
+            // image_address : [],
             post_time : moment().format('YYYY-MM-DD')
-            },
-            function(err, result){
-                if (err) {
-                    res.json({message : "등록 실패"})
-                }
-                else {
-                    console.log("post_id :", postId, " 등록");
-                    UpdatePostCount();
-                    UpdateUserInfo(req.user._id);
-                    res.status(200).json({message : "등록 성공"});         
-                }
-                RenameFolder(req.user._id.toString(), postId);
+        }}            
+        ,
+        function(err, result){
+            if (err) {
+                res.json({message : "등록 실패"})
             }
-        )
-    })
+            else {
+                // console.log("post_id :", postId, " 등록");
+                UpdateUserInfo(req.user._id);
+                res.status(200).json({message : "등록 성공"});         
+            }
+        }
+    )
 })
 
 function UpdateUserInfo(_id) {
@@ -498,7 +525,7 @@ function UpdatePostCount() {
 }
 
 app.get('/community/detail/:id', function(req, res) {
-    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err,result){
+    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
         if (err) {
             res.json({message : "글 전송 실패"});
         }
@@ -547,7 +574,7 @@ app.get("/community/edit/:id", function(req, res){
     })
 })
 
-app.put('/community/edit/:id', function(req,res){
+app.put('/community/edit/:id', function(req, res) {
     db.collection('post').updateOne(
         {_id : parseInt(req.params.id)}, 
         {$set : {
@@ -641,22 +668,263 @@ app.post('/point', function(req,res){
     
 })
 
+// control - userinfo 시작 ///////////////////////////////////////////////////////////////////////////
 
-app.get('/qna', function(req, res) {
-    res.render('qna.ejs');//삭제예정              // 문의 페이지
-});
-
-app.get('/signin', function(req, res) {
-    res.render('signin.ejs')//삭제예정
+// 내 정보 요청 API
+app.get('/mypage', (req, res) => {
+    res.send({
+        message: "불러오기",
+        profile: req.user.profile_image_path,
+        nickname: req.user.nickname,
+        user_level: req.user.user_level,
+        user_point: req.user.user_point,
+        posting_count: req.user.posting_count,
+    })
 })
 
+// 회원정보 요청 API
+app.get('/mypage/edit', (req, res) => {
+    res.send({
+        message: "불러오기",
+        profile: req.user.profile_image_path,
+        email: req.user.email,
+        nickname: req.user.nickname,
+    });
+})
+
+// 회원정보 수정 API
+app.post('/mypage/edit', (req, res) => {
+    // 닉네임 변경
+    db.collection('user_info').findOne({nickname : req.body.nickname}, function(err, result) {
+        if (err) { return console.log(err); }
+        if (result) { res.json({message: "사용중인 닉네임입니다."}); }
+        else {
+            db.collection('user_info').updateOne(
+                {_id : req.user._id},
+                {$set : {nickname : req.body.nickname}},
+                function(err, result) {
+                    if (err) { return console.log(err); }
+                    console.log("닉네임 변경 : ", req.user.nickname, " => ", req.body.nickname);
+                    res.json({message: "수정 성공"});
+            });
+        }
+    });
+})
+
+// 비밀번호 재확인 API
+app.post('/mypage/editpw/check', (req, res) => {
+    db.collection('user_info').findOne({_id : req.user._id}, function(err, result) {
+        if (err) { return console.log(err); }
+        if (result.password === req.body.password) { res.json({message: "비밀번호 일치"}); }
+        else { res.json({message: "비밀번호가 일치하지 않습니다."}); }
+    });
+})
+
+app.put('/mypage/editpw/change', (req, res) => {
+    db.collection('user_info').updateOne(
+        {_id : req.user._id},
+        {$set : {password : req.body.password}},
+        function(err, result) {
+            if (err) { return console.log(err); }
+            console.log("변경내역 : ", req.user.password, " => ", req.body.password);
+            res.json({message: "비밀번호가 변경되었습니다."});
+    });
+})
+
+// control - userinfo 끝 ////////////////////////////////////////////////////////////////////////////
 
 
-// 로그인 페이지
-app.post('/signin', passport.authenticate('local', {
-    }), (req, res) => {
+// control - image 시작 //////////////////////////////////////////////////////////////////////////////
+
+// 프로필 이미지 업로드 API
+app.post('/mypage/profile', (req, res) => {
+    console.log("request received :", req.user._id);
+    const form = new multiparty.Form();
+    const USER_ID = req.user._id;
+    const IMAGE_DIR = USER_ID + "/profile/";
+    let filename;
+    
+    // err 처리
+    form.on('error', function(err) { res.status(500).end(); });
+    
+    // form 데이터 처리
+    form.on('part', async function(part) {
+        filename = part.filename;
+        // 이미지 저장 디렉토리
+        if (!part.filename) { return part.resume(); }
+        else {
+            streamToBufferUpload(part, filename, IMAGE_DIR);
+            db.collection('user_info').updateOne(
+                {_id : req.user._id}, 
+                {$set : {profile_image_path: process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename}},
+                function(err, result) {
+                    if (err) { return console.log(err); }
+                    else { console.log(process.env.IMAGE_SERVER + "/" + IMAGE_DIR + part.filename); } 
+                }
+            );
+        }
+    });
+
+    // form 종료
+    form.on('close', function() {
+        res.send({
+            location: process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename,
+            filename: filename
+        });
+    });
+
+    form.parse(req);
+})
+
+// 프로필 이미지 삭제 API
+app.delete('/mypage/profile', (req, res) => {
+    console.log("query :", (req.query.url).substr(52)) 
+    const objectParams_del = {
+        Bucket: BUCKET_NAME,
+        Key: (req.query.url).substr(52),
+    };
+
+    s3
+        .deleteObject(objectParams_del)
+        .promise()
+        .then((data) => {
+            res.json({message: "삭제 성공"});
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+
+    db.collection('user_info').updateOne(
+        {_id : req.user._id}, 
+        {$set : {profile_image_path: "https://bucket-sunu.s3.ap-northeast-2.amazonaws.com/src/profile/ine.jpg"}}, 
+        function(err, result) {
+            if (err) { return console.log(err); }
+            else { console.log(process.env.IMAGE_SERVER + "/" + (req.query.url).substr(52)) } 
+        }
+    );
+})
+
+// 게시글 이미지 업로드 API
+app.post('/image/upload', (req, res) => {
+    console.log("request received :", req.user._id);
+    console.log("POST_ID :", req.body.postId);
+    const form = new multiparty.Form();
+    const USER_ID = req.user._id;
+    const POST_ID = "";
+    const IMAGE_DIR = USER_ID + "/" + POST_ID + "/";
+    let filename;
+    
+    // err 처리
+    form.on('error', function(err) { res.status(500).end(); })
+    
+    // form 데이터 처리
+    form.on('part', async function(part) {
+        filename = part.filename;
+        // 이미지 저장 디렉토리
+        if (!part.filename) { return part.resume(); }
+        else {
+            streamToBufferUpload(part, filename, IMAGE_DIR);
+            db.collection('post').updateOne(
+                {_id : POST_ID}, 
+                {$push : {image_address : process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename}}, 
+                function(err, result) {
+                    if (err) { return console.log(err); }
+                    else { console.log(process.env.IMAGE_SERVER + "/" + IMAGE_DIR + part.filename); } 
+                }
+            );
+        }
+    });
+
+    // form 종료
+    form.on('close', function() {
+        res.send({
+            location: process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename,
+            filename: filename
+        });
+    });
+
+    form.parse(req);
+});
+
+// 게시글 이미지 삭제 API
+app.delete('/image/delete/:id', (req, res) => {
+    console.log("query :", (req.query.url).substr(52))
+    
+    const objectParams_del = {
+        Bucket: BUCKET_NAME,
+        Key: (req.query.url).substr(52),
+    };
+
+    s3
+        .deleteObject(objectParams_del)
+        .promise()
+        .then((data) => {
+            res.json({message: "삭제 성공"});
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+
+    db.collection('post').findOne({_id: req.params.id}, function(err, result) {
+        console.log(result);
+    });
+})
+
+function streamToBufferUpload(part, filename, ADR) {
+    const chunks = [];
+    return new Promise((resolve, reject) => {
+        part.on('data',   (chunk) => chunks.push(Buffer.from(chunk)));
+        part.on('error',  ( err ) => reject(err));
+        part.on('end',    (     ) => resolve(Buffer.concat(chunks)));
+        uploadToBucket(ADR + filename, part);
+    });
+}
+
+function uploadToBucket(filename, Body) {
+    const params = { 
+        Bucket:BUCKET_NAME, 
+        Key:filename, 
+        Body, 
+        ContentType: 'image' 
+    }
+    const upload = new AWS.S3.ManagedUpload({ params });
+    return upload.promise();
+}
+
+// control - image 끝 ///////////////////////////////////////////////////////////////////////////////
+
+
+// service - auth 시작 ///////////////////////////////////////////////////////////////////////////////
+
+// header 로그인 인증
+app.post('/islogin', (req, res) => {
+    console.log("Client SID :", req.body.sessionID);
+    console.log("Server SID :", req.sessionID);
+
+    if (req.body.sessionID === req.sessionID) {
+        res.send({
+            message: "로그인 성공", 
+            nickname: req.user.nickname,
+            user_level: req.user.user_level,
+        });
+    }        
+    else { res.json({message: "로그인 실패"}); }        
+})
+
+// 로그아웃 API
+app.post('/signout', (req, res) => {
+    console.log("/signout :", req.user.email);
+    req.session.destroy();
+    res.json({message: "로그아웃"});
+});
+
+// 로그인 API
+app.post('/signin', passport.authenticate('local', {}), (req, res) => {
     console.log("session created :", req.session)
-    res.send({message: "로그인 성공", sessionID: req.sessionID})
+    res.send({
+        message: "로그인 성공", 
+        sessionID: req.sessionID
+    })
 })
 
 passport.use(new localStrategy({
@@ -666,53 +934,31 @@ passport.use(new localStrategy({
         passReqToCallback: false,
     }, 
     function(inputemail, inputpw, done) {
-        console.log("signin : " + inputemail)
+        console.log("signin : " + inputemail);
         db.collection('user_info').findOne({email: inputemail}, function(err, user) {
-            if (err) { return done(err) }
-            if (!user) { return done(null, false, console.log({message: "존재하지 않는 아이디입니다."})) }
-            if (user.password === inputpw) { return done(null, user) }
-            return done(null, false, console.log({message: "올바르지않은 비밀번호."}))
-        })
+            if (err) { return done(err); }
+            if (!user) { return done(null, false, console.log({message: "존재하지 않는 아이디입니다."})); }
+            if (user.password === inputpw) { return done(null, user); }
+            return done(null, false, console.log({message: "올바르지않은 비밀번호."}));
+        });
     }
-))
+));
+
 passport.serializeUser((user, done) => {
-    console.log("serialize :", user.email)
-    done(null, user.email)
-})
-passport.deserializeUser((usermail, done) => {
-    console.log("deserialize :", usermail)
-    db.collection("user_info").findOne({email: usermail}, function(err, user) {
-        if (err) { return next(err) }
-        // console.log("deserialize req.user :", user)
-        done(null, user)        
-    })
-})
-
-app.post('/islogin', function(req, res) {
-    console.log("Client SID :", req.body.sessionID)
-    console.log("Server SID :", req.sessionID)
-
-    if (req.body.sessionID === req.sessionID) {
-        res.send({
-            message: "로그인 성공", 
-            nickname: req.user.nickname,
-            user_level: req.user.user_level,
-        })
-    }        
-    else
-        res.json({message: "로그인 실패"})
-})
-
-// 로그아웃
-app.post("/signout", function(req, res) {
-    console.log("/signout :", req.user.email)
-    req.session.destroy()
-    res.json({message: "로그아웃"})
+    console.log("serialize :", user.email);
+    done(null, user.email);
 });
 
-// signup 시작 //////////////////////////////////////////////////////////////////////////////////////
-// 인증메일 요청
-app.post('/signup/mail', function(req, res) {
+passport.deserializeUser((usermail, done) => {
+    console.log("deserialize :", usermail);
+    db.collection("user_info").findOne({email: usermail}, function(err, user) {
+        if (err) { return next(err); }
+        done(null, user);
+    });
+});
+
+// 인증메일 발송 API
+app.post('/signup/mail', (req, res) => {
     console.log("/signup/mail request :", req.body.email);   // params 확인은 req.query
 
     if (!req.body.email) { res.json({ message: "올바른 이메일이 아닙니다." }) }
@@ -739,9 +985,9 @@ app.post('/signup/mail', function(req, res) {
                         console.log("/signup/mail response :", { message: "인증메일이 발송되었습니다." });
                         res.json({ message: "인증메일이 발송되었습니다." });
                     } 
-                })
+                });
             }
-        })
+        });
     }
 })
 
@@ -788,17 +1034,14 @@ function SendAuthMail(address) {
     });
 }
 
-// 인증번호 메일 요청
+// 인증메일 변수
 const ejs = require('ejs');
 const nodemailer = require('nodemailer');
 const path = require('path');
-const { Console } = require('console');
-const { query } = require('express');
-const { AppIntegrations } = require('aws-sdk');
 let appDir = path.dirname(require.main.filename) + '/templates/authMail.ejs';
 
-// 인증번호 확인 요청
-app.post('/signup/auth', function(req, res) {
+// 인증번호 확인 API
+app.post('/signup/auth', (req, res) => {
     console.log("authnum request received");
 
     db.collection("auth_request").findOne({email: req.body.email},
@@ -815,8 +1058,8 @@ app.post('/signup/auth', function(req, res) {
     )
 })
 
-// 회원가입 요청
-app.post('/signup', function(req, res) {
+// 회원가입 요청 API
+app.post('/signup', (req, res) => {
     console.log("/signup request received");
 
     // nickname 중복검사
@@ -848,225 +1091,5 @@ app.post('/signup', function(req, res) {
         }
     });
 })
-// signup 끝 ///////////////////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-async function RenameFolder(uid, pid) {
-    console.log("RenameFolder(", uid, ",", pid, ")")
-    const tempFolder = uid + '/temp/';   // old folder name
-    const awsAddress = "https://bucket-sunu.s3.ap-northeast-2.amazonaws.com"
-    
-    let imageAddress = [];
-
-    const listObjectsResponse = await s3.listObjects({
-        Bucket: BUCKET_NAME,
-        Prefix: tempFolder,
-    }).promise()
-
-    const folderContentInfo = listObjectsResponse.Contents
-
-    for (let i = 0; i < folderContentInfo.length; i++) {
-        const divide = folderContentInfo[i].Key.split('/');
-
-        s3.copyObject({
-            Bucket: BUCKET_NAME, 
-            CopySource: `${BUCKET_NAME}/${folderContentInfo[i].Key}`, 
-            Key: `${uid}/${pid}/${divide[2]}`
-        }).promise()
-
-        imageAddress[i] = awsAddress + "/" + String(uid) + "/" + String(pid) + "/" + divide[2];        
-
-        db.collection('post').updateOne(
-            {_id : pid}, 
-            {$set : {image_address : imageAddress}}, 
-            function(err, result) {
-                if (err) { return console.log(err); }
-            }
-        )
-    }
-}
-
-app.delete("/temp/delete", async function(req, res) {
-    const tempFolder = req.user._id + '/temp';
-
-    const listObjectsResponse = await s3.listObjects({
-        Bucket: BUCKET_NAME,
-        Prefix: tempFolder,
-    }).promise()
-
-    const folderContentInfo = listObjectsResponse.Contents
-
-    let count = 0;
-    for (i = 0; i < folderContentInfo.length; i++) {
-        s3.deleteObject({
-            Bucket: BUCKET_NAME,
-            Key: `${folderContentInfo[i].Key}`,
-        }, (err, data) => {
-            if (err) throw err
-        })
-        count++
-        if (count == folderContentInfo.length) {
-            res.json({message: "초기화"})
-        }
-    }
-    
-})
-
-app.delete('/image/delete', function(req, res) {
-    console.log("query :", (req.query.url).substr(52))
-    
-    const objectParams_del = {
-        Bucket: BUCKET_NAME,
-        Key: (req.query.url).substr(52),
-    };
-
-    s3
-        .deleteObject(objectParams_del)
-        .promise()
-        .then((data) => {
-            res.json({message: "삭제 성공"});
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-})
-
-app.post('/image/upload', function(req, res) {
-    console.log("request received :", req.user._id);
-    console.log("POST_ID :", req.body._id);
-    const form = new multiparty.Form();
-
-    const USER_ID = req.user._id;
-    const POST_ID = req.body._id ? "POST_ID" : "temp";
-    const IMAGE_DIR = USER_ID + "/" + POST_ID + "/";
-    let filename;
-    
-    // err 처리
-    form.on('error', function(err) { res.status(500).end(); })
-    
-    // form 데이터 처리
-    form.on('part', async function(part) {
-        filename = part.filename;
-        // 이미지 저장 디렉토리
-        if (!part.filename) { return part.resume(); }
-        else {
-            streamToBufferUpload(part, filename, IMAGE_DIR);
-            db.collection('post').updateOne(
-                {_id : POST_ID}, 
-                {$set : {image_address : process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename}}, 
-                function(err, result) {
-                    if (err) { return console.log(err); }
-                    else { console.log(process.env.IMAGE_SERVER + "/" + IMAGE_DIR + part.filename); } 
-                }
-            );
-        }
-    })
-
-    // form 종료
-    form.on('close', function() {
-        res.send({
-            location: process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename,
-            filename: filename
-        });
-    });
-
-    form.parse(req);
-});
-
-function streamToBufferUpload(part, filename, ADR){
-    const chunks = [];
-    return new Promise((resolve, reject) => {
-        part.on('data',   (chunk) => chunks.push(Buffer.from(chunk)));
-        part.on('error',  ( err ) => reject(err));
-        part.on('end',    (     ) => resolve(Buffer.concat(chunks)));
-        uploadToBucket(ADR + filename, part);
-    });
-}
-
-function uploadToBucket(filename, Body){
-    const params = { Bucket:BUCKET_NAME, Key:filename, Body, ContentType: 'image' }
-    const upload = new AWS.S3.ManagedUpload({ params });
-    return upload.promise();
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-// 내 정보
-app.get("/mypage", (req, res) => {
-    res.send({
-        message: "불러오기",
-        profile: req.user.profile_image_path,
-        nickname: req.user.nickname,
-        user_level: req.user.user_level,
-        user_point: req.user.user_point,
-        posting_count: req.user.posting_count,
-    })
-})
-
-// 회원정보 수정
-app.get("/mypage/edit", (req, res) => {
-    res.send({
-        message: "불러오기",
-        profile: req.user.profile_image_path,
-        email: req.user.email,
-        nickname: req.user.nickname,
-    })
-})
-
-app.post("/mypage/edit", (req, res) => {
-    // 닉네임
-    db.collection('user_info').findOne({nickname : req.body.nickname}, function(err, result) {
-        if (err) {return console.log(err)}
-        if (result) {res.json({message: "사용중인 닉네임입니다."})}
-        else {
-            db.collection('user_info').updateOne(
-                {_id : req.user._id},
-                {$set : {nickname : req.body.nickname}},
-                function(err, result) {
-                    if (err) { return console.log(err); }
-                    console.log("닉네임변경 : ", req.user.nickname, " => ", req.body.nickname);
-                    res.json({message: "수정 성공"});
-            });
-        }
-    })    
-})
-
-// 비밀번호 수정
-app.get("/mypage/editpw", (req, res) => {
-    res.send({message: "editPW"})
-})
-
-app.post('/mypage/editpw/check', function(req, res) {
-    db.collection('user_info').findOne({_id : req.user._id}, function(err, result){
-        if (err) { return console.log(err); }
-        console.log("result.password", result.password)
-        console.log("req.body.password", req.body.password)
-        if (result.password == req.body.password) { 
-            res.json({message: "비밀번호 일치"}); 
-        }
-        else { res.json({message: "비밀번호가 일치하지 않습니다."}); }
-    });
-})
-
-app.put('/mypage/editpw/change', function(req, res) {
-    db.collection('user_info').updateOne(
-        {_id : req.user._id},
-        {$set : {password : req.body.password}},
-        function(err, result) {
-            if (err) { return console.log(err); }
-            console.log("변경내역 : ", req.user.password, " => ", req.body.password);
-    });
-    res.json({message: "비밀번호가 변경되었습니다."});
-})
-
-// app.get('/mypage/like', function(req, res) {
-//     res.render('mypage_like.ejs', {userInfo : req.user});  // └ 좋아요 한 게시글
-// }); 
-// app.get('/mypage/post', function(req, res) {
-//     res.render('mypage_post.ejs', {userInfo : req.user}); // └ 작성한 게시글
-// });
-// app.get('/mypage/qna', function(req, res) {
-//     res.render('mypage_qna.ejs', {userInfo : req.user});     // └ 문의내역
-// });
-
+// service - auth 끝 ////////////////////////////////////////////////////////////////////////////////
