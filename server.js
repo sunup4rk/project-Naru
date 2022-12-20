@@ -792,9 +792,6 @@ function SendAuthMail(address) {
 const ejs = require('ejs');
 const nodemailer = require('nodemailer');
 const path = require('path');
-const { Console } = require('console');
-const { query } = require('express');
-const { AppIntegrations } = require('aws-sdk');
 let appDir = path.dirname(require.main.filename) + '/templates/authMail.ejs';
 
 // 인증번호 확인 요청
@@ -993,14 +990,29 @@ function uploadToBucket(filename, Body){
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 // 내 정보
-app.get("/mypage", (req, res) => {
-    res.send({
-        message: "불러오기",
-        profile: req.user.profile_image_path,
-        nickname: req.user.nickname,
-        user_level: req.user.user_level,
-        user_point: req.user.user_point,
-        posting_count: req.user.posting_count,
+app.get("/mypage", (req, res) => { 
+    const testArr = []
+    db.collection('user_info').findOne({_id : req.user._id}, function(err, result){
+        const UserResult = result
+        if(err){
+            {res.json({message: "로그인 필요"})}
+        }
+        else{
+            db.collection('post').find({like_user : req.user._id.toString()}).toArray(function (err, result){
+                res.send({
+                    message: "불러오기",
+                    profile: UserResult.profile_image_path,
+                    nickname: UserResult.nickname,
+                    user_level: UserResult.user_level,
+                    user_point: UserResult.user_point,
+                    posting_count: UserResult.posting_count,
+                    like_user: result,
+                })
+            })
+            
+            
+        }
+
     })
 })
 

@@ -9,7 +9,7 @@
     "dev": "concurrently --kill-others-on-fail \"yarn client\" \"yarn server\""
   },
   "dependencies": {
-    "aws-sdk": "^2.1269.0",
+    "aws-sdk": "^2.1278.0",
     "cheerio": "^1.0.0-rc.12",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
