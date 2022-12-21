@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import axios from "axios";
 import styled from "styled-components";
 import { Modal } from "../modal/Modal";
@@ -24,8 +24,8 @@ const Image = styled.img`
 `
 
 const Upload01 = (props) => {
-    const fileRef = useRef(null)
-    const { Failure } = Modal();
+const fileRef = useRef(null)
+const { Failure } = Modal();
 
 const onClickUpload = () => {
     fileRef.current?.click();
@@ -35,7 +35,7 @@ const onChangeFile = (e) => {
     console.log(e.target.files[0].name);
     const img = e.target.files[0];
     const formData = new FormData();
-    formData.append("image", img, img.name);
+    formData.append("image", img, props.postId + "/" + img.name);
 
     axios.post("http://localhost:8080/image/upload", formData)
     .then(res => {
