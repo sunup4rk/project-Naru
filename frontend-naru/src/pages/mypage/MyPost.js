@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Modal } from '../../components/common/modal/Modal';
 import { useCookies } from 'react-cookie';
@@ -8,6 +9,7 @@ const MyPost = () => {
   const [user, setUser] = useState();
   const [cookie, ] = useCookies();
   const { Warning } = Modal();
+  const navigate = useNavigate()
 
   useEffect(() => {
     axios.post("http://localhost:8080/islogin", {
@@ -19,20 +21,20 @@ const MyPost = () => {
       }
       else {
         Warning("마이페이지", "로그인이 필요합니다.")
-        // 버튼 클릭 시 로그인 페이지로 이동
+        navigate("/signin")
+
       }
     })
   }, [])
 
   const userData = () => {
-    axios.get("http://localhost:8080/userinfo")
+    axios.get("http://localhost:8080/mypage/post")
     .then((response) => {
-        if(response.data.message === "ex)불러오기") {
+        if(response.data.message === "게시글") {
           setUser(response.data)
         }
     })
   };
-
 
   return (
     <div>

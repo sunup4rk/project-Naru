@@ -5,7 +5,6 @@ import { Modal } from '../../components/common/modal/Modal';
 import { useCookies } from 'react-cookie';
 import { useForm } from 'react-hook-form';
 import UploadProfile from '../../components/common/upload/UploadProfile';
-import { uuid } from 'react-uuid';
 
 const MyEdit = () => {
   const [ user, setUser ] = useState();
