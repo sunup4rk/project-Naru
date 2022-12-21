@@ -58,10 +58,6 @@ const Edit = () => {
   }
 
   const onClickEdit = (data) => {
-    if(!data.title && !data.address && !data.addressDetail && !data.content) {
-      Warning("수정 실패", "수정된 내용이 없습니다.")
-      return;
-    }
       axios.put(`http://localhost:8080/community/edit/${params.id}`, {
         title: data.title,
         address: data.address,

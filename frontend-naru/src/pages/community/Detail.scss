@@ -20,8 +20,7 @@
 
     h1 {
         word-wrap: break-word;
-        overflow: hidden; 
-        text-overflow: ellipsis;
+        width: 90%;
     }
 
     &__date {
@@ -29,18 +28,22 @@
         justify-content: flex-end;
         width: 90%;
         color: #808080;
+        padding: 20px 0;
     }
 
     &__user {
         display: flex;
-        padding: 20px;
         font-size: 1.25rem;
+
+        img {
+          padding-right: 10px;
+        }
     }
 
     &__image {
       display: flex;
       align-items: center;
-      
+
       img {
         width: 100px;
         height: 100px;
@@ -48,7 +51,30 @@
     }
 
     pre {
+      max-width: 90%;
+      word-wrap: break-word;
+      word-break: keep-all;
+      white-space: pre-line;
       padding: 30px 0;
+    }
+
+    &__like {
+      background-color: #ffffff;
+      border: none;
+      margin: 10px 0;
+
+      img {
+        width: 1.5rem;
+      }
+    }
+  }
+
+  &__button {
+    display: flex;
+    padding-top: 40px;
+    
+    :not(:last-child) {
+      margin-right: 15px;
     }
   }
 }
