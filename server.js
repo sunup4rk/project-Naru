@@ -110,18 +110,19 @@ async function CrawlGame () {
         for (var i = 0; i < lists.length; i++){
         resultGame[i] = $(lists[i]).find("tr > td.name").text()
         }
-        db.collection('crawling').insertOne({
-                sort : 'game',
+        db.collection('crawling').updateOne(
+            {sort : 'game'}, 
+            {$set : {
                 title : resultGame,
                 time : crawlTime,
-            }, function(err, result){
-                if(err){
-                    console.log("크롤링 실패, 대상 웹페이지를 확인해보세요")
-                }
-                else{
-                    console.log('게임순위 데이터 입력 완료')
-                }
-            })
+                }}, function(err, result){
+            if(err){
+                console.log("크롤링 실패, 대상 웹페이지를 확인해보세요")
+            }   
+            else{
+                console.log('게임순위 데이터 입력 완료')
+            }
+        })
         browser.close();
 }
 
@@ -191,7 +192,6 @@ function CrawlCheck(){
             db.collection('crawling').updateOne(
                 { sort: 'time'}, { $set : {time : crawlTime}},
             )
-            db.collection('crawling').deleteOne({sort : 'game'}, function(err, result){})
             CrawlMovie()
             CrawlGame()
         }
@@ -240,7 +240,6 @@ app.get('/explore/culture', function(req, res){
     }).sort({
         'num' : 1
     }).toArray(function(err, result){
-        console.log(result)
         res.send({
             message : "영화",
             result : result
@@ -255,7 +254,7 @@ app.get('/explore/culture', function(req, res){
 
     
 app.get('/', function(req, res) {
-    CrawlMovie()
+    // CrawlGame()
     // ==================== 크롤링 DB구역에 데이터가 없을 때 한번만! =============================
     // if (true){
     //     db.collection('crawling').insertOne({

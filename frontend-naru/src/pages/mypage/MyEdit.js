@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Modal } from '../../components/common/modal/Modal';
 import { useCookies } from 'react-cookie';
 import { useForm } from 'react-hook-form';
+import UploadProfile from '../../components/common/upload/UploadProfile';
+import { uuid } from 'react-uuid';
 
 const MyEdit = () => {
-  const [user, setUser] = useState();
-  const [cookie, ] = useCookies();
+  const [ user, setUser ] = useState();
+  const [ cookie, ] = useCookies();
+  const [ image, setImage ] = useState([""]);
   const { Success, Warning, Failure } = Modal();
   const { register, handleSubmit, getValues } = useForm();
+  const navigate = useNavigate();
   
   useEffect(() => {
     const isLogin = () => {
@@ -21,7 +26,7 @@ const MyEdit = () => {
         }
         else {
           Warning("마이페이지", "로그인이 필요합니다.")
-          // 버튼 클릭 시 로그인 페이지로 이동
+          navigate("/signin")
         }
       })
     }
@@ -38,6 +43,12 @@ const MyEdit = () => {
     .catch((error) => {
       Failure("조회 실패", "회원정보 조회에 실패했습니다.")
     })
+  }
+
+  const onChangeImages = (img, index) => {
+    const newImages = [...image];
+    newImages[index] = img;
+    setImage(newImages);
   }
 
   const onClickEdit = () => {
@@ -59,6 +70,7 @@ const MyEdit = () => {
   return (
     <div>
       <form style={{display: "flex", flexDirection:"column"}} onSubmit={handleSubmit(onClickEdit)}>
+        <UploadProfile key={uuid()} onChangeImage={onChangeImages} image={image}/>
         이메일 <input type="text" defaultValue={user?.email} disabled/>
         닉네임<input type={"text"} defaultValue={user?.nickname} {...register("nickname")}/>
         <button>수정</button>
