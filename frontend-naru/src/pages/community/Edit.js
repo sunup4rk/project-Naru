@@ -79,7 +79,7 @@ const Edit = () => {
   const onClickCancel = () => {
     navigate(-1);
   }
-
+  
   return (
     <>
       <Pane>
@@ -109,7 +109,7 @@ const Edit = () => {
 
           <div className="write__input__image">
           {images.map((el, index) => (
-            <Upload01 key={uuid()} onChangeImages={onChangeImages} index={index} images={el}/>
+            <Upload01 key={uuid()} onChangeImages={onChangeImages} index={index} images={el} editImages={editPost?.images}/>
           ))}
           </div>
 
