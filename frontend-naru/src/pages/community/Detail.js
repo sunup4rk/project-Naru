@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Modal } from '../../components/common/modal/Modal';
 import Swal from 'sweetalert2'
 import axios from 'axios';
-import './Write.scss';
+import './Detail.scss';
+import MapDetail from '../../components/common/map/MapDetail';
+import uuid from 'react-uuid';
 
 const Detail = () => {
   const params = useParams();
@@ -84,14 +86,27 @@ const Detail = () => {
 
   return (
     <>
-      <div className="write">
-        <div className="write-wrapper">
-          <div style={{display:"flex", flexDirection:"column"}}>
-            <div>제목{post?.post_title}</div>
-            <div>주소{post?.post_address}</div>
-            <div>상세주소{post?.post_address_detail}</div>
-            이미지<button type="file" >+</button>
-            내용<pre>{post?.post_content}</pre>
+      <div className="detail">
+        <div className="detail__wrapper">
+          <div className="detail__post">
+              <h1>{post?.post_title}</h1>
+              <div className="detail__post__date">{post?.post_time}</div>
+              <div className="detail__post__user">
+                <img src="" alt="profile image"/>
+                <div>{post?.writer}</div>
+              </div>
+              <MapDetail address={post?.post_address} detail={post?.post_address_detail}/>
+
+            <div className="detail__post__image">
+            {post?.image_address.map((el) => (
+              <div key={uuid()}>
+              <img src={el} alt="post image"/>
+              </div>
+            ))}
+            </div>
+            <pre>{post?.post_content}</pre>
+            <button onClick={onClickLike}>좋아요</button>
+            <div>{post?.like_count}</div>
           </div>
           {myPost === "일치" &&
             <>
@@ -99,8 +114,6 @@ const Detail = () => {
               <button onClick={onClickDelete}>삭제</button>
             </>
           }
-          <button onClick={onClickLike}>좋아요</button>
-          <div>{post?.like_count}</div>
         </div>
       </div>
     </>

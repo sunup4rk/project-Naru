@@ -379,7 +379,6 @@ app.post("/community/detail/like/:id", function(req, res) {
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
         var chk = false
         if (!req.isAuthenticated()) {
-            // req.isAuth() 가 true를 반환하면 비 로그인 상태
             res.json({message : "비회원"})
         }
         else if (result.like_count == 0) {
@@ -588,7 +587,6 @@ app.put('/community/edit/:id', function(req, res) {
         contentchk = false
     }
 
-    console.log(titlechk)
     console.log("/community/edit put :", req.params.id);
     db.collection('post').findOne({_id : parseInt(req.params.id)},function(err, result){
         db.collection('post').updateOne(
@@ -637,59 +635,113 @@ app.delete('/community/delete/:id', function(req, res) {
 })
 
 // 포인트 페이지
-app.get("/point", isPoint, function(req, res){
-    res.render('point.ejs',{userpoint : req.user})
-})
-
-function isPoint(req, res, next){
-    if(req.user){
-        console.log(req.user)
-          next()
+app.get("/point", function(req, res){
+    if (!req.isAuthenticated()) {
+        res.json({message : "비회원"})
     }
     else{
-        res.send('<script>alert("로그인해주세요"); location.href="/signin";</script>')
-    }
-}
-
-app.post('/point', function(req,res) { 
-    if (!req.isAuthenticated()) {
-        res.send('<script>alert("로그인해주세요"); location.href="/signin";</script>')
-    }
-    else {
-        db.collection('user_info').updateOne(
-            {id : req.user.id}, 
-            {$set : {point : req.body.getpoint}}, 
-            function(err, result) {
-                if (err) return err;
-                console.log('process complete')
-                res.redirect('/point');
-            }
-        )
+        db.collection('user_info').findOne({_id : req.user.id}, function(err, result){
+            res.send({
+                message : "포인트게임 진입",
+                point : result.user_point
+            }); 
+        })
     }
 })
+
+app.post("/point/start", function(req, res){
+    if (!req.isAuthenticated()) {
+        res.json({message : "비회원"})
+    }
+    else if (req.body.point < 100){
+        res.json({message : "포인트 부족"})
+    }
+    else{
+        db.collection('user_info').updateOne(
+            {_id : req.user.id},
+            {$inc : {user_point : -100}}, function(err, result){
+            res.send({
+                message : "포인트게임 시작",
+                point : result.user_point
+            }); 
+        })
+    }
+})
+
+app.post("/point/result", function(req, res){
+    const card = req.body.card
+    var score = 0
+
+    if (!req.isAuthenticated()) {
+        res.json({message : "비회원"})
+    }
+    else{
+        if (card == "N"){
+            score = 20
+        }
+        else if (card == "R"){
+            score = 45
+        }
+        else if (card == "SR"){
+            score = 200
+        }
+        else if(card == "UR"){
+            score = 400
+        }
+        else{
+            res.json({message : "에러"})
+        }
+        db.collection('user_info').updateOne(
+            {_id : req.user.id},
+            {$inc : {user_point : score}}, function(err, result){
+            res.send({
+                message : "포인트게임 완료",
+                point : result.user_point
+            }); 
+        })
+    }
+})
+
+
+// app.post('/point', function(req,res) { 
+//     if (!req.isAuthenticated()) {
+//         res.send('<script>alert("로그인해주세요"); location.href="/signin";</script>')
+//     }
+//     else {
+//         db.collection('user_info').updateOne(
+//             {id : req.user.id}, 
+//             {$set : {point : req.body.getpoint}}, 
+//             function(err, result) {
+//                 if (err) return err;
+//                 console.log('process complete')
+//                 res.redirect('/point');
+//             }
+//         )
+//     }
+// })
 
 
 // control - userinfo 시작 ///////////////////////////////////////////////////////////////////////////
 
 // 내 정보 요청 API
 app.get('/mypage', (req, res) => { 
-    const testArr = [];
     db.collection('user_info').findOne({_id : req.user._id}, function(err, result) {
-        const UserResult = result;
+        const userResult = result;
         if (err) { res.json({message: "로그인 필요"}); }
         else{
-            db
-            .collection('post')
-            .find({like_user : req.user._id.toString()})
-            .toArray(function (err, result) {
-                res.send({
-                    message: "불러오기",
-                    profile: UserResult.profile_image_path,
-                    nickname: UserResult.nickname,
-                    user_level: UserResult.user_level,
-                    user_point: UserResult.user_point,
-                    posting_count: UserResult.posting_count,
-                    like_user: result,
+            db.collection('post').find({like_user : req.user._id.toString()}).sort({'_id' : -1}).limit(3).toArray(function (err, result) {
+                const likeResult = result
+                db.collection('post').find({user_id : req.user._id}).sort({'_id' : -1}).limit(3).toArray(function(err, result){
+                    res.send({
+                        message: "불러오기",
+                        profile: userResult.profile_image_path,
+                        nickname: userResult.nickname,
+                        user_level: userResult.user_level,
+                        user_point: userResult.user_point,
+                        posting_count: userResult.posting_count,
+                        like_user: likeResult,
+                        write_post : result
+                    })
                 });
             });
         }
