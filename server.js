@@ -280,6 +280,7 @@ app.get('/explore', function(req, res) {
 
 
 app.get('/community', function(req, res) { 
+    // db.collection('post').delete({writer : ""})
     db.collection('post').find().toArray(function(err, result){
         result.reverse()
         if (err) {
@@ -293,6 +294,11 @@ app.get('/community', function(req, res) {
             });         
         }
     });
+})
+
+app.delete('/community', function(req, res){
+    db.collection('post').deleteMany({writer : ""})
+    res.json({message : "삭제 완료"})
 })
 
 // ======================================= 검색기능 테스트 영역 ===================================================== //
@@ -739,7 +745,7 @@ app.get('/mypage', (req, res) => {
                         user_level: userResult.user_level,
                         user_point: userResult.user_point,
                         posting_count: userResult.posting_count,
-                        like_user: likeResult,
+                        like_post: likeResult,
                         write_post : result
                     })
                 });
@@ -797,6 +803,33 @@ app.put('/mypage/editpw/change', (req, res) => {
             res.json({message: "비밀번호가 변경되었습니다."});
     });
 })
+
+// 좋아요한 게시물 요청
+app.get('/mypage/like', (req, res) => { 
+    db.collection('post').find({like_user : req.user._id.toString()}).sort({'_id' : -1}).toArray(function(err, result){
+        res.send({
+            message : "좋아요",
+            result : result
+        }); 
+    })
+})
+
+app.get('/mypage/post', (req, res) => { 
+    db.collection('post').find({user_id : req.user._id}).sort({'_id' : -1}).toArray(function(err, result){
+        res.send({
+            message : "게시글",
+            result : result
+        }); 
+    })
+})
+        
+    
+    
+
+
+
+// 내가 쓴 게시물 요청
+
 
 // control - userinfo 끝 ////////////////////////////////////////////////////////////////////////////
 

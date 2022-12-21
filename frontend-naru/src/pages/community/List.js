@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { Modal } from './../../components/common/modal/Modal';
 import { useEffect, useState } from 'react';
 import Bestpost from '../../components/common/bestpost/BestPost';
 import Button01 from './../../components/common/button/Button01';
@@ -11,7 +10,6 @@ import './List.scss';
 const List = () => {
   const [cookie, ] = useCookies();
   const navigate = useNavigate();
-  const { Failure } = Modal();
   const [post, setPost] = useState([])
   
   useEffect(() => {
@@ -19,15 +17,19 @@ const List = () => {
         axios.get("http://localhost:8080/community")
         .then((response) => {
             if(response.data.message === "조회 성공") {
-                setPost(response.data.result)
+              setPost(response.data.result)
+              deletePost();
             }
-        })
-        .catch((error) => {
-          Failure("게시글 조회 실패", "게시글 조회에 실패했습니다.")
         })
     }
     fetchPost();
 }, []);
+
+  const deletePost = () => {
+    axios.delete("http://localhost:8080/community")
+    .then((response) => {
+    })
+  }
 
   const onClickWrite = () => {
     axios.post("http://localhost:8080/islogin", {

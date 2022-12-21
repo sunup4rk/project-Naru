@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Pane, Dialog } from 'evergreen-ui';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Modal } from './../../components/common/modal/Modal';
 import Upload01 from '../../components/common/upload/Upload01';
@@ -25,7 +25,6 @@ const Write = (props) => {
   });
   const { Success, Warning, Failure } = Modal();
   const navigate = useNavigate();
-  const params = useParams();
 
   useEffect(() => {
     const getPostId = () => {
