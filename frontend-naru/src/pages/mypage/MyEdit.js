@@ -31,7 +31,7 @@ const MyEdit = () => {
       })
     }
     isLogin();
-  }, [])
+  }, [image])
 
   const userData = () => {
     axios.get("http://localhost:8080/mypage/edit")
@@ -45,10 +45,8 @@ const MyEdit = () => {
     })
   }
 
-  const onChangeImages = (img, index) => {
-    const newImages = [...image];
-    newImages[index] = img;
-    setImage(newImages);
+  const onChangeImage = (img) => {
+    setImage(img);
   }
 
   const onClickEdit = () => {
@@ -70,7 +68,7 @@ const MyEdit = () => {
   return (
     <div>
       <form style={{display: "flex", flexDirection:"column"}} onSubmit={handleSubmit(onClickEdit)}>
-        <UploadProfile onChangeImage={onChangeImages} image={image}/>
+        <UploadProfile onChangeImage={onChangeImage} image={image} profile={user?.profile}/>
         이메일 <input type="text" defaultValue={user?.email} disabled/>
         닉네임<input type={"text"} defaultValue={user?.nickname} {...register("nickname")}/>
         <button>수정</button>
