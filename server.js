@@ -439,9 +439,10 @@ app.post("/community/detail/like/:id", function(req, res) {
     )
 })
 app.get("/community/write", function(req, res) {
-    console.log(req.query.message)
+    // console.log(req.query.message)
     db.collection('post_count').findOne({name : 'postcnt'}, function(err, result) {
-        const postId = Number(result.total_post) + 1
+        let postId = Number(result.total_post) + 1
+        console.log("postid :", postId)
         db.collection('post').insertOne({
             _id : postId,
             user_id : req.user._id,
@@ -457,12 +458,13 @@ app.get("/community/write", function(req, res) {
             },
             function(err, result) {
                 if (err) {
+                    console.log(err)
                     res.json({message : "다시 시도해주세요."})
                 }
                 else {
                     console.log("post_id :", postId, " 발급");
                     UpdatePostCount();
-                    res.status(200).json({postId : postId});         
+                    res.json({postId : postId});         
                 }
             }
         )
@@ -806,8 +808,11 @@ app.post('/image/upload', (req, res) => {
         if (!part.filename) { res.send({location: ""}); }
         else {
             db.collection('post').findOne({_id: postID}, (err, result) => {
+                if (result.image_address === null) {
+                    res.send({location: ""});
+                }
                 // 파일명 O, 배열에 O
-                if (result.image_address.indexOf(imageAddress) !== -1) {
+                if (result.image_address.indexOf(imageAddress) !== -1 && result.image_address.indexOf(imageAddress) !== null) {
                     res.send({location: ""}); }
                 // 파일명 O, 배열에 X
                 else {
@@ -820,7 +825,7 @@ app.post('/image/upload', (req, res) => {
                             res.send({location: imageAddress});
                         }
                     );
-                }                
+                }            
             })
         }
     });

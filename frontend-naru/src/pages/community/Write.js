@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Pane, Dialog } from 'evergreen-ui';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Pane, Dialog } from 'evergreen-ui';
@@ -16,12 +17,29 @@ import './Write.scss';
 const Write = (props) => {
   const [isShown, setIsShown] = useState(false);
   const [images, setImages] = useState(["","","",""]);
-  const { register, handleSubmit, formState: { errors }, setValue, getValues} = useForm({ 
+  const [postId, setPostId] = useState();
+  const { register, handleSubmit, setValue, getValues } = useForm({
+    defaultValues: {
+      postId: 0,
+    } ,
     mode : 'onChange' 
   });
   const { Success, Warning, Failure } = Modal();
   const navigate = useNavigate();
   const params = useParams();
+
+  useEffect(() => {
+    const getPostId = () => {
+      axios.get("http://localhost:8080/community/write")
+      .then((response) => {
+        if(response.data) {
+          setPostId(response.data.postId)
+        }
+      })
+    }
+    getPostId();
+  }, []);
+
 
   const onClickAddressSearch = () => {
     setIsShown(true)
@@ -66,10 +84,6 @@ const Write = (props) => {
   }
 
   const onClickEdit = (data) => {
-    // const currentFiles = JSON.stringify(images);
-    // const defaultFiles = JSON.stringify(props.editPost?.image_address);
-    // const isChangedFiles = currentFiles !== defaultFiles;
-
     if(!data.title && !data.address && !data.addressDetail && !data.content) {
       Warning("수정 실패", "수정된 내용이 없습니다.")
       return;
@@ -156,7 +170,7 @@ const Write = (props) => {
 
           <div className="write__input__image">
           {images.map((el, index) => (
-            <Upload01 key={uuid()} onChangeImages={onChangeImages} index={index} images={el}/>
+            <Upload01 key={uuid()} postId={postId} onChangeImages={onChangeImages} index={index} images={el}/>
           ))}
           </div>
 
