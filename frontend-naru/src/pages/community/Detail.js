@@ -6,6 +6,8 @@ import axios from 'axios';
 import './Detail.scss';
 import MapDetail from '../../components/common/map/MapDetail';
 import uuid from 'react-uuid';
+import Button01 from '../../components/common/button/Button01';
+import Button02 from '../../components/common/button/Button02';
 
 const Detail = () => {
   const params = useParams();
@@ -25,9 +27,6 @@ const Detail = () => {
         else {
           setPost(response.data.result);
         }
-      })
-      .catch((error) => {
-        Failure("게시글 조회 실패", "게시글 조회에 실패했습니다.")
       })
     };
     fetchPost();
@@ -57,6 +56,10 @@ const Detail = () => {
 
   const onClickEdit = () => {
     navigate(`/community/edit/${params.id}`)
+  }
+
+  const onClickList = () => {
+    navigate("/community")
   }
 
   const onClickDelete = () => {
@@ -95,24 +98,32 @@ const Detail = () => {
                 <img src="" alt="profile image"/>
                 <div>{post?.writer}</div>
               </div>
+              
               <MapDetail address={post?.post_address} detail={post?.post_address_detail}/>
 
             <div className="detail__post__image">
             {post?.image_address.map((el) => (
               <div key={uuid()}>
-              <img src={el} alt="post image"/>
+                <img src={el} alt="post image"/>
               </div>
             ))}
             </div>
             <pre>{post?.post_content}</pre>
-            <button onClick={onClickLike}>좋아요</button>
+            <button className="detail__post__like" onClick={onClickLike}>
+              <img src="/images/icon/full_heart.svg" alt="like"/>
+            </button>
             <div>{post?.like_count}</div>
           </div>
-          {myPost === "일치" &&
-            <>
-              <button onClick={onClickEdit}>수정</button>
-              <button onClick={onClickDelete}>삭제</button>
-            </>
+          {myPost === "일치" ?
+            <div className="detail__button">
+              <Button01 text={"수정"} onClick={onClickEdit} size={"s"}/>
+              <Button02 text={"목록"} size={"s"} onClick={onClickList}/>
+              <Button01 text={"삭제"} onClick={onClickDelete} size={"s"}/>
+            </div>
+            :
+            <div className="detail__button">
+            <Button02 text={"목록"} onClick={onClickList} size={"s"} />
+          </div>
           }
         </div>
       </div>
