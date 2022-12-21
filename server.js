@@ -730,13 +730,13 @@ app.post("/point/result", function(req, res){
 // control - userinfo 시작 ///////////////////////////////////////////////////////////////////////////
 
 // 내 정보 요청 API
-app.get('/mypage', (req, res) => { 
+app.get('/mypage', (req, res) => {
     db.collection('user_info').findOne({_id : req.user._id}, function(err, result) {
         const userResult = result;
         if (err) { res.json({message: "로그인 필요"}); }
         else{
             db.collection('post').find({like_user : req.user._id.toString()}).sort({'_id' : -1}).limit(3).toArray(function (err, result) {
-                const likeResult = result
+                const likeResult = result;
                 db.collection('post').find({user_id : req.user._id}).sort({'_id' : -1}).limit(3).toArray(function(err, result){
                     res.send({
                         message: "불러오기",
@@ -747,7 +747,7 @@ app.get('/mypage', (req, res) => {
                         posting_count: userResult.posting_count,
                         like_post: likeResult,
                         write_post : result
-                    })
+                    });
                 });
             });
         }
@@ -916,7 +916,9 @@ app.post('/image/upload', (req, res) => {
         // 파일명 X : 이미지 저장 디렉토리
         if (!part.filename) { res.send({location: ""}); }
         else {
+            console.log("filename :", part.filename)
             db.collection('post').findOne({_id: postID}, (err, result) => {
+                console.log(result)
                 if (result.image_address === null) {
                     res.send({location: ""});
                 }
@@ -1013,33 +1015,29 @@ const uploadToBucket = (key, Body) => {
 
 // header 로그인 인증
 app.post('/islogin', (req, res) => {
-    console.log("Client SID :", req.body.sessionID);
-    console.log("Server SID :", req.sessionID);
-
-    if (req.body.sessionID === req.sessionID) {
+    if (req.user) {
         res.send({
-            message: "로그인 성공", 
+            message: "로그인 성공",
             nickname: req.user.nickname,
             user_level: req.user.user_level,
         });
-    }        
-    else { res.json({message: "로그인 실패"}); }        
+    }
+    else { res.send({message: "로그인 실패"}); }
 })
 
 // 로그아웃 API
 app.post('/signout', (req, res) => {
     console.log("/signout req :", req.user.email);
-    req.session.destroy();
-    res.json({message: "로그아웃"});
-});
+    req.logout(() => {
+        req.session.destroy();
+        res.clearCookie('connect.sid').send({message: "로그아웃"});
+    });
+})
 
 // 로그인 API
 app.post('/signin', passport.authenticate('local', {}), (req, res) => {
-    console.log("session created :", req.session)
-    res.send({
-        message: "로그인 성공", 
-        sessionID: req.sessionID
-    })
+    console.log("signin req :", req.user.email);
+    res.send({message: "로그인 성공"});
 })
 
 passport.use(new localStrategy({
