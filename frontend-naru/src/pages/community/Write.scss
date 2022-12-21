@@ -1,5 +1,4 @@
 .write {
-  text-align: center;
   padding: 100px 0;
 
   &__form {
@@ -7,7 +6,6 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    padding-top: 50px;
   }
 
   &__input {
@@ -103,10 +101,10 @@
 
   &__button {
     display: flex;
-    padding-top: 20px;
+    padding-top: 40px;
 
     :first-child {
-      margin-right: 10px;
+      margin-right: 15px;
     }
   }
 }

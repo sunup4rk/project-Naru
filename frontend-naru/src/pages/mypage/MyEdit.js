@@ -70,7 +70,7 @@ const MyEdit = () => {
   return (
     <div>
       <form style={{display: "flex", flexDirection:"column"}} onSubmit={handleSubmit(onClickEdit)}>
-        <UploadProfile key={uuid()} onChangeImage={onChangeImages} image={image}/>
+        <UploadProfile onChangeImage={onChangeImages} image={image}/>
         이메일 <input type="text" defaultValue={user?.email} disabled/>
         닉네임<input type={"text"} defaultValue={user?.nickname} {...register("nickname")}/>
         <button>수정</button>
