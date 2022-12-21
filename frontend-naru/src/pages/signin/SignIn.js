@@ -37,15 +37,15 @@ const SignIn = () => {
     }
 
     return (
-        <div className="signin-container">
-            <form className="signin-wrapper --top" onSubmit={handleSubmit(onClickSignIn)}>
+        <div className="signin">
+            <form className="signin__wrapper --top" onSubmit={handleSubmit(onClickSignIn)}>
                 <img src="/images/icon/logo01.svg" alt="naru" />
                 <Input01 type={"text"} placeholder={"이메일"} size={"m"} register={register("email")} />
                 <Input01 type={"password"} placeholder={"비밀번호"} size={"m"} register={register("password")}/>
                 <Button01 text={"로그인"} size={"m"}/>
             </form>
 
-            <div className="signin-wrapper --bottom">
+            <div className="signin__wrapper --bottom">
                 <span>회원이 아니신가요?</span>
                 <Link to={"/signUp"}>
                     <Button01 text={"회원가입"} size={"m"}/>

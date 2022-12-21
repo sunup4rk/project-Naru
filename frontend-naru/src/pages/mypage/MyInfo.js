@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from '../../components/common/modal/Modal';
 import axios from 'axios';
+import './MyInfo.scss';
 
 const MyInfo = () => {
   const [user, setUser] = useState();
   const { Warning } = Modal();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
       axios.post("http://localhost:8080/islogin")
@@ -31,24 +32,43 @@ const MyInfo = () => {
   }
 
   return (
-    <div>
-      <img src={user?.profile} alt="profile"/> 
-      <div>닉네임</div>{user?.nickname}
-      <div>등급</div>{user?.user_level}
-      <div>포인트</div>{user?.user_point}
-      <div>게시글 수</div>{user?.posting_count}
-      <hr/>
-      <div>좋아요 한 게시글</div>
-      <div>이미지</div>
-      <div>제목</div>
-      <div>날짜</div>
-      <div>좋아요 수</div>
-      <hr/>
-      <div>내가 쓴 게시글</div>
-      <div>이미지</div>
-      <div>제목</div>
-      <div>날짜</div>
-      <div>좋아요 수</div>
+    <div className="myinfo">
+      <div className="myinfo__profile">
+        <img src={user?.profile} alt="profile"/> 
+        <span>{user?.nickname}</span>{" "}<span>님</span>
+      </div>
+
+      <div className="myinfo__info">
+        <ul>
+          <li>
+            <span>등급</span>
+            {user?.user_level}
+          </li>
+          <li>
+            <span>포인트</span>
+            {user?.user_point} P
+          </li>
+          <li>
+            <span>게시글 수</span>{user?.posting_count}
+          </li>
+        </ul>
+      </div>
+
+      <span>좋아요 한 게시글</span>
+      <div>
+        <div>이미지</div>
+        <div>제목</div>
+        <div>날짜</div>
+        <div>좋아요 수</div>
+      </div>
+
+      <span>내가 쓴 게시글</span>
+      <div>
+        <div>이미지</div>
+        <div>제목</div>
+        <div>날짜</div>
+        <div>좋아요 수</div>
+      </div>
     </div>
     
   );
