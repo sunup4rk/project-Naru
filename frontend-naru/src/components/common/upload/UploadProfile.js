@@ -28,7 +28,7 @@ const onChangeFile = (e) => {
     const formData = new FormData();
     formData.append("image", img, img.name);
 
-    axios.post("http://localhost:8080/mypage/profile", formData)
+    axios.post("http://localhost:8080/image/upload", formData)
     .then(res => {
         props.onChangeImage(res.data.location, props.index)
         // console.log(res.data.location, props.index)
@@ -38,8 +38,8 @@ const onChangeFile = (e) => {
     }
 
 const imageDelete = (e) => {
-    console.log(e.target.src)
-    axios.delete("http://localhost:8080/mypage/profile", {
+    console.log(typeof(e.target.src))
+    axios.delete("http://localhost:8080/image/delete", {
         params: {
         url: e.target.src     
         }
@@ -57,7 +57,7 @@ const imageDelete = (e) => {
     return(
         <>
         {props.image ?
-        (<Image src={props.profile} onClick={imageDelete} alt="upload image" />)
+        (<Image src={props.image} onClick={imageDelete} alt="upload image" />)
         :
         (<Image src={""} alt="profile image" />)
         }
