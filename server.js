@@ -152,7 +152,7 @@ async function CrawlMovie () {
                     title : name,
                     titleimg : titleimg,
                     time : crawlTime,
-                    }}, function(err, result    ){
+                    }}, function(err, result){
                 if(err){
                     console.log("크롤링 실패, 대상 웹페이지를 확인해보세요")
                 }   
@@ -360,7 +360,7 @@ app.get('/best', function(req, res) {
         'like_count' : { '$gt' : 0 } 
     }).sort({
         'like_count' : -1
-    }).limit(3).toArray(function(err, result){
+    }).limit(3).toArray(function(err, result) {
         if (err) {
             res.json({message : "전송 실패"})
         }
@@ -375,15 +375,15 @@ app.get('/best', function(req, res) {
 })
 
 // 좋아요 구현
-app.post("/community/detail/like/:id", function(req, res){
+app.post("/community/detail/like/:id", function(req, res) {
     console.log("접속자 : ", req.user._id)
-    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
+    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
         var chk = false
-        if (!req.isAuthenticated()){
+        if (!req.isAuthenticated()) {
             // req.isAuth() 가 true를 반환하면 비 로그인 상태
             res.json({message : "비회원"})
         }
-        else if(result.like_count == 0){
+        else if (result.like_count == 0) {
             db.collection('post').updateOne(
                 { _id: parseInt(req.params.id)},
                 { $inc : {like_count : 1} , $push: { like_user: req.user._id.toString()}},
@@ -398,14 +398,14 @@ app.post("/community/detail/like/:id", function(req, res){
                 like_count : result.like_count,
             }); 
         }
-        else{
+        else {
             for (var i = 0; i <= result.like_count; i++){
-                if(result.like_user[i] == req.user._id.toString()){
+                if (result.like_user[i] == req.user._id.toString()) {
                     chk = true
                     break
                 }
             }
-                if(!chk){
+                if (!chk) {
                     console.log('좋아요 완료')
                     db.collection('post').updateOne(
                         { _id: parseInt(req.params.id)},
@@ -420,7 +420,7 @@ app.post("/community/detail/like/:id", function(req, res){
                         like_count : result.like_count,
                     }); 
                 }
-                else{
+                else {
                     console.log('좋아요 취소')
                     db.collection('post').updateOne(
                         { _id: parseInt(req.params.id)},
@@ -439,7 +439,7 @@ app.post("/community/detail/like/:id", function(req, res){
         }
     )
 })
-app.get("/community/write/", function(req, res) {
+app.get("/community/write", function(req, res) {
     console.log(req.query.message)
     db.collection('post_count').findOne({name : 'postcnt'}, function(err, result) {
         const postId = Number(result.total_post) + 1
@@ -456,7 +456,7 @@ app.get("/community/write/", function(req, res) {
             image_address : [],
             post_time : moment().format('YYYY-MM-DD')
             },
-            function(err, result){
+            function(err, result) {
                 if (err) {
                     res.json({message : "다시 시도해주세요."})
                 }
@@ -469,11 +469,11 @@ app.get("/community/write/", function(req, res) {
         )
     })
 })
-app.post("/community/write/:id", function(req, res) {
+app.post("/community/write/", function(req, res) {
     db.collection('post').updateOne(
-        {_id: req.body.params},
+        {_id: req.body.postId},
         {$set: {
-            _id : req.params.id,
+            _id : req.body.postId,
             user_id : req.user._id,
             writer : req.user.nickname, 
             post_title : req.body.title, 
@@ -482,11 +482,10 @@ app.post("/community/write/:id", function(req, res) {
             like_user : [],
             post_address : req.body.address,
             post_address_detail : req.body.addressDetail,
-            // image_address : [],
             post_time : moment().format('YYYY-MM-DD')
         }}            
         ,
-        function(err, result){
+        function (err, result) {
             if (err) {
                 res.json({message : "등록 실패"})
             }
@@ -524,116 +523,92 @@ function UpdatePostCount() {
     )
 }
 
+// 게시글 상세 페이지 요청 API
 app.get('/community/detail/:id', function(req, res) {
+    console.log("/community/detail req :", req.params.id);
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
-        if (err) {
-            res.json({message : "글 전송 실패"});
-        }
-        else{
-            if (!req.isAuthenticated()){
-                console.log("전송, 비로그인");
-                res.status(200).send({
-                    message : "비로그인",
-                    result : result,
-                }); 
-            }
-            else if (result.user_id.toString() === req.user._id.toString()){
-                console.log("전송, 일치");
-                res.status(200).send({
-                    message : "일치",
-                    result : result,
-                });         
-            }
-            else{
-                console.log("전송, 불일치");
-                res.status(200).send({
-                    message : "불일치",
-                    result : result,
-                });  
-            }
-        }
-        
-        
-    })
-})
-
-// 글 수정 페이지
-// 시맨틱 url
-app.get("/community/edit/:id", function(req, res){
-    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
-        if (err) return err;
-        // if (!req.isAuthenticated()){
-        //     res.send('<script>alert("작성자만 수정할 수 있습니다. (로그인 필요)"); history.back();</script>')
-        // }
-        console.log("수정할 글 전송");
+        if (err) { res.json({message : "글 전송 실패"}); }
+        if (!req.isAuthenticated()) {
+            console.log("전송, 비로그인");
             res.status(200).send({
-                message : "전송",
+                message : "비로그인",
                 result : result,
             }); 
-        
+        }
+        else if (result.user_id.toString() === req.user._id.toString()) {
+            console.log("전송, 일치");
+            res.status(200).send({
+                message : "일치",
+                result : result,
+            });         
+        }
+        else {
+            console.log("전송, 불일치");
+            res.status(200).send({
+                message : "불일치",
+                result : result,
+            });  
+        }
     })
 })
 
+// 게시글 수정 데이터 요청 API
+app.get("/community/edit/:id", function(req, res) {
+    console.log("/community/edit get :", req.params.id);
+    db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
+        if (err) return err;
+        console.log("수정할 글 전송 완료", req.params.id);
+        res.status(200).send({
+            message : "전송",
+            result : result
+        });         
+    });
+})
+
+// 게시글 수정 API
 app.put('/community/edit/:id', function(req, res) {
+    console.log("/community/edit put :", req.params.id);
     db.collection('post').updateOne(
         {_id : parseInt(req.params.id)}, 
         {$set : {
             post_title : req.body.title, 
             post_content : req.body.content,
-            // image_address : {
-            //     key: req.user._id + "/" + postId + "/" + req.body.imageName,
-            //     url: process.env.IMAGE_SERVER + "/" + req.user._id + "/" + postId + "/" + req.body.imageName,                
-            // },
             post_address : req.body.address,
             post_address_detail : req.body.addressDetail,
-            }}, 
-        function(err, result){
-            if (err) {
-                res.json({message : "수정 실패"})
+        }}, 
+        function(err, result) {
+            if (err) { res.json({message : "수정 실패"}); }
+            else {
+                console.log("게시글 수정 완료 :", req.params.id);
+                res.status(200).send({message : "수정 성공"});
             }
-            else{
-                console.log("전송");
-                res.status(200).send({
-                    message : "수정 성공",
-                });
-            }
-    })
+        }
+    );
 })
 
-app.delete('/community/delete/:id', function(req, res){ 
+// 게시글 삭제 API
+app.delete('/community/delete/:id', function(req, res) {
+    console.log("/community/delete req :", req.params.id);
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
-        if (err) {
-            res.json({message : "삭제 실패"})
-        }
-        else if(result.user_id.toString() == req.user._id.toString()){
+        if (err) { res.json({message : "삭제 실패"}); }
+        if (result.user_id.toString() === req.user._id.toString()) {
+            // 게시글 삭제
             db.collection('post').deleteOne({_id : parseInt(req.params.id)}, function(err, result) {
-                db.collection('user_info').updateOne({_id : req.user._id}, {$inc : {user_point : -30, posting_count : -1}}, function(err, result) {
-                    res.json({message : "삭제 완료"})
-                })
-            })
-            // const objectParams_del = {
-            //     Bucket: BUCKET_NAME,
-            //     Key: result.post_address.key,
-            // };
-            // const s3 = new AWS.S3;
-            // s3
-            //     .deleteObject(objectParams_del)
-            //     .promise()
-            //     .then((data) => {
-            //         console.log('success : ', data);
-            //         res.send('<script>alert("삭제가 완료되었습니다."); location.href="/community";</script>')
-            //     })
-            //     .catch((error) => {
-            //         console.error(error);
-            //     });
-                
-            
+                // 포인트 -30, 게시글 수 -1
+                db.collection('user_info').updateOne(
+                    {_id : req.user._id}, 
+                    {$inc : {user_point : -30, posting_count : -1}}, 
+                    function(err, result) {
+                        console.log("게시글 삭제 완료 :", req.params.id);
+                        res.json({message : "삭제 완료"});
+                    }
+                );
+            });
+            // AWS 이미지 삭제
+            // ...
         }
-        else{
-            res.json({message : "삭제 실패"})
-        }
-       
-    })
+        else { res.json({message : "삭제 실패"}); }
+    });
 })
 
 // 포인트 페이지
@@ -651,22 +626,23 @@ function isPoint(req, res, next){
     }
 }
 
-app.post('/point', function(req,res){ 
-    if (!req.isAuthenticated()){
+app.post('/point', function(req,res) { 
+    if (!req.isAuthenticated()) {
         res.send('<script>alert("로그인해주세요"); location.href="/signin";</script>')
     }
-    else{
+    else {
         db.collection('user_info').updateOne(
             {id : req.user.id}, 
             {$set : {point : req.body.getpoint}}, 
-            function(err, result){
+            function(err, result) {
                 if (err) return err;
-                    console.log('process complete')
-                    res.redirect('/point');
-                })
+                console.log('process complete')
+                res.redirect('/point');
+            }
+        )
     }
-    
 })
+
 
 // control - userinfo 시작 ///////////////////////////////////////////////////////////////////////////
 
@@ -695,25 +671,26 @@ app.get('/mypage/edit', (req, res) => {
 // 회원정보 수정 API
 app.post('/mypage/edit', (req, res) => {
     // 닉네임 변경
-    db.collection('user_info').findOne({nickname : req.body.nickname}, function(err, result) {
+    db.collection('user_info').findOne({nickname : req.body.nickname}, (err, result) => {
         if (err) { return console.log(err); }
         if (result) { res.json({message: "사용중인 닉네임입니다."}); }
         else {
             db.collection('user_info').updateOne(
                 {_id : req.user._id},
                 {$set : {nickname : req.body.nickname}},
-                function(err, result) {
+                (err, result) => {
                     if (err) { return console.log(err); }
                     console.log("닉네임 변경 : ", req.user.nickname, " => ", req.body.nickname);
                     res.json({message: "수정 성공"});
-            });
+                }
+            );
         }
     });
 })
 
 // 비밀번호 재확인 API
 app.post('/mypage/editpw/check', (req, res) => {
-    db.collection('user_info').findOne({_id : req.user._id}, function(err, result) {
+    db.collection('user_info').findOne({_id : req.user._id}, (err, result) => {
         if (err) { return console.log(err); }
         if (result.password === req.body.password) { res.json({message: "비밀번호 일치"}); }
         else { res.json({message: "비밀번호가 일치하지 않습니다."}); }
@@ -724,7 +701,7 @@ app.put('/mypage/editpw/change', (req, res) => {
     db.collection('user_info').updateOne(
         {_id : req.user._id},
         {$set : {password : req.body.password}},
-        function(err, result) {
+        (err, result) => {
             if (err) { return console.log(err); }
             console.log("변경내역 : ", req.user.password, " => ", req.body.password);
             res.json({message: "비밀번호가 변경되었습니다."});
@@ -738,39 +715,35 @@ app.put('/mypage/editpw/change', (req, res) => {
 
 // 프로필 이미지 업로드 API
 app.post('/mypage/profile', (req, res) => {
-    console.log("request received :", req.user._id);
+    console.log("upload profile req :", req.user._id);
     const form = new multiparty.Form();
-    const USER_ID = req.user._id;
-    const IMAGE_DIR = USER_ID + "/profile/";
-    let filename;
+    const userID = req.user._id;
+    const imageDir = "profile/" + userID + "/";
     
     // err 처리
-    form.on('error', function(err) { res.status(500).end(); });
+    form.on('error', err => { res.status(500).end(); });
     
     // form 데이터 처리
-    form.on('part', async function(part) {
-        filename = part.filename;
+    form.on('part', async part => {
+        const profilePath = process.env.IMAGE_SERVER + "/" + imageDir + part.filename;
         // 이미지 저장 디렉토리
         if (!part.filename) { return part.resume(); }
-        else {
-            streamToBufferUpload(part, filename, IMAGE_DIR);
-            db.collection('user_info').updateOne(
-                {_id : req.user._id}, 
-                {$set : {profile_image_path: process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename}},
-                function(err, result) {
-                    if (err) { return console.log(err); }
-                    else { console.log(process.env.IMAGE_SERVER + "/" + IMAGE_DIR + part.filename); } 
-                }
-            );
-        }
+        streamToBufferUpload(part, filename, imageDir);
+        db.collection('user_info').updateOne(
+            {_id : req.user._id}, 
+            {$set : {profile_image_path: profilePath}},
+            (err, result) => {
+                if (err) { return console.log(err); }
+                else { 
+                    console.log("profile_path :", profilePath); 
+                    res.send({location: profilePath});
+                } 
+            }
+        );
     });
 
     // form 종료
-    form.on('close', function() {
-        res.send({
-            location: process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename,
-            filename: filename
-        });
+    form.on('close', () => {        
     });
 
     form.parse(req);
@@ -778,7 +751,7 @@ app.post('/mypage/profile', (req, res) => {
 
 // 프로필 이미지 삭제 API
 app.delete('/mypage/profile', (req, res) => {
-    console.log("query :", (req.query.url).substr(52)) 
+    console.log("delete profile req :", (req.query.url).substr(52)) 
     const objectParams_del = {
         Bucket: BUCKET_NAME,
         Key: (req.query.url).substr(52),
@@ -796,8 +769,8 @@ app.delete('/mypage/profile', (req, res) => {
 
     db.collection('user_info').updateOne(
         {_id : req.user._id}, 
-        {$set : {profile_image_path: "https://bucket-sunu.s3.ap-northeast-2.amazonaws.com/src/profile/ine.jpg"}}, 
-        function(err, result) {
+        {$set : {profile_image_path: process.env.IMAGE_SERVER + "/src/profile/ine.jpg"}}, 
+        (err, result) => {
             if (err) { return console.log(err); }
             else { console.log(process.env.IMAGE_SERVER + "/" + (req.query.url).substr(52)) } 
         }
@@ -806,84 +779,98 @@ app.delete('/mypage/profile', (req, res) => {
 
 // 게시글 이미지 업로드 API
 app.post('/image/upload', (req, res) => {
-    console.log("request received :", req.user._id);
-    console.log("POST_ID :", req.body.postId);
+    console.log("/image/upload req :", req.user._id);
     const form = new multiparty.Form();
-    const USER_ID = req.user._id;
-    const POST_ID = "";
-    const IMAGE_DIR = USER_ID + "/" + POST_ID + "/";
-    let filename;
+    const userID = req.user._id;
     
     // err 처리
-    form.on('error', function(err) { res.status(500).end(); })
+    form.on('error', (err) => { res.status(500).end(); })
     
     // form 데이터 처리
-    form.on('part', async function(part) {
-        filename = part.filename;
-        // 이미지 저장 디렉토리
-        if (!part.filename) { return part.resume(); }
+    form.on('part', async (part) => {
+        const imageAddress = process.env.IMAGE_SERVER + "/" + userID + "/" + part.filename;
+        const postID = Number(part.filename.split('/')[0]);
+        // 파일명 X : 이미지 저장 디렉토리
+        if (!part.filename) { res.send({location: ""}); }
         else {
-            streamToBufferUpload(part, filename, IMAGE_DIR);
-            db.collection('post').updateOne(
-                {_id : POST_ID}, 
-                {$push : {image_address : process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename}}, 
-                function(err, result) {
-                    if (err) { return console.log(err); }
-                    else { console.log(process.env.IMAGE_SERVER + "/" + IMAGE_DIR + part.filename); } 
-                }
-            );
+            db.collection('post').findOne({_id: postID}, (err, result) => {
+                // 파일명 O, 배열에 O
+                if (result.image_address.indexOf(imageAddress) !== -1) {
+                    res.send({location: ""}); }
+                // 파일명 O, 배열에 X
+                else {
+                    streamToBufferUpload(part, userID + "/" + part.filename);
+                    db.collection('post').updateOne(
+                        {_id : postID}, 
+                        {$push : {image_address : imageAddress}}, 
+                        (err, result) => {
+                            console.log("modified :", result.modifiedCount); 
+                            res.send({location: imageAddress});
+                        }
+                    );
+                }                
+            })
         }
     });
 
     // form 종료
-    form.on('close', function() {
-        res.send({
-            location: process.env.IMAGE_SERVER + "/" + IMAGE_DIR + filename,
-            filename: filename
-        });
+    form.on('close', () => {
     });
 
     form.parse(req);
 });
 
 // 게시글 이미지 삭제 API
-app.delete('/image/delete/:id', (req, res) => {
-    console.log("query :", (req.query.url).substr(52))
+app.delete('/image/delete', (req, res) => {
+    const postID = Number(req.query.url.split('/')[4]);
+    console.log("/image/delete req :", postID);
     
+    // AWS 이미지 삭제
     const objectParams_del = {
         Bucket: BUCKET_NAME,
         Key: (req.query.url).substr(52),
     };
-
+    
     s3
         .deleteObject(objectParams_del)
         .promise()
         .then((data) => {
-            res.json({message: "삭제 성공"});
         })
         .catch((error) => {
             console.error(error);
         });
 
-    db.collection('post').findOne({_id: req.params.id}, function(err, result) {
-        console.log(result);
+    // 이미지 주소 삭제
+    db.collection('post').findOne({_id: postID}, (err, result) => {
+        console.log("result.image_address :", result.image_address);
+        // 이미지 주소 X
+        if (!result) { res.send({message: "삭제 성공"}); }
+        // 이미지 주소 O
+        else {
+            const urlIndex = Number(result.image_address.indexOf(req.query.url));
+            db.collection('post').updateOne(
+                {_id: postID},
+                {$set: {image_address: result.image_address.splice(urlIndex, 1)}},
+                (err, result) => { res.send({message: "삭제 성공"}); }
+            );
+        }
     });
 })
 
-function streamToBufferUpload(part, filename, ADR) {
+const streamToBufferUpload = (part, key) => {
     const chunks = [];
     return new Promise((resolve, reject) => {
         part.on('data',   (chunk) => chunks.push(Buffer.from(chunk)));
         part.on('error',  ( err ) => reject(err));
         part.on('end',    (     ) => resolve(Buffer.concat(chunks)));
-        uploadToBucket(ADR + filename, part);
+        uploadToBucket(key, part);
     });
 }
 
-function uploadToBucket(filename, Body) {
+const uploadToBucket = (key, Body) => {
     const params = { 
         Bucket:BUCKET_NAME, 
-        Key:filename, 
+        Key:key, 
         Body, 
         ContentType: 'image' 
     }
@@ -913,7 +900,7 @@ app.post('/islogin', (req, res) => {
 
 // 로그아웃 API
 app.post('/signout', (req, res) => {
-    console.log("/signout :", req.user.email);
+    console.log("/signout req :", req.user.email);
     req.session.destroy();
     res.json({message: "로그아웃"});
 });
@@ -933,9 +920,9 @@ passport.use(new localStrategy({
         session: true,
         passReqToCallback: false,
     }, 
-    function(inputemail, inputpw, done) {
+    (inputemail, inputpw, done) => {
         console.log("signin : " + inputemail);
-        db.collection('user_info').findOne({email: inputemail}, function(err, user) {
+        db.collection('user_info').findOne({email: inputemail}, (err, user) => {
             if (err) { return done(err); }
             if (!user) { return done(null, false, console.log({message: "존재하지 않는 아이디입니다."})); }
             if (user.password === inputpw) { return done(null, user); }
@@ -951,7 +938,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((usermail, done) => {
     console.log("deserialize :", usermail);
-    db.collection("user_info").findOne({email: usermail}, function(err, user) {
+    db.collection("user_info").findOne({email: usermail}, (err, user) => {
         if (err) { return next(err); }
         done(null, user);
     });
@@ -964,7 +951,7 @@ app.post('/signup/mail', (req, res) => {
     if (!req.body.email) { res.json({ message: "올바른 이메일이 아닙니다." }) }
     if (req.body.email) {
         // 이메일 중복 검사
-        db.collection('user_info').findOne({ email : req.body.email }, function(err, result) {
+        db.collection('user_info').findOne({ email : req.body.email }, (err, result) => {
             if (err) { return console.log(err); }
             if (result !== null) {
                 // Case 1.
@@ -972,7 +959,7 @@ app.post('/signup/mail', (req, res) => {
                 res.json({ message: "사용중인 이메일입니다." });
             } 
             if (result === null) {
-                db.collection("auth_request").findOne({ email: req.body.email }, function(err, result) {
+                db.collection("auth_request").findOne({ email: req.body.email }, (err, result) => {
                     if (err) { return console.log(err); }
                     // Case 2.
                     if (result !== null) {
@@ -991,13 +978,13 @@ app.post('/signup/mail', (req, res) => {
     }
 })
 
-function SendAuthMail(address) {
+const SendAuthMail = (address) => {
     let authNum = Number(Math.random().toString().substr(2,6));
     let emailtemplate;
 
-    ejs.renderFile(appDir, {authCode : authNum}, function(err, data) {
-        if (err) console.log(err);
-        else emailtemplate = data;
+    ejs.renderFile(appDir, {authCode : authNum}, (err, data) => {
+        if (err) { return console.log(err); }
+        emailtemplate = data;
     });
 
     let transporter = nodemailer.createTransport({
@@ -1015,12 +1002,12 @@ function SendAuthMail(address) {
         from: `나루`,
         to: address,
         subject: '회원가입을 위한 인증번호를 입력해주세요.',
-        html: emailtemplate,
+        html: emailtemplate
     };
 
-    transporter.sendMail(mailOptions, function(err, info) {
-        if (err) { console.log(err); } 
-        else { console.log("Mail sent. " + info.response); } 
+    transporter.sendMail(mailOptions, (err, info) => {
+        if (err) { return console.log(err); } 
+        console.log("Mail sent. " + info.response);
         transporter.close();
     });
 
@@ -1028,7 +1015,7 @@ function SendAuthMail(address) {
         email      : address,
         auth_number: authNum,
     }, 
-    function(err, result) {
+    (err, result) => {
         if (err) { return console.log(err); }
         return true;
     });
@@ -1038,11 +1025,11 @@ function SendAuthMail(address) {
 const ejs = require('ejs');
 const nodemailer = require('nodemailer');
 const path = require('path');
-let appDir = path.dirname(require.main.filename) + '/templates/authMail.ejs';
+const appDir = path.dirname(require.main.filename) + '/templates/authMail.ejs';
 
 // 인증번호 확인 API
 app.post('/signup/auth', (req, res) => {
-    console.log("authnum request received");
+    console.log("/signup/auth check req :", req.body.email);
 
     db.collection("auth_request").findOne({email: req.body.email},
         function(err, result) {
@@ -1060,10 +1047,10 @@ app.post('/signup/auth', (req, res) => {
 
 // 회원가입 요청 API
 app.post('/signup', (req, res) => {
-    console.log("/signup request received");
+    console.log("/signup req :", req.body.email);
 
     // nickname 중복검사
-    db.collection('user_info').findOne({nickname : req.body.nickname}, function(err, result) {
+    db.collection('user_info').findOne({nickname : req.body.nickname}, (err, result) => {
         if (err) { return console.log(err); } 
         if (result !== null) { res.json({message: "이미 사용중인 닉네임입니다."}); } 
         if (result === null) {
@@ -1078,11 +1065,8 @@ app.post('/signup', (req, res) => {
                 user_level          : 1,
                 daily_point         : 0,
             }, 
-            function(err, result) {
-                if (err) {
-                    console.log("/signup error", err);
-                    res.json({message: "가입오류"});
-                }
+            (err, result) => {
+                if (err) { res.json({message: "가입오류"}); }
                 // 가입완료 후 해당 회원의 인증요청 삭제
                 db.collection("auth_request").deleteOne({email: req.body.email});
                 console.log("/signup 신규회원 : ", req.body.email);
