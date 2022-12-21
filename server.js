@@ -443,6 +443,7 @@ app.get("/community/write", function(req, res) {
     // console.log(req.query.message)
     db.collection('post_count').findOne({name : 'postcnt'}, function(err, result) {
         let postId = Number(result.total_post) + 1
+        UpdatePostCount();
         console.log("postid :", postId)
         db.collection('post').insertOne({
             _id : postId,
@@ -464,7 +465,6 @@ app.get("/community/write", function(req, res) {
                 }
                 else {
                     console.log("post_id :", postId, " 발급");
-                    UpdatePostCount();
                     res.json({postId : postId});         
                 }
             }
@@ -472,6 +472,7 @@ app.get("/community/write", function(req, res) {
     })
 })
 app.post("/community/write/", function(req, res) {
+    console.log(req.body.postId)
     db.collection('post').updateOne(
         {_id: req.body.postId},
         {$set: {
@@ -734,13 +735,14 @@ app.post('/mypage/profile', (req, res) => {
     const form = new multiparty.Form();
     const userID = req.user._id;
     const imageDir = "profile/" + userID + "/";
-    
+    let profilePath;
+
     // err 처리
     form.on('error', err => { res.status(500).end(); });
     
     // form 데이터 처리
     form.on('part', async part => {
-        const profilePath = process.env.IMAGE_SERVER + "/" + imageDir + part.filename;
+        profilePath = process.env.IMAGE_SERVER + "/" + imageDir + part.filename;
         // 이미지 저장 디렉토리
         if (!part.filename) { return part.resume(); }
         streamToBufferUpload(part, filename, imageDir);
@@ -749,16 +751,14 @@ app.post('/mypage/profile', (req, res) => {
             {$set : {profile_image_path: profilePath}},
             (err, result) => {
                 if (err) { return console.log(err); }
-                else { 
-                    console.log("profile_path :", profilePath); 
-                    res.send({location: profilePath});
-                } 
+                else { console.log("profile_path :", profilePath); } 
             }
         );
     });
-
-    // form 종료
+        
+        // form 종료
     form.on('close', () => {        
+        setTimeout(() => { res.send({location: imageAddress}) }, 1000)
     });
 
     form.parse(req);
@@ -797,13 +797,14 @@ app.post('/image/upload', (req, res) => {
     console.log("/image/upload req :", req.user._id);
     const form = new multiparty.Form();
     const userID = req.user._id;
-    
+    let imageAddress;
+
     // err 처리
     form.on('error', (err) => { res.status(500).end(); })
     
     // form 데이터 처리
     form.on('part', async (part) => {
-        const imageAddress = process.env.IMAGE_SERVER + "/" + userID + "/" + part.filename;
+        imageAddress = process.env.IMAGE_SERVER + "/" + userID + "/" + part.filename;
         const postID = Number(part.filename.split('/')[0]);
         // 파일명 X : 이미지 저장 디렉토리
         if (!part.filename) { res.send({location: ""}); }
@@ -823,7 +824,6 @@ app.post('/image/upload', (req, res) => {
                         {$push : {image_address : imageAddress}}, 
                         (err, result) => {
                             console.log("modified :", result.modifiedCount); 
-                            res.send({location: imageAddress});
                         }
                     );
                 }            
@@ -833,9 +833,12 @@ app.post('/image/upload', (req, res) => {
 
     // form 종료
     form.on('close', () => {
+        setTimeout(() => { res.send({location: imageAddress}) }, 1000);
     });
 
     form.parse(req);
+
+    
 });
 
 // 게시글 이미지 삭제 API
@@ -893,7 +896,7 @@ const uploadToBucket = (key, Body) => {
         ContentType: 'image' 
     }
     const upload = new AWS.S3.ManagedUpload({ params });
-    return upload.promise();
+    upload.promise();   
 }
 
 // control - image 끝 ///////////////////////////////////////////////////////////////////////////////
