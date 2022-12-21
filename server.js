@@ -852,7 +852,8 @@ app.post('/mypage/profile', (req, res) => {
         profilePath = process.env.IMAGE_SERVER + "/" + imageDir + part.filename;
         // 이미지 저장 디렉토리
         if (!part.filename) { return part.resume(); }
-        streamToBufferUpload(part, filename, imageDir);
+        streamToBufferUpload(part, imageDir + part.filename);
+        console.log("경로 :", imageDir + part.filename)
         db.collection('user_info').updateOne(
             {_id : req.user._id}, 
             {$set : {profile_image_path: profilePath}},
@@ -865,7 +866,7 @@ app.post('/mypage/profile', (req, res) => {
         
         // form 종료
     form.on('close', () => {        
-        setTimeout(() => { res.send({location: imageAddress}) }, 1000)
+        setTimeout(() => { res.send({location: profilePath}) }, 1000)
     });
 
     form.parse(req);
@@ -873,7 +874,7 @@ app.post('/mypage/profile', (req, res) => {
 
 // 프로필 이미지 삭제 API
 app.delete('/mypage/profile', (req, res) => {
-    console.log("delete profile req :", (req.query.url).substr(52)) 
+    console.log("delete profile req :", (req.query))
     const objectParams_del = {
         Bucket: BUCKET_NAME,
         Key: (req.query.url).substr(52),
@@ -883,7 +884,10 @@ app.delete('/mypage/profile', (req, res) => {
         .deleteObject(objectParams_del)
         .promise()
         .then((data) => {
-            res.json({message: "삭제 성공"});
+            res.send({
+                message: "삭제 성공",
+                profile: ""
+            });
         })
         .catch((error) => {
             console.error(error);
@@ -918,13 +922,15 @@ app.post('/image/upload', (req, res) => {
         else {
             console.log("filename :", part.filename)
             db.collection('post').findOne({_id: postID}, (err, result) => {
+                console.log("postid :", postID)
                 console.log(result)
-                if (result.image_address === null) {
+                if (result === null) {
                     res.send({location: ""});
                 }
                 // 파일명 O, 배열에 O
-                if (result.image_address.indexOf(imageAddress) !== -1 && result.image_address.indexOf(imageAddress) !== null) {
-                    res.send({location: ""}); }
+                if (result.image_address.indexOf(imageAddress) !== -1) {
+                    res.send({location: ""}); 
+                }
                 // 파일명 O, 배열에 X
                 else {
                     streamToBufferUpload(part, userID + "/" + part.filename);
@@ -972,7 +978,6 @@ app.delete('/image/delete', (req, res) => {
 
     // 이미지 주소 삭제
     db.collection('post').findOne({_id: postID}, (err, result) => {
-        console.log("result.image_address :", result.image_address);
         // 이미지 주소 X
         if (!result) { res.send({message: "삭제 성공"}); }
         // 이미지 주소 O
