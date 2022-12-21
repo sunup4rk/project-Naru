@@ -439,7 +439,7 @@ app.post("/community/detail/like/:id", function(req, res) {
     )
 })
 app.get("/community/write", function(req, res) {
-    // console.log(req.query.message)
+    console.log("req.query.message")
     db.collection('post_count').findOne({name : 'postcnt'}, function(err, result) {
         let postId = Number(result.total_post) + 1
         console.log("postid :", postId)
@@ -568,23 +568,46 @@ app.get("/community/edit/:id", function(req, res) {
 
 // 게시글 수정 API
 app.put('/community/edit/:id', function(req, res) {
+
+    var titlechk = true
+    var addresschk = true
+    var addressDetailchk = true
+    var contentchk = true
+
+    if (req.body.title == ""){
+        titlechk = false
+    }
+    if (req.body.address == ""){
+        addresschk = false
+    }
+    if (req.body.addressDetail == ""){
+        addressDetailchk = false
+    }
+    if (req.body.content == ""){
+        contentchk = false
+    }
+
+    console.log(titlechk)
     console.log("/community/edit put :", req.params.id);
-    db.collection('post').updateOne(
-        {_id : parseInt(req.params.id)}, 
-        {$set : {
-            post_title : req.body.title, 
-            post_content : req.body.content,
-            post_address : req.body.address,
-            post_address_detail : req.body.addressDetail,
-        }}, 
-        function(err, result) {
-            if (err) { res.json({message : "수정 실패"}); }
-            else {
-                console.log("게시글 수정 완료 :", req.params.id);
-                res.status(200).send({message : "수정 성공"});
+    db.collection('post').findOne({_id : parseInt(req.params.id)},function(err, result){
+        db.collection('post').updateOne(
+            {_id : parseInt(req.params.id)}, 
+            {$set : {
+                post_title : titlechk ? req.body.title : result.post_title, 
+                post_content : contentchk? req.body.content : result.post_content,
+                post_address : addresschk? req.body.address : result.post_address,
+                post_address_detail : addressDetailchk? req.body.addressDetail : result.post_address_detail,
+            }}, 
+            function(err, result) {
+                if (err) { res.json({message : "수정 실패"}); }
+                else {
+                    console.log("게시글 수정 완료 :", req.params.id);
+                    res.status(200).send({message : "수정 성공"});
+                }
             }
-        }
-    );
+        );
+    })
+    
 })
 
 // 게시글 삭제 API

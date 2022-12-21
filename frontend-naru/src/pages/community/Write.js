@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Pane, Dialog } from 'evergreen-ui';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Pane, Dialog } from 'evergreen-ui';
 import { Modal } from './../../components/common/modal/Modal';
 import Upload01 from '../../components/common/upload/Upload01';
 import MapPost from '../../components/common/map/MapPost';
@@ -33,6 +32,7 @@ const Write = (props) => {
       axios.get("http://localhost:8080/community/write")
       .then((response) => {
         if(response.data) {
+          console.log(response.data.postId)
           setPostId(response.data.postId)
         }
       })
@@ -68,7 +68,8 @@ const Write = (props) => {
         title: data.title,
         address: data.address,
         addressDetail: data.addressDetail,
-        content: data.content
+        content: data.content,
+        postId : postId
       })
       .then((response) => {
           if(response.data.message === "등록 성공") {
@@ -81,29 +82,6 @@ const Write = (props) => {
         Failure("등록 실패", "등록에 실패했습니다.")
       })
     }
-  }
-
-  const onClickEdit = (data) => {
-    if(!data.title && !data.address && !data.addressDetail && !data.content) {
-      Warning("수정 실패", "수정된 내용이 없습니다.")
-      return;
-    }
-      axios.put(`http://localhost:8080/community/edit/${params.id}`, {
-        title: data.title,
-        address: data.address,
-        addressDetail: data.addressDetail,
-        content: data.content
-      })
-      .then((response) => {
-          if(response.data.message === "수정 성공") {
-            Success("수정 완료", "게시글이 수정되었습니다.")
-            navigate(`/community/detail/${params.id}`)
-          } else {
-              Warning("수정 실패", response.data.message);
-          }
-      }).catch((error) => {
-          Failure("수정 실패", "게시글 수정에 실패했습니다.")
-      })
   }
 
   const onClickCancel = () => {
@@ -124,37 +102,6 @@ const Write = (props) => {
     </Pane>  
 
     <div className="write">
-      {props.isEdit ?
-      <form className="write__form" onSubmit={handleSubmit(onClickEdit)}>
-      <div className="write__input">
-        <input className="write__input__title" type="text" {...register("title")} placeholder="제목을 입력하세요." defaultValue={props.editPost?.post_title} />
-
-        <div className="write__input__location">
-          <MapPost address={props.editPost?.post_address}/>
-          <div className="write__input__location__address">
-            <button type="button" onClick={onClickAddressSearch}>주소 찾기</button>
-            <input className="write__input__location__address " type="text" {...register("address")} placeholder="주소를 입력하세요." defaultValue={props.editPost?.post_address} readOnly/>
-            <input className="write__input__location__address" type="text" {...register("addressDetail")} placeholder="상세주소를 입력하세요." defaultValue={props.editPost?.post_address_detail}/>
-          </div>
-        </div>
-
-        <div className="write__input__image">
-        {images.map((el, index) => (
-          <Upload01 key={uuid()} onChangeImages={onChangeImages} index={index} images={el}/>
-        ))}
-        </div>
-
-        <textarea cols="50" rows="10" {...register("content")} placeholder="내용을 입력하세요." defaultValue={props.editPost?.post_content}/>
-      </div>
-      <div className="write__button">
-        <Button01 type={"submit"} text={"수정"} size={"s"}/>
-        <Button02 type={"button"} text={"취소"} size={"s"} onClick={onClickCancel}/>
-      </div>
-    </form>
-
-
-      :
-
       <form className="write__form" onSubmit={handleSubmit(onClickSubmit)}>
         <div className="write__input">
           <input className="write__input__title" type="text" {...register("title")} placeholder="제목을 입력하세요." />
@@ -181,7 +128,6 @@ const Write = (props) => {
           <Button02 type={"button"} text={"취소"} size={"s"} onClick={onClickCancel}/>
         </div>
       </form>
-      }
     </div>
     </>
   );
