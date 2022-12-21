@@ -1,0 +1,55 @@
+.myinfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 70%;
+
+  &__profile {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+
+    img {
+      width: 6.25rem;
+      border-radius: 50%;
+      margin-right: 20px;
+    }
+    span:nth-of-type(1) {
+      font-family: SUIT-Bold;
+      padding-right: 10px;
+    }
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+
+    padding: 20px;
+    margin: 50px 0;
+    box-shadow: 3px 3px 4px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    width: 80%;
+    height: 6rem;
+
+    ul {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      :not(:last-child) {
+        border-right: 1px solid #d9d9d9;
+      }
+    }
+
+    li {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 20px;
+      width: 9rem;
+      
+      span {
+        font-size: 1.2rem;
+      }
+    }
+  }
+}

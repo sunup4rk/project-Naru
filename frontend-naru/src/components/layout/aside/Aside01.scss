@@ -4,19 +4,18 @@
   width: 100%;
   max-width: 200px;
   padding-top: 50px;
-  
 
-  .aside01__menu {
+  .__menu {
     font-size: 24px;
     padding-top: 40px;
   }
 
-  .aside01__item {
+  .__item {
     color: #d9d9d9;
-  }
 
-  .aside01__item--active {
-    color: #000000;
+    .--active {
+      color: #000000;
+    }
   }
 }
 

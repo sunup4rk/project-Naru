@@ -15,17 +15,17 @@ const Aside02 = () => {
   ]
 
   return (
-      <div className="aside02">
-            <ul className="aside02__list">
-            {category.map((menu) => (
-                <li key={menu.page} className="aside02__menu" >
-                    <Link to={menu.page} className={path === menu.page ? "aside02__item--active" : "aside02__item"}>
-                      {menu.name}
-                    </Link>
-                </li>
-            ))}
-            </ul>
-        </div>
+    <div className="aside02">
+      <ul className="aside02__list">
+      {category.map((menu) => (
+        <li key={menu.page} className="aside02__menu" >
+          <Link to={menu.page} className={path === menu.page ? "aside02__item--active" : "aside02__item"}>
+            {menu.name}
+          </Link>
+        </li>
+      ))}
+      </ul>
+    </div>
   );
 };
 
