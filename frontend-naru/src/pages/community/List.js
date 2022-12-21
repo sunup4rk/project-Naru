@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { useCookies } from 'react-cookie';
 import { useEffect, useState } from 'react';
 import Bestpost from '../../components/common/bestpost/BestPost';
 import Button01 from './../../components/common/button/Button01';
@@ -8,7 +7,6 @@ import Swal from 'sweetalert2'
 import './List.scss';
 
 const List = () => {
-  const [cookie, ] = useCookies();
   const navigate = useNavigate();
   const [post, setPost] = useState([])
   
@@ -27,14 +25,11 @@ const List = () => {
 
   const deletePost = () => {
     axios.delete("http://localhost:8080/community")
-    .then((response) => {
-    })
+    .then((response) => {})
   }
 
   const onClickWrite = () => {
-    axios.post("http://localhost:8080/islogin", {
-        sessionID : cookie.sessionID
-    })
+    axios.post("http://localhost:8080/islogin")
     .then((response) => {
         if(response.data.message === "로그인 성공") {
           navigate("/community/write")
@@ -55,7 +50,6 @@ const List = () => {
   const onClickMoveDetail = () => (e) => {
     navigate(`/community/detail/${e.target.id}`)
   }
-
   return (
     <>
     <Bestpost />
@@ -67,13 +61,14 @@ const List = () => {
             <div className="list__post" key={el._id}>
               <div className="list__post__img" id={el._id} onClick={onClickMoveDetail(el)}>
                 {el?.image_address[0] ?
-                <img id={el._id} src={el?.image_address[0]} alt="post image" />
+                <img className="list__post__img--post" id={el._id} src={el?.image_address[0]} alt="post image" />
                 :
-                <img id={el._id} className='list__post__img--default' src="/images/icon/logo02.svg" alt="post image" />
+                <img className="list__post__img--default" id={el._id} src="/images/icon/logo02.svg" alt="post image" />
                 }
               </div>
               <div className="list__post__content">
                 <h2 id={el._id} onClick={onClickMoveDetail(el)}>{el?.post_title}</h2>
+                <span className="list__post__content__top">{el.writer}</span>
                 <div className="list__post__content__bottom">
                   <span>{el?.post_time}</span>
                     <div>

@@ -31,13 +31,14 @@ const BestPost = () => {
                 <div className="best__post" key={el._id}>
                     <div className="best__post__img" id={el._id} onClick={onClickMoveDetail(el)}>
                         {el?.image_address[0] ?
-                        <img id={el._id} src={el?.image_address[0]} alt="post image" />
+                        <img className="best__post__img--post" id={el._id} src={el?.image_address[0]} alt="post image" />
                         :
-                        <img id={el._id} className='best__post__img--default' src="/images/icon/logo02.svg" alt="post image" />
+                        <img className="best__post__img--default" id={el._id} src="/images/icon/logo02.svg" alt="post image" />
                         }
                     </div>
                     <div className="best__post__content">
                         <h2 id={el._id} onClick={onClickMoveDetail(el)}>{el?.post_title}</h2>
+                        <span className="best__post__content__top">{el.writer}</span>
                         <div className="best__post__content__bottom">
                             <span>{el?.post_time}</span>
                             <div>

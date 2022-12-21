@@ -1,19 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Modal } from '../../components/common/modal/Modal';
-import Swal from 'sweetalert2'
-import axios from 'axios';
-import './Detail.scss';
 import MapDetail from '../../components/common/map/MapDetail';
-import uuid from 'react-uuid';
 import Button01 from '../../components/common/button/Button01';
 import Button02 from '../../components/common/button/Button02';
+import Swal from 'sweetalert2'
+import axios from 'axios';
+import uuid from 'react-uuid';
+import './Detail.scss';
 
 const Detail = () => {
   const params = useParams();
   const navigate = useNavigate();
-  const [post, setPost] = useState();
-  const [myPost, setMyPost] = useState("불일치");
+  const [ post, setPost ] = useState();
+  const [ like, setLike ] = useState(false);
+  const [ myPost, setMyPost ] = useState("불일치");
   const { Success, Warning, Failure } = Modal();
 
   useEffect(() => {
@@ -30,19 +31,13 @@ const Detail = () => {
       })
     };
     fetchPost();
-  }, [])
+  }, [like])
 
   const onClickLike = () => {
     axios.post(`http://localhost:8080/community/detail/like/${params.id}`)
     .then((response) => {
         if(response.data.message === "좋아요") {
-          console.log('처리성공')
-          
-          // ========================= 여기 =========================== //
-
-          // setPost( ...post, {like_count : response.data.like_count})
-
-          // ========================= 여기 ========================== //
+          setLike( prev => !prev )
           }
         else {
           Warning("오류", "회원만 가능합니다.")

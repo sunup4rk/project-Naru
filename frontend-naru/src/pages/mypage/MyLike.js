@@ -1,20 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Modal } from '../../components/common/modal/Modal';
-import { useCookies } from 'react-cookie';
-
+import axios from 'axios';
 
 const MyLike = () => {
   const [user, setUser] = useState();
-  const [cookie, ] = useCookies();
   const { Warning } = Modal();
   const navigate = useNavigate()
 
   useEffect(() => {
-    axios.post("http://localhost:8080/islogin", {
-      sessionID : cookie.sessionID
-    })
+    axios.post("http://localhost:8080/islogin")
     .then((response) => {
       if(response.data.message === "로그인 성공") {
         userData();

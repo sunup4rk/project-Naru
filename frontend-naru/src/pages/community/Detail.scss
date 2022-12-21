@@ -19,6 +19,7 @@
     box-shadow: 3px 3px 4px 0 rgba(0, 0, 0, 0.2);
 
     h1 {
+        text-align: center;
         word-wrap: break-word;
         width: 90%;
     }
@@ -42,11 +43,14 @@
 
     &__image {
       display: flex;
-      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      width: 90%;
 
       img {
-        width: 100px;
-        height: 100px;
+        width: 12rem;
+        height: 12rem;
+        margin: 10px;
       }
     }
 
