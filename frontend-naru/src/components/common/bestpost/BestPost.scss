@@ -26,9 +26,14 @@
       justify-content: center;
       align-items: center;
       background-color: #fafafa;
-      height: 14rem;
+      height: 15rem;
       cursor: pointer;
-    
+
+      &--post {
+        max-width: 20rem;
+        max-height: 15rem;
+      }
+
       &--default {
         width: 6rem;
       }
@@ -38,18 +43,23 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 6.5rem;
       padding: 1rem;
+      height: 8rem;
     
       h2 {
         display: -webkit-box; 
         -webkit-box-orient: vertical; 
-        -webkit-line-clamp: 2; 
+        -webkit-line-clamp: 1; 
         word-break: break-all;
         overflow: hidden; 
         text-overflow:ellipsis;
-        font-size: 1.25rem;
+        font-size: 1.5rem;
         cursor: pointer;
+      }
+
+      &__top {
+        font-size: 1rem;
+        color: #808080;
       }
   
       &__bottom {

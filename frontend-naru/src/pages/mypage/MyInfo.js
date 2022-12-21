@@ -1,20 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Modal } from '../../components/common/modal/Modal';
-import { useCookies } from 'react-cookie';
+import axios from 'axios';
 
 const MyInfo = () => {
   const [user, setUser] = useState();
-  const [cookie, ] = useCookies();
-  const { Warning, Failure } = Modal();
+  const { Warning } = Modal();
   const navigate = useNavigate()
 
   useEffect(() => {
-    const isLogin = () => {
-      axios.post("http://localhost:8080/islogin", {
-        sessionID : cookie.sessionID
-      })
+      axios.post("http://localhost:8080/islogin")
       .then((response) => {
         if(response.data.message === "로그인 성공") {
           userData();
@@ -24,20 +19,14 @@ const MyInfo = () => {
           navigate("/signin")
         }
       })
-    }
-    isLogin();
   }, [])
 
   const userData = () => {
     axios.get("http://localhost:8080/mypage")
     .then((response) => {
         if(response.data.message === "불러오기") {
-          console.log(response.data)
           setUser(response.data)
         }
-    })
-    .catch((error) => {
-      Failure("조회 실패", "회원정보 조회에 실패했습니다.")
     })
   }
 

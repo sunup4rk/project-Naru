@@ -1,6 +1,5 @@
 import { GlobalStyles } from "./components/common/styles/GlobalStyles";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CookiesProvider } from "react-cookie";
 import { RecoilRoot } from "recoil";
 import Header from "./components/layout/header/Header";
 import Footer from "./components/layout/footer/Footer";
@@ -29,7 +28,6 @@ import Contents from './pages/main/Contents';
 function App() {
   return (
     <BrowserRouter>
-      <CookiesProvider>
         <RecoilRoot>
           <GlobalStyles />
           <Header category={<Nav01 />} />
@@ -66,7 +64,6 @@ function App() {
           </Routes>
           <Footer />
         </RecoilRoot>
-      </CookiesProvider>
     </BrowserRouter>
   );
 }

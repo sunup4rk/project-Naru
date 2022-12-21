@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Modal } from '../../components/common/modal/Modal';
-import { useCookies } from 'react-cookie';
 import { useForm } from 'react-hook-form';
+import { Modal } from '../../components/common/modal/Modal';
 import UploadProfile from '../../components/common/upload/UploadProfile';
+import axios from 'axios';
 
 const MyEdit = () => {
   const [ user, setUser ] = useState();
-  const [ cookie, ] = useCookies();
   const [ image, setImage ] = useState([""]);
   const { Success, Warning, Failure } = Modal();
   const { register, handleSubmit, getValues } = useForm();
@@ -16,9 +14,7 @@ const MyEdit = () => {
   
   useEffect(() => {
     const isLogin = () => {
-      axios.post("http://localhost:8080/islogin", {
-        sessionID : cookie.sessionID
-      })
+      axios.post("http://localhost:8080/islogin")
       .then((response) => {
         if(response.data.message === "로그인 성공") {
           userData();

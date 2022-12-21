@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { useCookies } from 'react-cookie';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { loginState } from '../../../assets/State';
@@ -11,15 +10,12 @@ import './Header.scss';
 const Header = ({category}) => {
     const [login, setLogin] = useRecoilState(loginState)
     const [user, setUser] = useState()
-    const [cookie, ] = useCookies();
     
     axios.defaults.withCredentials = true;
 
     useEffect(() => {
         const isLogin = () => {
-            axios.post("http://localhost:8080/islogin", {
-                sessionID : cookie.sessionID
-            })
+            axios.post("http://localhost:8080/islogin")
             .then((response) => {
                 if(response.data.message === "로그인 성공") {
                     setLogin(true)

@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
-import { useCookies } from 'react-cookie';
 import { Modal } from './../../components/common/modal/Modal';
 import { useRecoilState } from 'recoil';
 import { loginState } from '../../assets/State'; 
@@ -10,11 +9,10 @@ import axios from 'axios';
 import './SignIn.scss';
 
 const SignIn = () => {
-    const navigate = useNavigate();
     const { register, handleSubmit } = useForm();
     const [ , setLogin ] = useRecoilState(loginState)
     const { Warning, Failure } = Modal();
-    const [ , setCookie ] = useCookies();
+    const navigate = useNavigate();
 
     axios.defaults.withCredentials = true;
 
@@ -28,9 +26,8 @@ const SignIn = () => {
             })
             .then((response) => {
                 if(response.data.message === "로그인 성공") {
-                    setCookie('sessionID', response.data.sessionID)
                     setLogin(true)
-                    window.location.replace("/")
+                    navigate("/")
                 }
             })
             .catch((error) => {

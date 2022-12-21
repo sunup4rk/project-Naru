@@ -58,7 +58,7 @@ const MapPost = (props) => {
                 });
 
                 const infowindow = new window.kakao.maps.InfoWindow({
-                    content: `<div style="width: 200px;text-align:center;padding:10px;word-break:kepp-all;">${props.address + " " + props.detail|| ""}</div>`
+                    content: `<div style="width: 200px;text-align:center;padding:10px;word-break:kepp-all;">${props.address + "<br/>" + props.detail|| ""}</div>`
                 });
                 infowindow.open(map, marker);
 
