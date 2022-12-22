@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Modal } from '../../components/common/modal/Modal';
 import UploadProfile from '../../components/common/upload/UploadProfile';
 import axios from 'axios';
+import './MyEdit.scss';
 
 const MyEdit = () => {
   const [ user, setUser ] = useState();
@@ -61,8 +62,8 @@ const MyEdit = () => {
   }
 
   return (
-    <div>
-      <form style={{display: "flex", flexDirection:"column"}} onSubmit={handleSubmit(onClickEdit)}>
+    <div className="myedit">
+      <form className="myedit-wrapper" onSubmit={handleSubmit(onClickEdit)}>
       <UploadProfile onChangeImage={onChangeImage} image={image} profile={user?.profile}/>
         이메일 <input type="text" defaultValue={user?.email} disabled/>
         닉네임<input type={"text"} defaultValue={user?.nickname} {...register("nickname")}/>

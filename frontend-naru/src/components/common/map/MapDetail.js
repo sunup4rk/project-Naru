@@ -5,7 +5,7 @@ const Map = styled.div`
     width: 50%;
     height: 20rem;
     border: 1px solid #D1D9DE;
-    margin: 30px 0;
+    margin: 50px 0;
 `;
 
 const MapPost = (props) => {

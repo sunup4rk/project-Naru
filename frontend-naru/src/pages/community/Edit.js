@@ -79,7 +79,6 @@ const Edit = () => {
   const onClickCancel = () => {
     navigate(-1);
   }
-console.log(editPost)
 
   return (
     <>
@@ -110,7 +109,7 @@ console.log(editPost)
 
           <div className="write__input__image">
           {images.map((el, index) => (
-            <Upload01 key={uuid()} onChangeImages={onChangeImages} index={index} images={editPost?.image_address} />
+            <Upload01 key={uuid()} postId={editPost?._id} onChangeImages={onChangeImages} index={index} images={editPost?.image_address} />
           ))}
           </div>
 

@@ -1,21 +1,18 @@
 .aside01 {
   display: flex;
   justify-content: center;
-  width: 100%;
-  max-width: 200px;
   padding-top: 50px;
-
-  .__menu {
-    font-size: 24px;
-    padding-top: 40px;
+  
+  &__menu {
+    font-size: 1.25rem;
+    padding-top: 2.2rem;
   }
 
-  .__item {
+  &__item {
     color: #d9d9d9;
 
-    .--active {
+    &--active {
       color: #000000;
     }
   }
 }
-
