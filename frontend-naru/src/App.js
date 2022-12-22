@@ -4,7 +4,7 @@ import { RecoilRoot } from "recoil";
 import Header from "./components/layout/header/Header";
 import Footer from "./components/layout/footer/Footer";
 import Nav01 from "./components/layout/navigation/Nav01";
-import { PointBanner, QnaBanner } from "./components/layout/banner/Banner03";
+import { QnaBanner } from "./components/layout/banner/Banner03";
 import Cafe from "./pages/explore/Cafe";
 import Entertainment from "./pages/explore/Entertainment";
 import Culture from "./pages/explore/Culture";
@@ -14,6 +14,7 @@ import ExploreLayout from "./components/layout/ExploreLayout";
 import Layout from "./components/layout/Layout";
 import MypageLayout from "./components/layout/MypageLayout";
 import CommunityLayout from "./components/layout/CommunityLayout";
+import PointLayout from "./components/layout/PointLayout";
 import Write from "./pages/community/Write";
 import List from "./pages/community/List";
 import Detail from "./pages/community/Detail";
@@ -24,6 +25,7 @@ import MyLike from "./pages/mypage/MyLike";
 import MyPost from "./pages/mypage/MyPost";
 import MyEditpw from "./pages/mypage/MyEditpw";
 import Contents from './pages/main/Contents';
+import Point from "./pages/point/Point";
 
 function App() {
   return (
@@ -36,7 +38,9 @@ function App() {
               <Route index element={<Contents />} />
             </Route>
 
-            <Route path="point" element={<PointBanner />} />
+            <Route path="point" element={<PointLayout />}>
+              <Route index element={<Point />} />
+            </Route>
             <Route path="qna" element={<QnaBanner />} />
             <Route path="signin" element={<SignIn />} />
             <Route path="signup" element={<SignUp />} />

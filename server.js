@@ -295,7 +295,6 @@ app.get('/explore', function(req, res) {
 
 
 app.get('/community', function(req, res) { 
-    // db.collection('post').delete({writer : ""})
     db.collection('post').find({writer: {$nin: [""]}}).toArray(function(err, result){
         result.reverse()
         if (err) {
@@ -311,7 +310,7 @@ app.get('/community', function(req, res) {
 })
 
 app.delete('/community', function(req, res){
-    db.collection('post').deleteMany({writer : ""})
+    // db.collection('post').deleteMany({writer : ""})
     res.json({message : "삭제 완료"})
 })
 
@@ -539,25 +538,32 @@ function UpdatePostCount() {
 // 게시글 상세 페이지 요청 API
 app.get('/community/detail/:id', function(req, res) {
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
-        if (err) { res.json({message : "글 전송 실패"}); }
-        if (!req.isAuthenticated()) {
-            res.status(200).send({
-                message : "비로그인",
-                result : result,
-            }); 
-        }
-        else if (result.user_id.toString() === req.user._id.toString()) {
-            res.status(200).send({
-                message : "일치",
-                result : result,
-            });         
-        }
-        else {
-            res.status(200).send({
-                message : "불일치",
-                result : result,
-            });  
-        }
+        const postResult = result
+        db.collection('user_info').findOne({_id : result.user_id}, function(err, result){
+            if (err) { res.json({message : "글 전송 실패"}); }
+            if (!req.isAuthenticated()) {
+                res.status(200).send({
+                    message : "비로그인",
+                    postResult : postResult,
+                    userResult : result
+                }); 
+            }
+            else if (postResult.user_id.toString() === req.user._id.toString()) {
+                res.status(200).send({
+                    message : "일치",
+                    postResult : postResult,
+                    userResult : result
+                });         
+            }
+            else {
+                res.status(200).send({
+                    message : "불일치",
+                    postResult : postResult,
+                    userResult : result
+                });  
+            }
+        })
+        
     })
 })
 
@@ -642,9 +648,9 @@ app.get("/point", function(req, res){
         res.json({message : "비회원"})
     }
     else{
-        db.collection('user_info').findOne({_id : req.user.id}, function(err, result){
+        db.collection('user_info').findOne({_id : req.user._id}, function(err, result){
             res.send({
-                message : "포인트게임 진입",
+                message : "포인트게임",
                 point : result.user_point
             }); 
         })
@@ -659,13 +665,51 @@ app.post("/point/start", function(req, res){
         res.json({message : "포인트 부족"})
     }
     else{
+        var tempPoint = req.body.point
+        const cardValue = Math.floor(Math.random() * 100) + 1
+        const value = req.body.value
+        var CardResult = ""
+
+        // 카드값 정하기
+        console.log(cardValue)
+        if(cardValue > 0 && cardValue <= 5){
+            CardResult = "UR"
+        }
+        else if(cardValue > 5 && cardValue <= 20){
+            CardResult = "SR"
+        }
+        else if(cardValue > 20 && cardValue <= 55){
+            CardResult = "R"
+        }
+        else if(cardValue > 55 && cardValue <= 100){
+            CardResult = "N"
+        }
+
+        // 포인트 정산
+        if (CardResult ==  'N'){
+            tempPoint = tempPoint - 80
+        }
+        else if (CardResult ==  'R'){
+            tempPoint = tempPoint - 55
+        }
+        else if (CardResult ==  'SR'){
+            tempPoint = tempPoint + 100
+        }
+        else if (CardResult ==  'UR'){
+            tempPoint = tempPoint + 300
+        }
         db.collection('user_info').updateOne(
-            {_id : req.user.id},
-            {$inc : {user_point : -100}}, function(err, result){
-            res.send({
-                message : "포인트게임 시작",
-                point : result.user_point
-            }); 
+            {_id : req.user._id},
+            {$set : {user_point : tempPoint}}, function(err, result){
+                console.log("point : ", tempPoint)
+                console.log("value : ",value)
+                console.log("cardValue : ",CardResult)
+                res.send({
+                    message : "포인트게임 완료",
+                    point : tempPoint,
+                    value : value,
+                    cardValue : CardResult,
+                });   
         })
     }
 })
@@ -773,7 +817,10 @@ app.post('/mypage/edit', (req, res) => {
         if (result) { res.json({message: "사용중인 닉네임입니다."}); }
         else {
             db.collection('user_info').findOne({_id : req.user._id}, (err, result) => {
-                console.log("result : ",result)
+                db.collection('post').update(
+                    {user_id : req.user._id},
+                    {$set : {writer : nicknamechk ? req.body.nickname : result.writer}}
+                )
                 db.collection('user_info').updateOne(
                     {_id : req.user._id},
                     {$set : {nickname : nicknamechk ? req.body.nickname : result.nickname}},

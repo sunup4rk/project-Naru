@@ -13,6 +13,7 @@ const Detail = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [ post, setPost ] = useState();
+  const [ user, setUser ] = useState();
   const [ like, setLike ] = useState(false);
   const [ myPost, setMyPost ] = useState("불일치");
   const { Success, Warning, Failure } = Modal();
@@ -22,11 +23,13 @@ const Detail = () => {
       axios.get(`http://localhost:8080/community/detail/${params.id}`)
       .then((response) => {
         if(response.data.message === "일치") {
-          setPost(response.data.result);
-          setMyPost(response.data.message)
+          setPost(response.data.postResult);
+          setMyPost(response.data.message);
+          setUser(response.data.userResult);
         }
         else {
-          setPost(response.data.result);
+          setPost(response.data.postResult);
+          setUser(response.data.userResult);
         }
       })
     };
@@ -91,11 +94,11 @@ const Detail = () => {
               <div className="detail__post__date">{post?.post_time}</div>
               <div className="detail__post__user">
                 {post?.profile ? 
-                  <img src={post?.profile} alt="profile image"/>
+                  <img src={user?.profile_image_path} alt="profile image"/>
                 :
                   <img src="/images/icon/user.svg" alt="profile image"/>
                 }
-                <div>{post?.writer}</div>
+                <div>{user?.nickname}</div>
               </div>
               
               <MapDetail address={post?.post_address} detail={post?.post_address_detail}/>
