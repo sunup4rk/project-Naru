@@ -40,7 +40,7 @@ const Edit = () => {
       })
     };
     fetchPost();
-  }, [])
+  }, [images])
 
   const onClickAddressSearch = () => {
     setIsShown(true)
@@ -108,8 +108,8 @@ const Edit = () => {
           </div>
 
           <div className="write__input__image">
-          {images.map((el, index) => (
-            <Upload01 key={uuid()} postId={editPost?._id} onChangeImages={onChangeImages} index={index} images={editPost?.image_address} />
+          {editPost?.image_address.map((el, index) => (
+            <Upload01 key={uuid()} postId={editPost?._id} onChangeImages={onChangeImages} index={index} images={el} />
           ))}
           </div>
 

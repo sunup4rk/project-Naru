@@ -978,13 +978,14 @@ app.post('/image/upload', (req, res) => {
 
 // 게시글 이미지 삭제 API
 app.delete('/image/delete', (req, res) => {
-    const postID = Number(req.query.url.split('/')[4]);
+    const decodeUrl = decodeURIComponent(req.query.url)
+    const postID = Number(decodeUrl.split('/')[4]);
     console.log("/image/delete req :", postID);
     
     // AWS 이미지 삭제
     const objectParams_del = {
         Bucket: BUCKET_NAME,
-        Key: (req.query.url).substr(52),
+        Key: (decodeUrl).substr(52),
     };
     
     s3
@@ -1003,7 +1004,10 @@ app.delete('/image/delete', (req, res) => {
         // 이미지 주소 O
         else {
             let targetObj = result.image_address;
-            const targetIdx = Number(result.image_address.indexOf(req.query.url));
+            console.log("이미지 address :", result.image_address)
+            const targetIdx = Number(result.image_address.indexOf(decodeUrl));
+            console.log("지울 이미지 :", decodeUrl)
+            console.log("타겟 인덱스 :", targetIdx)
             let removeUrl = targetObj.splice(targetIdx, 1);
             console.log("remove :", removeUrl);
             targetObj[3] = null;
