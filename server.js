@@ -452,10 +452,11 @@ app.get("/community/write", function(req, res) {
         db.collection('post').insertOne({
             _id : postId,
             user_id : req.user._id,
-            writer : "", 
+            writer : "",
+            profile : "",
             post_title : "", 
             post_content : "", 
-            like_count : 0, 
+            like_count : 0,
             like_user : [],
             post_address : "",
             post_address_detail : "",
@@ -482,7 +483,8 @@ app.post("/community/write/", function(req, res) {
         {$set: {
             _id : req.body.postId,
             user_id : req.user._id,
-            writer : req.user.nickname, 
+            writer : req.user.nickname,
+            profile : req.user.profile_image_path,
             post_title : req.body.title, 
             post_content : req.body.content, 
             like_count : 0, 
