@@ -83,11 +83,13 @@
       padding-top: 30px;
     }
 
-    svg {
-      position: relative;
-      left: -28px;
-      display: inline;
-      padding-left: 0;
-    }
+
+  }
+
+  &__arrow {
+    position: relative;
+    left: -28px;
+    display: inline;
+    padding-left: 0;
   }
 }

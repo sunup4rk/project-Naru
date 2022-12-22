@@ -1,8 +1,7 @@
-import './Banner01.scss'
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
-import { ReactComponent as RightArrow } from '../../../assets/icon/rightArrow.svg';
+import './Banner01.scss'
 
 const Banner01 = () => {
     const settings = {
@@ -24,7 +23,7 @@ const Banner01 = () => {
                     <p>지금 내 주변에서 찾아보세요.</p>
                     <div>
                         <button className="banner01__button">바로가기</button>
-                        <RightArrow width="8" stroke="white"/>
+                        <img className="banner01__arrow" src="images/icon/rightArrow.svg" alt="arrow"/>
                     </div>
                 </div>
                 <img src="images/carousel01.svg" alt="main_banner"/>
@@ -35,7 +34,7 @@ const Banner01 = () => {
                     <p>포인트를 모아 등급을 올려보세요.</p>
                     <div>
                         <button className="banner01__button">바로가기</button>
-                        <RightArrow width="8" stroke="white"/>
+                        <img className="banner01__arrow" src="images/icon/rightArrow.svg" alt="arrow"/>
                     </div>
                 </div>
                 <img src="images/carousel02.svg" alt="main_banner"/>
@@ -46,7 +45,7 @@ const Banner01 = () => {
                     <p>미니게임에 도전해보세요!</p>
                     <div>
                         <button className="banner01__button">바로가기</button>
-                        <RightArrow width="8" stroke="white"/>
+                        <img className="banner01__arrow" src="images/icon/rightArrow.svg" alt="arrow"/>
                     </div>
                 </div>
                 <img src="images/carousel03.svg" alt="main_banner"/>

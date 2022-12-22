@@ -53,8 +53,8 @@ export const QnaBanner = () => {
 export const MypageBanner = () => {
 
     return(
-        <div className='Banner03 mypage'>
-            <div className='Banner03-text'>
+        <div className='Banner03'>
+            <div className='Banner03-text mypage'>
                 <h1>마이페이지</h1>
             </div>
         </div>
