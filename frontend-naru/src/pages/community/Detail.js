@@ -90,7 +90,11 @@ const Detail = () => {
               <h1>{post?.post_title}</h1>
               <div className="detail__post__date">{post?.post_time}</div>
               <div className="detail__post__user">
-                <img src="" alt="profile image"/>
+                {post?.profile ? 
+                  <img src={post?.profile} alt="profile image"/>
+                :
+                  <img src="/images/icon/user.svg" alt="profile image"/>
+                }
                 <div>{post?.writer}</div>
               </div>
               

@@ -27,12 +27,14 @@
       justify-content: center;
       align-items: center;
       background-color: #fafafa;
-      height: 10rem;
+      height: 13rem;
       cursor: pointer;
 
       &--post {
+        width: 100%;
         max-width: 15em;
-        max-height: 10rem;
+        max-height: 13rem;
+        border-radius: 10px 10px 10px 10px;
       }
 
       &--default {
