@@ -88,81 +88,95 @@ moment.tz.setDefault("Asia/Seoul");
 
 // ================================= 크롤링 ================================================== //
 
-// puppeteer.launch( { headless : true } ).then(async browser => {})
-
 const crawlTime = moment().format('YYYY-MM-DD')
 const puppeteer = require( "puppeteer" );
 const cheerio = require( "cheerio" );
 async function CrawlGame () {
         
     const browser = await puppeteer.launch({
-        
         headless: true
-        });
-        console.log("게임 크롤링 실행")
-        const page = await browser.newPage()
-        await page.goto('https://www.thelog.co.kr/index.do');
-        const content = await page.content();
-        const $ = cheerio.load(content);
+    });
+    const browsertest = await puppeteer.launch({
+        headless: false
+    });
+    
+    console.log("게임 크롤링 실행")
+    const page = await browser.newPage()
+    await page.goto('https://www.thelog.co.kr/index.do');
+    const content = await page.content();
+    const $ = cheerio.load(content);
 
-        const lists = $("#game_rank > tr");
-        var resultGame = []
-        for (var i = 0; i < lists.length; i++){
+    const lists = $("#game_rank > tr");
+    var resultGame = []
+    for (var i = 0; i < lists.length; i++){
         resultGame[i] = $(lists[i]).find("tr > td.name").text()
+    }
+    // const imgpage = await browsertest.newPage()
+    //     await imgpage.goto('https://namu.wiki');
+
+    //     // const inputArea = await imgpage.$('.search');
+    //     // const searchBtn = await imgpage.$('#E8Ow8AfSl > span.tNb7IB9G > button:nth-child(1)');
+    //     // await imgpage.waitForSelector('#KrL7prAiD > input[type=search]')
+    //     // await inputArea.type('리그 오브 레전드');
+    //     // await searchBtn.click()
+
+    //     await imgpage.type('#KrL7prAiD > input[type=search]','리그 오브 레전드');
+    //     await imgpage.type('#KrL7prAiD > input[type=search]', String.fromCharCode(13));
+    //     const gameimg = $('#lYnqWtHhT > div.\31 0260d0f > div > div > div > div > div > div > div > div > div > article > div:nth-child(6) > div > div:nth-child(6) > div > div > div > div > div > div:nth-child(11) > div > div > div > div > div > div:nth-child(1) > div > div.JPVrx4GT.MaYP-MZ6 > table > tbody > tr:nth-child(2) > td > div > div > a > span > span > img._2wJ1XSYz').find().attr('src')
+    //     console.log('gameimg : ',gameimg)
+    //     await browsertest.close()
+
+    db.collection('crawling').updateOne(
+        {sort : 'game'}, 
+        {$set : {
+            title : resultGame,
+            time : crawlTime,
+            }}, function(err, result){
+        if(err){
+            console.log("크롤링 실패, 대상 웹페이지를 확인해보세요")
+        }   
+        else{
+            console.log('게임순위 데이터 입력 완료')
         }
-        db.collection('crawling').updateOne(
-            {sort : 'game'}, 
-            {$set : {
-                title : resultGame,
-                time : crawlTime,
-                }}, function(err, result){
-            if(err){
-                console.log("크롤링 실패, 대상 웹페이지를 확인해보세요")
-            }   
-            else{
-                console.log('게임순위 데이터 입력 완료')
-            }
-        })
-        browser.close();
+    })
+    browser.close();
 }
 
 async function CrawlMovie () {
         
     const browser = await puppeteer.launch({
         headless: true
-        });
-        console.log("영화 크롤링 실행")
-        const page = await browser.newPage();
-        await page.goto('https://movie.daum.net/ranking/boxoffice/weekly');
-        const content = await page.content();
-        const $ = cheerio.load(content);
+    });
+    console.log("영화 크롤링 실행")
+    const page = await browser.newPage();
+    await page.goto('https://movie.daum.net/ranking/boxoffice/weekly');
+    const content = await page.content();
+    const $ = cheerio.load(content);
 
-        const lists = $("#mainContent > div > div.box_boxoffice > ol > li");
-        var resultMovie = []
-        var resultMovieImg = []
+    const lists = $("#mainContent > div > div.box_boxoffice > ol > li");
 
-        var name;
-        var titleimg;
+    var name;
+    var titleimg;
 
-        lists.each((index, lists) => {
-            name = $(lists).find("div > div.thumb_cont > strong > a").text();
-            titleimg = $(lists).find("div > div.thumb_item > div.poster_movie > img").attr('src')
-            db.collection('crawling').updateOne(
-                {num : index}, 
-                {$set : {
-                    title : name,
-                    titleimg : titleimg,
-                    time : crawlTime,
-                    }}, function(err, result){
-                if(err){
-                    console.log("크롤링 실패, 대상 웹페이지를 확인해보세요")
-                }   
-                else{
-                    console.log(index + 1,'번째 영화순위 데이터 입력 완료')
-                }
-        
-            })
+    lists.each((index, lists) => {
+        name = $(lists).find("div > div.thumb_cont > strong > a").text();
+        titleimg = $(lists).find("div > div.thumb_item > div.poster_movie > img").attr('src')
+        db.collection('crawling').updateOne(
+            {num : index}, 
+            {$set : {
+                title : name,
+                titleimg : titleimg,
+                time : crawlTime,
+                }}, function(err, result){
+            if(err){
+                console.log("크롤링 실패, 대상 웹페이지를 확인해보세요")
+            }   
+            else{
+                console.log(index + 1,'번째 영화순위 데이터 입력 완료')
+            }
+    
         })
+    })
   
         // for (var i = 0; i < lists.length; i++){
         // resultMovieImg[i] = $(lists[i]).find("div > div.thumb_item > div.poster_movie > img").attr('src')
@@ -182,7 +196,7 @@ async function CrawlMovie () {
         //         }
         
         //     })
-        browser.close();
+    browser.close();
 }
 
 function CrawlCheck(){
@@ -200,6 +214,7 @@ function CrawlCheck(){
         }
     })
 }
+
 
 app.get('/explore/cafe', function(req, res){
     CrawlCheck()
@@ -234,7 +249,6 @@ app.get('/explore/ent', function(req, res){
 
 app.get('/explore/culture', function(req, res){
     CrawlCheck()
-    console.log("result")
     db.collection('crawling').find({
         sort : 'movietest'
     }).sort({
@@ -254,7 +268,8 @@ app.get('/explore/culture', function(req, res){
 
     
 app.get('/', function(req, res) {
-    // CrawlGame()
+    console.log("CrawlGame?")
+    CrawlGame()
     // ==================== 크롤링 DB구역에 데이터가 없을 때 한번만! =============================
     // if (true){
     //     db.collection('crawling').insertOne({
@@ -287,7 +302,6 @@ app.get('/community', function(req, res) {
             res.json({message : "전송 실패"})
         }
         else {
-            console.log("전송");
             res.status(200).send({
                 message : "조회 성공",
                 result : result,
@@ -370,7 +384,6 @@ app.get('/best', function(req, res) {
             res.json({message : "전송 실패"})
         }
         else{
-            console.log("인기글 전송");
             res.status(200).send({
                 message : "인기글 조회 성공",
                 result : result
@@ -381,7 +394,6 @@ app.get('/best', function(req, res) {
 
 // 좋아요 구현
 app.post("/community/detail/like/:id", function(req, res) {
-    console.log("접속자 : ", req.user._id)
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
         var chk = false
         if (!req.isAuthenticated()) {
@@ -396,7 +408,6 @@ app.post("/community/detail/like/:id", function(req, res) {
                 { _id: req.user._id},
                 { $push: { like_post: parseInt(req.params.id)}},
             )
-            console.log('좋아요 완료')
             res.send({
                 message : "좋아요",
                 like_count : result.like_count,
@@ -410,7 +421,6 @@ app.post("/community/detail/like/:id", function(req, res) {
                 }
             }
                 if (!chk) {
-                    console.log('좋아요 완료')
                     db.collection('post').updateOne(
                         { _id: parseInt(req.params.id)},
                         { $inc : {like_count : 1} , $push: { like_user: req.user._id.toString()}},
@@ -425,7 +435,6 @@ app.post("/community/detail/like/:id", function(req, res) {
                     }); 
                 }
                 else {
-                    console.log('좋아요 취소')
                     db.collection('post').updateOne(
                         { _id: parseInt(req.params.id)},
                         { $inc : {like_count : -1} , $pull: { like_user: req.user._id.toString()}},
@@ -444,11 +453,9 @@ app.post("/community/detail/like/:id", function(req, res) {
     )
 })
 app.get("/community/write", function(req, res) {
-    console.log("req.query.message")
     db.collection('post_count').findOne({name : 'postcnt'}, function(err, result) {
         let postId = Number(result.total_post) + 1
         UpdatePostCount();
-        console.log("postid :", postId)
         db.collection('post').insertOne({
             _id : postId,
             user_id : req.user._id,
@@ -464,11 +471,9 @@ app.get("/community/write", function(req, res) {
             },
             function(err, result) {
                 if (err) {
-                    console.log(err)
                     res.json({message : "다시 시도해주세요."})
                 }
                 else {
-                    console.log("post_id :", postId, " 발급");
                     res.json({postId : postId});         
                 }
             }
@@ -476,7 +481,6 @@ app.get("/community/write", function(req, res) {
     })
 })
 app.post("/community/write/", function(req, res) {
-    console.log(req.body.postId)
     db.collection('post').updateOne(
         {_id: req.body.postId},
         {$set: {
@@ -532,25 +536,21 @@ function UpdatePostCount() {
 
 // 게시글 상세 페이지 요청 API
 app.get('/community/detail/:id', function(req, res) {
-    console.log("/community/detail req :", req.params.id);
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
         if (err) { res.json({message : "글 전송 실패"}); }
         if (!req.isAuthenticated()) {
-            console.log("전송, 비로그인");
             res.status(200).send({
                 message : "비로그인",
                 result : result,
             }); 
         }
         else if (result.user_id.toString() === req.user._id.toString()) {
-            console.log("전송, 일치");
             res.status(200).send({
                 message : "일치",
                 result : result,
             });         
         }
         else {
-            console.log("전송, 불일치");
             res.status(200).send({
                 message : "불일치",
                 result : result,
@@ -561,10 +561,8 @@ app.get('/community/detail/:id', function(req, res) {
 
 // 게시글 수정 데이터 요청 API
 app.get("/community/edit/:id", function(req, res) {
-    console.log("/community/edit get :", req.params.id);
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result){
         if (err) return err;
-        console.log("수정할 글 전송 완료", req.params.id);
         res.status(200).send({
             message : "전송",
             result : result
@@ -593,7 +591,6 @@ app.put('/community/edit/:id', function(req, res) {
         contentchk = false
     }
 
-    console.log("/community/edit put :", req.params.id);
     db.collection('post').findOne({_id : parseInt(req.params.id)},function(err, result){
         db.collection('post').updateOne(
             {_id : parseInt(req.params.id)}, 
@@ -606,7 +603,6 @@ app.put('/community/edit/:id', function(req, res) {
             function(err, result) {
                 if (err) { res.json({message : "수정 실패"}); }
                 else {
-                    console.log("게시글 수정 완료 :", req.params.id);
                     res.status(200).send({message : "수정 성공"});
                 }
             }
@@ -617,7 +613,6 @@ app.put('/community/edit/:id', function(req, res) {
 
 // 게시글 삭제 API
 app.delete('/community/delete/:id', function(req, res) {
-    console.log("/community/delete req :", req.params.id);
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
         if (err) { res.json({message : "삭제 실패"}); }
         if (result.user_id.toString() === req.user._id.toString()) {
@@ -628,7 +623,6 @@ app.delete('/community/delete/:id', function(req, res) {
                     {_id : req.user._id}, 
                     {$inc : {user_point : -30, posting_count : -1}}, 
                     function(err, result) {
-                        console.log("게시글 삭제 완료 :", req.params.id);
                         res.json({message : "삭제 완료"});
                     }
                 );
@@ -767,19 +761,28 @@ app.get('/mypage/edit', (req, res) => {
 // 회원정보 수정 API
 app.post('/mypage/edit', (req, res) => {
     // 닉네임 변경
+    var nicknamechk = true
+
+    if (req.body.nickname == ""){
+        nicknamechk = false
+    }
     db.collection('user_info').findOne({nickname : req.body.nickname}, (err, result) => {
         if (err) { return console.log(err); }
         if (result) { res.json({message: "사용중인 닉네임입니다."}); }
         else {
-            db.collection('user_info').updateOne(
-                {_id : req.user._id},
-                {$set : {nickname : req.body.nickname}},
-                (err, result) => {
-                    if (err) { return console.log(err); }
-                    console.log("닉네임 변경 : ", req.user.nickname, " => ", req.body.nickname);
-                    res.json({message: "수정 성공"});
-                }
-            );
+            db.collection('user_info').findOne({_id : req.user._id}, (err, result) => {
+                console.log("result : ",result)
+                db.collection('user_info').updateOne(
+                    {_id : req.user._id},
+                    {$set : {nickname : nicknamechk ? req.body.nickname : result.nickname}},
+                    (err, result) => {
+                        if (err) { return console.log(err); }
+                        console.log("닉네임 변경 : ", req.user.nickname, " => ", req.body.nickname);
+                        res.json({message: "수정 성공"});
+                    }
+                )
+            })
+            
         }
     });
 })
