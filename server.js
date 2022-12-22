@@ -467,7 +467,7 @@ app.get("/community/write", function(req, res) {
             like_user : [],
             post_address : "",
             post_address_detail : "",
-            image_address : [],
+            image_address : new Array(4),
             post_time : moment().format('YYYY-MM-DD')
             },
             function(err, result) {
@@ -910,7 +910,7 @@ app.delete('/mypage/profile', (req, res) => {
 
 // 게시글 이미지 업로드 API
 app.post('/image/upload', (req, res) => {
-    console.log("/image/upload req :", req.user._id);
+    console.log("/image/upload req");
     const form = new multiparty.Form();
     const userID = req.user._id;
     let imageAddress;
@@ -923,29 +923,44 @@ app.post('/image/upload', (req, res) => {
         imageAddress = process.env.IMAGE_SERVER + "/" + userID + "/" + part.filename;
         const postID = Number(part.filename.split('/')[0]);
         // 파일명 X : 이미지 저장 디렉토리
-        if (!part.filename) { res.send({location: ""}); }
+        if (!part.filename) {
+            res.send({
+                message: "파일명이 올바르지 않습니다.",
+                location: ""
+            });
+        }
         else {
-            console.log("filename :", part.filename)
+            // 작성중인 빈 게시글 검색
             db.collection('post').findOne({_id: postID}, (err, result) => {
-                console.log("postid :", postID)
-                console.log(result)
-                if (result === null) {
-                    res.send({location: ""});
+                console.log("postid :", postID, "OK")
+                // 작성중인 빈 게시글이 삭제된 경우
+                if (!result) {
+                    console.log("유효하지 않은 요청")
+                    res.send({
+                        message: "유효하지 않은 요청",
+                        location: ""
+                    });
                 }
-                // 파일명 O, 배열에 O
-                if (result.image_address.indexOf(imageAddress) !== -1) {
+                // 파일명 OK, 배열에 O => 추가 X
+                else if (result.image_address.indexOf(imageAddress) !== -1) {
+                    console.log("이미 존재하는 파일")
                     res.send({location: ""}); 
                 }
-                // 파일명 O, 배열에 X
+                // 파일명 OK, 배열에 X => 추가 O
                 else {
+                    console.log("새로운 이미지 추가")
                     streamToBufferUpload(part, userID + "/" + part.filename);
-                    db.collection('post').updateOne(
-                        {_id : postID}, 
-                        {$push : {image_address : imageAddress}}, 
-                        (err, result) => {
-                            console.log("modified :", result.modifiedCount); 
-                        }
-                    );
+                    db.collection('post').findOne({_id : postID}, (err, result) => {
+                        let target = result.image_address;
+                        target[result.image_address.indexOf(null)] = imageAddress;
+                        db.collection('post').updateOne(
+                            {_id : postID},
+                            {$set : {image_address : target}},
+                            (err, result) => {
+                                console.log("modified :", result.modifiedCount);
+                            }
+                        )
+                    })
                 }            
             })
         }
@@ -987,10 +1002,15 @@ app.delete('/image/delete', (req, res) => {
         if (!result) { res.send({message: "삭제 성공"}); }
         // 이미지 주소 O
         else {
-            const urlIndex = Number(result.image_address.indexOf(req.query.url));
+            let targetObj = result.image_address;
+            const targetIdx = Number(result.image_address.indexOf(req.query.url));
+            let removeUrl = targetObj.splice(targetIdx, 1);
+            console.log("remove :", removeUrl);
+            targetObj[3] = null;
+
             db.collection('post').updateOne(
                 {_id: postID},
-                {$set: {image_address: result.image_address.splice(urlIndex, 1)}},
+                {$set: {image_address: targetObj}},
                 (err, result) => { res.send({message: "삭제 성공"}); }
             );
         }
