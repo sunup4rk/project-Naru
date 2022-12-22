@@ -50,6 +50,7 @@ const List = () => {
   const onClickMoveDetail = () => (e) => {
     navigate(`/community/detail/${e.target.id}`)
   }
+  
   return (
     <>
     <Bestpost />

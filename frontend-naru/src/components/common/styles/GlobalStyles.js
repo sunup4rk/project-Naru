@@ -52,6 +52,10 @@ export const GlobalStyles = createGlobalStyle`
         font-size: 2rem;
     }
 
+    strong {
+        font-family: 'SUIT-Bold';
+    }
+
 
     @font-face {
         font-family: Jalnan;

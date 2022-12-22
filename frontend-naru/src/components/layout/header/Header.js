@@ -24,7 +24,7 @@ const Header = ({category}) => {
             })
         }
         isLogin();
-    }, []);
+    }, [login]);
 
     return (
         <div className='header'>
