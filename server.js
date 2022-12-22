@@ -281,7 +281,7 @@ app.get('/explore', function(req, res) {
 
 app.get('/community', function(req, res) { 
     // db.collection('post').delete({writer : ""})
-    db.collection('post').find().toArray(function(err, result){
+    db.collection('post').find({writer: {$nin: [""]}}).toArray(function(err, result){
         result.reverse()
         if (err) {
             res.json({message : "전송 실패"})
@@ -1003,14 +1003,14 @@ const streamToBufferUpload = (part, key) => {
 }
 
 const uploadToBucket = (key, Body) => {
-    const params = { 
-        Bucket:BUCKET_NAME, 
-        Key:key, 
-        Body, 
-        ContentType: 'image' 
+    const params = {
+        Bucket:BUCKET_NAME,
+        Key:key,
+        Body,
+        ContentType: 'image'
     }
     const upload = new AWS.S3.ManagedUpload({ params });
-    upload.promise();   
+    upload.promise();
 }
 
 // control - image 끝 ///////////////////////////////////////////////////////////////////////////////
@@ -1020,20 +1020,20 @@ const uploadToBucket = (key, Body) => {
 
 // header 로그인 인증
 app.post('/islogin', (req, res) => {
-    if (req.user) {
+    if (!req.user) { res.send({message: "로그인 실패"}); }
+    else {
         res.send({
             message: "로그인 성공",
             nickname: req.user.nickname,
-            user_level: req.user.user_level,
+            user_level: req.user.user_level
         });
     }
-    else { res.send({message: "로그인 실패"}); }
 })
 
 // 로그아웃 API
 app.post('/signout', (req, res) => {
-    console.log("/signout req :", req.user.email);
     req.logout(() => {
+        console.log("/signout req");
         req.session.destroy();
         res.clearCookie('connect.sid').send({message: "로그아웃"});
     });
@@ -1077,7 +1077,7 @@ passport.deserializeUser((usermail, done) => {
 
 // 인증메일 발송 API
 app.post('/signup/mail', (req, res) => {
-    console.log("/signup/mail request :", req.body.email);   // params 확인은 req.query
+    console.log("/signup/mail request :", req.body.email);
 
     if (!req.body.email) { res.json({ message: "올바른 이메일이 아닙니다." }) }
     if (req.body.email) {
@@ -1161,31 +1161,26 @@ const SendAuthMail = (address) => {
 
 // 인증번호 확인 API
 app.post('/signup/auth', (req, res) => {
-    console.log("/signup/auth check req :", req.body.email);
-
+    // 인증내역 발생 확인
     db.collection("auth_request").findOne({email: req.body.email},
         function(err, result) {
-            if (err) 
-                res.json({number: req.body.authNum});
-            if (result === null)
-                res.json({message: "인증 요청된 이메일이 아닙니다."});
-            else if (result.auth_number === Number(req.body.authNum))
-                res.json({message: "인증되었습니다."});
-            else if (result.auth_number !== Number(req.body.authNum))
-                res.json({message: "인증번호가 일치하지 않습니다."});
+            console.log("/signup/auth check req :", req.body.email);
+            if (err) { res.json({number: req.body.authNum}); }                
+            if (result === null) { res.json({message: "인증 요청된 이메일이 아닙니다."}); }                
+            if (result.auth_number === Number(req.body.authNum)) {res.json({message: "인증되었습니다."});}
+            else res.json({message: "인증번호가 일치하지 않습니다."});
         }
-    )
+    );
 })
 
 // 회원가입 요청 API
 app.post('/signup', (req, res) => {
-    console.log("/signup req :", req.body.email);
-
     // nickname 중복검사
     db.collection('user_info').findOne({nickname : req.body.nickname}, (err, result) => {
+        console.log("/signup req :", req.body.email);
         if (err) { return console.log(err); } 
         if (result !== null) { res.json({message: "이미 사용중인 닉네임입니다."}); } 
-        if (result === null) {
+        else {
             db.collection("user_info").insertOne({
                 email               : req.body.email,
                 nickname            : req.body.nickname,
