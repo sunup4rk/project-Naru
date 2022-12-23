@@ -65,13 +65,12 @@
   &-post {
     display: flex;
     flex-direction: column;
-    justify-content: baseline;
     padding-top: 50px;
 
     &__title {
       span {
         font-size: 1.5rem;
-        padding-left: 60px;
+        padding-left: 20px;
         padding-right: 15px;
         cursor: pointer;
       }
@@ -83,16 +82,12 @@
   
     &__postlist {
       display: flex; 
-      flex-wrap: wrap;
       justify-content: flex-start;
-      padding: 30px 0;
-      width: 90%;
-      max-width: 1200px;
-      margin: 0 auto;
+      padding: 25px 0;
     }
 
     &__postitem {
-      width: calc(90%/3);
+      width: calc(90%/2.9);
       box-shadow: 3px 3px 4px 0 rgba(0, 0, 0, 0.2);
       border-radius: 20px;
       margin: 10px;
