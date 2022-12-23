@@ -944,6 +944,15 @@ app.delete('/mypage/profile', (req, res) => {
         .catch((error) => {
             console.error(error);
         });
+
+    db.collection('user_info').updateOne(
+        {_id : req.user._id}, 
+        {$set : {profile_image_path: ""}}, 
+        (err, result) => {
+            if (err) { return console.log(err); }
+            else { console.log(process.env.IMAGE_SERVER + "/" + (req.query.url).substr(52)) } 
+        }
+    );
 })
 
 // 게시글 이미지 업로드 API
