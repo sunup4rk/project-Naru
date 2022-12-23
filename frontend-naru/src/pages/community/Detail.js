@@ -75,7 +75,7 @@ const Detail = () => {
         .then((response) => {
             if(response.data.message === "삭제 완료") {
               Success("삭제 완료", "게시글이 삭제되었습니다.");
-              navigate("/community");
+              navigate(-1);
             }
         })
         .catch((error) => {

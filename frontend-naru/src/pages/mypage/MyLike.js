@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from '../../components/common/modal/Modal';
+import Post from '../../components/common/post/Post';
 import axios from 'axios';
+import './MyLike.scss';
 
 const MyLike = () => {
-  const [user, setUser] = useState();
+  const [ like, setLike ] = useState();
   const { Warning } = Modal();
   const navigate = useNavigate()
 
@@ -25,16 +27,25 @@ const MyLike = () => {
     axios.get("http://localhost:8080/mypage/like")
     .then((response) => {
         if(response.data.message === "좋아요") {
-          setUser(response.data)
+          setLike(response.data)
         }
     })
   };
+  
+  const onClickMoveDetail = () => (e) => {
+    navigate(`/community/detail/${e.target.id}`)
+  }
 
   return (
-    <div>
-      {/* {user?.map((el) => (
-        <div></div>
-      ))} */}
+    <div className="mylike">
+      <div className="mylike-posts">
+        {like?.result.map((el) => (
+          <Fragment key={el._id}>
+            <Post page={"like"} id={el._id} onClick={onClickMoveDetail(el)} src={el.image_address[0]}
+            title={el.post_title} writer={el.writer} time={el.post_time} like={el.like_count}/>
+          </Fragment>
+          ))}
+      </div>
     </div>
   );
 };

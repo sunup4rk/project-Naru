@@ -11,6 +11,7 @@ import Button02 from '../../components/common/button/Button02';
 import axios from 'axios';
 import uuid from 'react-uuid'
 import './Write.scss';
+import Button03 from './../../components/common/button/Button03';
 
 
 const Edit = () => {
@@ -101,7 +102,7 @@ const Edit = () => {
           <div className="write__input__location">
             <MapPost address={editPost?.post_address}/>
             <div className="write__input__location__address">
-              <button type="button" onClick={onClickAddressSearch}>주소 찾기</button>
+            <Button03 type={"button"} text={"주소 찾기"} onClick={onClickAddressSearch} />
               <input className="write__input__location__address " type="text" {...register("address")} placeholder="주소를 입력하세요." defaultValue={editPost?.post_address} readOnly/>
               <input className="write__input__location__address" type="text" {...register("addressDetail")} placeholder="상세주소를 입력하세요." defaultValue={editPost?.post_address_detail}/>
             </div>

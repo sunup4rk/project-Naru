@@ -20,15 +20,15 @@ export const GlobalStyles = createGlobalStyle`
 
         @media ${breakPoints.tablet} {
             font-size: 14px;
-          }
-          @media ${breakPoints.mobile} {
+        }
+        @media ${breakPoints.mobile} {
             font-size: 12px;
-          }
+        }
     }
 
     body {
         font-family: 'SUIT-Medium', '맑은 고딕', 'sans-serif';
-        // overflow-x: hidden;
+        overflow-x: hidden;
     }
 
     a {

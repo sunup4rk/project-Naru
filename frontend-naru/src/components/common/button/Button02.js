@@ -8,7 +8,6 @@ const Button = styled.button`
     width: ${(props) => props.size === 's' && '6rem'};
     width: ${(props) => props.size === 'm' && '10rem'};
     
-    // min-width: 8rem;
     height: 2.8rem;
     border-radius: 2rem;
     border: 2px solid #D1D9DE;

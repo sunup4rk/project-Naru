@@ -54,18 +54,6 @@
           font-size: 1.25rem;
           padding: 0.5rem;
         }
-        button {
-          width: 26%;
-          border-radius: 1.4rem;
-          border: 2px solid #D1D9DE;
-          padding: 10px;
-          background-color: #ffffff;
-          font-family: "SUIT-Medium";
-          font-size: 1rem;
-          &:hover {
-            border: 2px solid #4461AA;
-          }
-        }
 
         :not(:first-child) {
           padding-top: 30px;

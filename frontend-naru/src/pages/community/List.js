@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import Bestpost from '../../components/common/bestpost/BestPost';
 import Button01 from './../../components/common/button/Button01';
+import Post from '../../components/common/post/Post';
 import axios from 'axios';
 import Swal from 'sweetalert2'
 import './List.scss';
@@ -59,26 +60,10 @@ const List = () => {
       <div className="list__wrapper">
         <div className="list__posts">
           {post?.map((el) => (
-            <div className="list__post" key={el._id}>
-              <div className="list__post__img" id={el._id} onClick={onClickMoveDetail(el)}>
-                {el?.image_address[0] ?
-                <img className="list__post__img--post" id={el._id} src={el?.image_address[0]} alt="post image" />
-                :
-                <img className="list__post__img--default" id={el._id} src="/images/icon/logo02.svg" alt="post image" />
-                }
-              </div>
-              <div className="list__post__content">
-                <h2 id={el._id} onClick={onClickMoveDetail(el)}>{el?.post_title}</h2>
-                <span className="list__post__content__top">{el.writer}</span>
-                <div className="list__post__content__bottom">
-                  <span>{el?.post_time}</span>
-                    <div>
-                        <img src={"/images/icon/full_heart.svg"} alt="like" />
-                        {el?.like_count}
-                    </div>
-                </div>
-              </div>
-            </div>
+            <Fragment key={el._id}>
+              <Post page={"list"} id={el._id} onClick={onClickMoveDetail(el)} src={el.image_address[0]}
+              title={el.post_title} writer={el.writer} time={el.post_time} like={el.like_count}/>
+            </Fragment>
             ))}
         </div>
         <div className="list__button">

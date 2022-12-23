@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Modal } from '../../components/common/modal/Modal';
+import Post from '../../components/common/post/Post';
 
 
 const MyPost = () => {
-  const [user, setUser] = useState();
+  const [ post, setPost ] = useState();
   const { Warning } = Modal();
   const navigate = useNavigate()
 
@@ -26,17 +27,25 @@ const MyPost = () => {
     axios.get("http://localhost:8080/mypage/post")
     .then((response) => {
         if(response.data.message === "게시글") {
-          setUser(response.data)
+          setPost(response.data)
         }
     })
   };
 
+  const onClickMoveDetail = () => (e) => {
+    navigate(`/community/detail/${e.target.id}`)
+  }
+
   return (
-    <div>
-      <div>이미지</div>
-      <div>제목</div>
-      <div>날짜</div>
-      <div>좋아요 수</div>
+    <div className="mylike">
+      <div className="mylike-posts">
+        {post?.result.map((el) => (
+          <Fragment key={el._id}>
+            <Post page={"like"} id={el._id} onClick={onClickMoveDetail(el)} src={el.image_address[0]}
+            title={el.post_title} writer={el.writer} time={el.post_time} like={el.like_count}/>
+          </Fragment>
+          ))}
+      </div>
     </div>
   );
 };
