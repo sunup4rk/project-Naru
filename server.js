@@ -101,7 +101,7 @@ function LevelCheck(_id) {
         else if(result.user_point > 3000 && result.user_point <= 4000){
             lv = 4;
         }
-        else if(result.user_point > 4000 && result.user_point <= 5000){
+        else if(result.user_point > 4000){
             lv = 5;
         }
         db.collection('user_info').updateOne({_id : _id}, {$set : {user_level : lv}})
