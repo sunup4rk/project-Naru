@@ -1140,7 +1140,7 @@ app.post('/signup', (req, res) => {
                 email               : req.body.email,
                 nickname            : req.body.nickname,
                 password            : req.body.password,
-                profile_image_path  : process.env.DEFAULT_PROFILE,
+                profile_image_path  : "",
                 posting_count       : 0,
                 like_post           : [],
                 user_point          : 0,
