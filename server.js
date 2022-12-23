@@ -85,8 +85,31 @@ var moment = require('moment');
 require('moment-timezone');
 moment.tz.setDefault("Asia/Seoul");
 
+// ================================= 사용자 레벨 체크 함수 ============================================ //
+function LevelCheck(_id) {
+    db.collection('user_info').findOne({_id : _id}, function(err, result){
+        var lv = 0;
+        if(result.user_point <= 1000){
+            lv = 1;
+        }
+        else if(result.user_point > 1000 && result.user_point <= 2000){
+            lv = 2;
+        }
+        else if(result.user_point > 2000 && result.user_point <= 3000){
+            lv = 3;
+        }
+        else if(result.user_point > 3000 && result.user_point <= 4000){
+            lv = 4;
+        }
+        else if(result.user_point > 4000 && result.user_point <= 5000){
+            lv = 5;
+        }
+        db.collection('user_info').updateOne({_id : _id}, {$set : {user_level : lv}})
+    })  
+}
 
-// ================================= 크롤링 ================================================== //
+
+// ================================= 크롤링 코드 영역 ================================================== //
 
 const crawlTime = moment().format('YYYY-MM-DD')
 const puppeteer = require( "puppeteer" );
@@ -111,20 +134,6 @@ async function CrawlGame () {
     for (var i = 0; i < lists.length; i++){
         resultGame[i] = $(lists[i]).find("tr > td.name").text()
     }
-    // const imgpage = await browsertest.newPage()
-    //     await imgpage.goto('https://namu.wiki');
-
-    //     // const inputArea = await imgpage.$('.search');
-    //     // const searchBtn = await imgpage.$('#E8Ow8AfSl > span.tNb7IB9G > button:nth-child(1)');
-    //     // await imgpage.waitForSelector('#KrL7prAiD > input[type=search]')
-    //     // await inputArea.type('리그 오브 레전드');
-    //     // await searchBtn.click()
-
-    //     await imgpage.type('#KrL7prAiD > input[type=search]','리그 오브 레전드');
-    //     await imgpage.type('#KrL7prAiD > input[type=search]', String.fromCharCode(13));
-    //     const gameimg = $('#lYnqWtHhT > div.\31 0260d0f > div > div > div > div > div > div > div > div > div > article > div:nth-child(6) > div > div:nth-child(6) > div > div > div > div > div > div:nth-child(11) > div > div > div > div > div > div:nth-child(1) > div > div.JPVrx4GT.MaYP-MZ6 > table > tbody > tr:nth-child(2) > td > div > div > a > span > span > img._2wJ1XSYz').find().attr('src')
-    //     console.log('gameimg : ',gameimg)
-    //     await browsertest.close()
 
     db.collection('crawling').updateOne(
         {sort : 'game'}, 
@@ -178,24 +187,6 @@ async function CrawlMovie () {
         })
     })
   
-        // for (var i = 0; i < lists.length; i++){
-        // resultMovieImg[i] = $(lists[i]).find("div > div.thumb_item > div.poster_movie > img").attr('src')
-        // resultMovie[i] = $(lists[i]).find("div > div.thumb_cont > strong > a").text()
-        // }
-        // db.collection('crawling').insertOne({
-        //         sort : 'movie',
-        //         title : resultMovie,
-        //         titleimg : resultMovieImg,
-        //         time : crawlTime,
-        //     }, function(err, result){
-        //         if(err){
-        //             console.log("크롤링 실패, 대상 웹페이지를 확인해보세요")
-        //         }
-        //         else{
-        //             console.log('영화순위 데이터 입력 완료')
-        //         }
-        
-        //     })
     browser.close();
 }
 
@@ -215,7 +206,7 @@ function CrawlCheck(){
     })
 }
 
-
+// 크롤링 페이지 요청 API
 app.get('/explore/cafe', function(req, res){
     CrawlCheck()
     db.collection('crawling').findOne({sort : 'cafe'}, function(err, result){
@@ -236,17 +227,6 @@ app.get('/explore/ent', function(req, res){
     })
 })
 
-// app.get('/explore/culture', function(req, res){
-//     CrawlCheck()
-//     db.collection('crawling').findOne({sort : 'movie'}, function(err, result){
-//         res.send({
-//             message : "영화",
-//             result : result.title,
-//             image : result.titleimg
-//         }); 
-//     })
-// })
-
 app.get('/explore/culture', function(req, res){
     CrawlCheck()
     db.collection('crawling').find({
@@ -261,41 +241,13 @@ app.get('/explore/culture', function(req, res){
     })
 })
 
-    
-
 // ================================= 크롤링 끝 ================================================== //
 
 
-    
-app.get('/', function(req, res) {
-    console.log("CrawlGame?")
-    CrawlGame()
-    // ==================== 크롤링 DB구역에 데이터가 없을 때 한번만! =============================
-    // if (true){
-    //     db.collection('crawling').insertOne({
-    //         sort : 'time',
-    //         time : crawlTime,
-    //     }, function(err, result){
-    //         console.log('최초 데이터 입력')
-    //         
-    //     })
-    // }
-    // =========================================================================================
-    res.render('main.ejs');   
-});
-
-
-
-
-app.get('/explore', function(req, res) {
-    res.render('explore.ejs');             // 정보 페이지
-});
-
-
-
-
+// 커뮤니티 - 전체 글 불러오기
 app.get('/community', function(req, res) { 
     db.collection('post').find({writer: {$nin: [""]}}).toArray(function(err, result){
+        console.log(result.length)
         result.reverse()
         if (err) {
             res.json({message : "전송 실패"})
@@ -304,6 +256,7 @@ app.get('/community', function(req, res) {
             res.status(200).send({
                 message : "조회 성공",
                 result : result,
+                totalpost : result.length
             });         
         }
     });
@@ -314,7 +267,7 @@ app.delete('/community', function(req, res){
     res.json({message : "삭제 완료"})
 })
 
-// ======================================= 검색기능 테스트 영역 ===================================================== //
+// ======================================= 검색기능 ===================================================== //
 
 app.get('/test', function(req, res){
     db.collection('post').find().toArray(function(err, result){
@@ -349,30 +302,9 @@ app.get('/search', function(req, res){
             })
         }
     })
-    // db.collection('post').aggregate(condition).toArray(function(err, result){
-        
-    //     // if (err) {
-    //     //     res.json({message : "검색 오류"})
-    //     // }
-    //     // else if(result !== undefined){
-    //     //     console.log("검색 완료");
-    //     //     res.status(200).send({
-    //     //         message : "검색 완료",
-    //     //         result : result,
-    //     //     });         
-    //     // }
-    //     // else{
-    //     //     console.log("검색 완료, 결과값 없음")
-    //     //     res.status(200).send({
-    //     //         message : "검색 결과 없음",
-    //     //         result : result,
-    //     //     });  
-    //     // }
-    // })
 })
-// ======================================= 검색기능 테스트 영역 끝 =================================================== //
 
-
+// 커뮤니티 - 인기글 로드 코드 
 app.get('/best', function(req, res) {
     db.collection('post').find({ 
         'like_count' : { '$gt' : 0 } 
@@ -391,7 +323,7 @@ app.get('/best', function(req, res) {
     });
 })
 
-// 좋아요 구현
+// 커뮤니티 -  상세페이지 - 좋아요 코드
 app.post("/community/detail/like/:id", function(req, res) {
     db.collection('post').findOne({_id : parseInt(req.params.id)}, function(err, result) {
         var chk = false
@@ -451,6 +383,8 @@ app.post("/community/detail/like/:id", function(req, res) {
         }
     )
 })
+
+// 커뮤니티 - 글 작성 페이지 요청 코드
 app.get("/community/write", function(req, res) {
     db.collection('post_count').findOne({name : 'postcnt'}, function(err, result) {
         let postId = Number(result.total_post) + 1
@@ -480,6 +414,8 @@ app.get("/community/write", function(req, res) {
         )
     })
 })
+
+// 글 작성 페이지 최종작성 API
 app.post("/community/write/", function(req, res) {
     db.collection('post').updateOne(
         {_id: req.body.postId},
@@ -504,12 +440,14 @@ app.post("/community/write/", function(req, res) {
             else {
                 // console.log("post_id :", postId, " 등록");
                 UpdateUserInfo(req.user._id);
+                LevelCheck(req.user._id)
                 res.status(200).json({message : "등록 성공"});         
             }
         }
     )
 })
 
+// 글 작성시 포인트 업데이트
 function UpdateUserInfo(_id) {
     db.collection('user_info').updateOne(
         {_id : _id},
@@ -524,6 +462,7 @@ function UpdateUserInfo(_id) {
     )
 }
 
+// 글 작성시 전체 포스트 카운터 수 증가
 function UpdatePostCount() {
     db.collection('post_count').updateOne(
         {name : 'postcnt'},
@@ -627,6 +566,7 @@ app.delete('/community/delete/:id', function(req, res) {
             // 게시글 삭제
             db.collection('post').deleteOne({_id : parseInt(req.params.id)}, function(err, result) {
                 // 포인트 -30, 게시글 수 -1
+                LevelCheck(req.user._id)
                 db.collection('user_info').updateOne(
                     {_id : req.user._id}, 
                     {$inc : {user_point : -30, posting_count : -1}}, 
@@ -642,7 +582,7 @@ app.delete('/community/delete/:id', function(req, res) {
     });
 })
 
-// 포인트 페이지
+// 포인트 페이지 이동 API
 app.get("/point", function(req, res){
     if (!req.isAuthenticated()) {
         res.json({message : "비회원"})
@@ -657,6 +597,7 @@ app.get("/point", function(req, res){
     }
 })
 
+// 포인트 게임 처리 코드
 app.post("/point/start", function(req, res){
     if (!req.isAuthenticated()) {
         res.json({message : "비회원"})
@@ -668,110 +609,45 @@ app.post("/point/start", function(req, res){
         var tempPoint = req.body.point
         const cardValue = Math.floor(Math.random() * 100) + 1
         const value = req.body.value
-        var CardResult = ""
+        var cardResult = ""
 
-        // 카드값 정하기
-        console.log(cardValue)
         if(cardValue > 0 && cardValue <= 5){
-            CardResult = "UR"
-        }
-        else if(cardValue > 5 && cardValue <= 20){
-            CardResult = "SR"
-        }
-        else if(cardValue > 20 && cardValue <= 55){
-            CardResult = "R"
-        }
-        else if(cardValue > 55 && cardValue <= 100){
-            CardResult = "N"
-        }
-
-        // 포인트 정산
-        if (CardResult ==  'N'){
-            tempPoint = tempPoint - 80
-        }
-        else if (CardResult ==  'R'){
-            tempPoint = tempPoint - 55
-        }
-        else if (CardResult ==  'SR'){
-            tempPoint = tempPoint + 100
-        }
-        else if (CardResult ==  'UR'){
+            cardResult = "UR"
             tempPoint = tempPoint + 300
         }
+        else if(cardValue > 5 && cardValue <= 20){
+            cardResult = "SR"
+            tempPoint = tempPoint + 100
+        }
+        else if(cardValue > 20 && cardValue <= 55){
+            cardResult = "R"
+            tempPoint = tempPoint - 55
+        }
+        else if(cardValue > 55 && cardValue <= 100){
+            cardResult = "N"
+            tempPoint = tempPoint - 80
+        }
+
         db.collection('user_info').updateOne(
             {_id : req.user._id},
             {$set : {user_point : tempPoint}}, function(err, result){
-                console.log("point : ", tempPoint)
-                console.log("value : ",value)
-                console.log("cardValue : ",CardResult)
+                LevelCheck(req.user._id)
                 res.send({
                     message : "포인트게임 완료",
                     point : tempPoint,
                     value : value,
-                    cardValue : CardResult,
+                    cardValue : cardResult,
                 });   
         })
     }
 })
-
-app.post("/point/result", function(req, res){
-    const card = req.body.card
-    var score = 0
-
-    if (!req.isAuthenticated()) {
-        res.json({message : "비회원"})
-    }
-    else{
-        if (card == "N"){
-            score = 20
-        }
-        else if (card == "R"){
-            score = 45
-        }
-        else if (card == "SR"){
-            score = 200
-        }
-        else if(card == "UR"){
-            score = 400
-        }
-        else{
-            res.json({message : "에러"})
-        }
-        db.collection('user_info').updateOne(
-            {_id : req.user.id},
-            {$inc : {user_point : score}}, function(err, result){
-            res.send({
-                message : "포인트게임 완료",
-                point : result.user_point
-            }); 
-        })
-    }
-})
-
-
-// app.post('/point', function(req,res) { 
-//     if (!req.isAuthenticated()) {
-//         res.send('<script>alert("로그인해주세요"); location.href="/signin";</script>')
-//     }
-//     else {
-//         db.collection('user_info').updateOne(
-//             {id : req.user.id}, 
-//             {$set : {point : req.body.getpoint}}, 
-//             function(err, result) {
-//                 if (err) return err;
-//                 console.log('process complete')
-//                 res.redirect('/point');
-//             }
-//         )
-//     }
-// })
-
 
 // control - userinfo 시작 ///////////////////////////////////////////////////////////////////////////
 
 // 내 정보 요청 API
 app.get('/mypage', (req, res) => {
     db.collection('user_info').findOne({_id : req.user._id}, function(err, result) {
+        LevelCheck(req.user._id)
         const userResult = result;
         if (err) { res.json({message: "로그인 필요"}); }
         else{
@@ -804,9 +680,8 @@ app.get('/mypage/edit', (req, res) => {
     });
 })
 
-// 회원정보 수정 API
+// 회원정보 수정 API - 닉네임 변경
 app.post('/mypage/edit', (req, res) => {
-    // 닉네임 변경
     var nicknamechk = true
 
     if (req.body.nickname == ""){
@@ -861,16 +736,19 @@ app.get('/mypage/like', (req, res) => {
     db.collection('post').find({like_user : req.user._id.toString()}).sort({'_id' : -1}).toArray(function(err, result){
         res.send({
             message : "좋아요",
-            result : result
+            result : result,
+            totalpost : result.length,
         }); 
     })
 })
 
+// 내가 쓴 게시물 요청
 app.get('/mypage/post', (req, res) => { 
     db.collection('post').find({user_id : req.user._id}).sort({'_id' : -1}).toArray(function(err, result){
         res.send({
             message : "게시글",
-            result : result
+            result : result,
+            totalpost : result.length,
         }); 
     })
 })
@@ -880,7 +758,7 @@ app.get('/mypage/post', (req, res) => {
 
 
 
-// 내가 쓴 게시물 요청
+
 
 
 // control - userinfo 끝 ////////////////////////////////////////////////////////////////////////////
@@ -1098,6 +976,7 @@ const uploadToBucket = (key, Body) => {
 app.post('/islogin', (req, res) => {
     if (!req.user) { res.send({message: "로그인 실패"}); }
     else {
+        LevelCheck(req.user._id)
         res.send({
             message: "로그인 성공",
             nickname: req.user.nickname,
