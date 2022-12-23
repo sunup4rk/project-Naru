@@ -8,6 +8,7 @@ import MapPost from '../../components/common/map/MapPost';
 import DaumPostcode from "react-daum-postcode";
 import Button01 from './../../components/common/button/Button01';
 import Button02 from '../../components/common/button/Button02';
+import Button03 from '../../components/common/button/Button03';
 import axios from 'axios';
 import uuid from 'react-uuid'
 import './Write.scss';
@@ -108,7 +109,7 @@ const Write = (props) => {
           <div className="write__input__location">
             <MapPost address={getValues("address")}/>
             <div className="write__input__location__address">
-              <button type="button" onClick={onClickAddressSearch}>주소 찾기</button>
+              <Button03 type={"button"} text={"주소 찾기"} onClick={onClickAddressSearch} />
               <input className="write__input__location__address " type="text" {...register("address")} placeholder="주소를 입력하세요." readOnly/>
               <input className="write__input__location__address" type="text" {...register("addressDetail")} placeholder="상세주소를 입력하세요." />
             </div>

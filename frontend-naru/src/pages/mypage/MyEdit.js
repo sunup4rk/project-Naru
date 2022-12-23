@@ -5,6 +5,8 @@ import { Modal } from '../../components/common/modal/Modal';
 import UploadProfile from '../../components/common/upload/UploadProfile';
 import axios from 'axios';
 import './MyEdit.scss';
+import Input01 from './../../components/common/input/Input01';
+import Button01 from './../../components/common/button/Button01';
 
 const MyEdit = () => {
   const [ user, setUser ] = useState();
@@ -51,13 +53,13 @@ const MyEdit = () => {
     })
     .then((response) => {
         if(response.data.message === "수정 성공") {
-          Success("회원정보 수정 완료", "회원정보가 수정되었습니다.")
+          Success("수정 완료", "회원정보가 수정되었습니다.")
           window.location.reload();
         } else {
-            Warning("회원정보 수정 실패", response.data.message);
+            Warning("수정 실패", response.data.message);
         }
     }).catch((error) => {
-        Failure("회원정보 수정 실패", "회원정보 수정에 실패했습니다.")
+        Failure("수정 실패", "회원정보 수정에 실패했습니다.")
     })
   }
 
@@ -65,9 +67,17 @@ const MyEdit = () => {
     <div className="myedit">
       <form className="myedit-wrapper" onSubmit={handleSubmit(onClickEdit)}>
       <UploadProfile onChangeImage={onChangeImage} image={image} profile={user?.profile}/>
-        이메일 <input type="text" defaultValue={user?.email} disabled/>
-        닉네임<input type={"text"} defaultValue={user?.nickname} {...register("nickname")}/>
-        <button>수정</button>
+      <div className="myedit__input">
+        <div>
+          <span>이메일</span>
+          <Input01 defaultValue={user?.email} disabled={true} />
+        </div>
+        <div>
+          <span>닉네임</span>
+          <Input01 type={"text"} defaultValue={user?.nickname} register={register("nickname")} />
+        </div>
+      </div>
+        <Button01 text={"수정"} onClick={onClickEdit} size={"s"}/>
       </form>
     </div>
   );

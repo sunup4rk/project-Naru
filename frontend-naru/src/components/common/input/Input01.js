@@ -3,7 +3,6 @@ import styled from 'styled-components';
 const Input = styled.input`
     width: ${(props) => props.size === 's' && '12rem'};
     width: ${(props) => props.size === 'm' && '22rem'};
-    width: ${(props) => props.size === 'l' && '90%'};
     
     // min-width: 13rem;
     height: 2.8rem;
@@ -21,7 +20,7 @@ const Input = styled.input`
 const Input01 = (props) => {
     return (
         <Input type={props.type} placeholder={props.placeholder} size={props.size} disabled={props.disabled}
-        {...props.register}/>
+        defaultValue={props.defaultValue} {...props.register}/>
     );
 };
 

@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { Modal } from '../../components/common/modal/Modal';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
+import './MyEditpw.scss';
+import Input01 from './../../components/common/input/Input01';
+import Button01 from './../../components/common/button/Button01';
 
 const MyEditpw = () => {
   const [check, setCheck] = useState(false);
   const { Success, Warning, Failure } = Modal();
-  const { register, handleSubmit, getValues } = useForm();
+  const { register, handleSubmit, getValues, setValue } = useForm();
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -22,13 +25,14 @@ const MyEditpw = () => {
 
   }, [])
 
-  const onClickCheck = () => {
+  const onClickCheck = (data) => {
     axios.post("http://localhost:8080/mypage/editpw/check", {
-      password: getValues("passwordCheck")
+      password: data.password
     })
     .then((response) => {
         if(response.data.message === "비밀번호 일치") {
           setCheck(true)
+          setValue("password", "")
         } else {
           Warning("확인 실패", response.data.message);
         }
@@ -37,33 +41,39 @@ const MyEditpw = () => {
     })
   }
 
-  const onClickEdit = () => {
-    axios.put("http://localhost:8080/mypage/editpw/change", {
-      password: getValues("passwordEdit")
-    })
-    .then((response) => {
-        if(response.data.message === "비밀번호가 변경되었습니다.") {
-          Success("변경 완료", response.data.message)
-        }
-    }).catch((error) => {
-        Failure("변경 실패", "비밀번호 변경에 실패했습니다.")
-    })
+  const onClickEdit = (data) => {
+    if(data.password === data.passwordCheck) {
+      axios.put("http://localhost:8080/mypage/editpw/change", {
+        password: data.password
+      })
+      .then((response) => {
+          if(response.data.message === "비밀번호가 변경되었습니다.") {
+            Success("변경 완료", response.data.message)
+          }
+      }).catch((error) => {
+          Failure("변경 실패", "비밀번호 변경에 실패했습니다.")
+      })
+    }
+    else {
+      Warning("변경 실패", "비밀번호가 일치하지 않습니다.")
+    }
   }
 
   return (
-    <div>
+    <div className="myeditpw">
       { check ? 
-      <form style={{display: "flex", flexDirection:"column"}} onSubmit={handleSubmit(onClickEdit)}>
-        비밀번호 변경<input type={"password"} {...register("passwordEdit")}/>
-        <input type={"text"} />
-        <button>변경</button>
+      <form className="myeditpw-wrapper" onSubmit={handleSubmit(onClickEdit)}>
+        <span>비밀번호 변경</span>
+        <Input01 type={"password"} register={register("password")} placeholder={"비밀번호"}/>
+        <Input01 type={"password"} register={register("passwordCheck")} placeholder={"비밀번호 확인"}/>
+        <Button01 text={"변경"} size={"s"} />
       </form>
-
       :
-        <form style={{display: "flex", flexDirection:"column"}} onSubmit={handleSubmit(onClickCheck)}>
-        비밀번호 재확인<input type={"password"} {...register("passwordCheck")}/>
-        <button>확인</button>
-        </form>
+      <form className="myeditpw-wrapper" onSubmit={handleSubmit(onClickCheck)}>
+        <span>비밀번호 재확인</span>
+        <Input01 type={"password"} register={register("password")} placeholder={"비밀번호"} />
+        <Button01 text={"확인"} size={"s"} />
+      </form>
       }
     </div>
   );
