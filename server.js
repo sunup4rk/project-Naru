@@ -119,9 +119,6 @@ async function CrawlGame () {
     const browser = await puppeteer.launch({
         headless: true
     });
-    const browsertest = await puppeteer.launch({
-        headless: false
-    });
     
     console.log("게임 크롤링 실행")
     const page = await browser.newPage()
