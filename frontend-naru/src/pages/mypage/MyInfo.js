@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Modal } from '../../components/common/modal/Modal';
 import axios from 'axios';
 import './MyInfo.scss';
+import './../community/List.scss';
 
 const MyInfo = () => {
   const [user, setUser] = useState();
@@ -106,7 +107,7 @@ const MyInfo = () => {
           <img src="/images/icon/rightArrow.svg" alt="arrow" />
         </div>
         <div className="myinfo-post__postlist">
-        {user?.write_post.map((el) => (
+          {user?.write_post.map((el) => (
               <div className="myinfo-post__postitem" key={el._id}>
                 <div className="list__post__img" id={el._id} onClick={onClickMoveDetail(el)}>
                   {el?.image_address[0] ?
