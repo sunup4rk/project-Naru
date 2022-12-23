@@ -104,7 +104,7 @@ const Detail = () => {
               <MapDetail address={post?.post_address} detail={post?.post_address_detail}/>
 
             <div className="detail__post__image">
-            {post?.image_address.map((el) => (
+            {post?.image_address.filter((el) => el).map((el) => (
               <div key={uuid()}>
                 <img src={el} alt="post image"/>
               </div>
