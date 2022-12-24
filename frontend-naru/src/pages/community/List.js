@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Fragment, useEffect, useState } from 'react';
-import Bestpost from '../../components/common/bestpost/BestPost';
 import Button01 from './../../components/common/button/Button01';
+import BestPost from './../../components/common/post/BestPost';
 import Post from '../../components/common/post/Post';
 import axios from 'axios';
 import Swal from 'sweetalert2'
@@ -54,7 +54,7 @@ const List = () => {
   
   return (
     <>
-    <Bestpost />
+    <BestPost />
     <div className="list">
       <h1>전체글</h1>
       <div className="list__wrapper">

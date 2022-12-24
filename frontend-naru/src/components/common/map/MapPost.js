@@ -9,7 +9,7 @@ const Map = styled.div`
 
 const MapPost = (props) => {
     useEffect(() => {
-        const script = document.createElement("script"); // <script></script>
+        const script = document.createElement("script");
         script.src =
         "//dapi.kakao.com/v2/maps/sdk.js?appkey=58129ac07f6fdda65814d3d744bfb178&autoload=false&libraries=services";
         document.head.appendChild(script);
@@ -65,7 +65,7 @@ const MapPost = (props) => {
     }, [props.address]);
 
     return (
-        <Map id="map"></Map>
+        <Map id="map" />
     );
 };
 

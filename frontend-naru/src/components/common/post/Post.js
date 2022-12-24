@@ -33,7 +33,6 @@ const PostImg = styled.img`
 const DefaultImg = styled.img`
   width: 6rem;
 `
-
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -67,7 +66,8 @@ const Content = styled.div`
   
     span {
       color: #808080;
-      font-size: ${(props) => props.page === "list" || props.page === "info"  || props.page === "like" ? "0.815rem" : ""};
+      font-size: 0.8125rem;
+      /* font-size: ${(props) => props.page === "list" || props.page === "info"  || props.page === "like" ? "0.815rem" : ""}; */
       font-size: ${(props) => props.page === "best" && "1rem"};
     }
   
