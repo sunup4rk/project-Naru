@@ -32,7 +32,6 @@ const UploadProfile = (props) => {
         axios.post("http://localhost:8080/mypage/profile", formData)
         .then(res => {
             props.onChangeImage(res.data.location, props.index)
-            // console.log(res.data.location, props.index)
         }).catch(err => {
             Failure("이미지 업로드 실패", "이미지 업로드에 실패했습니다.")
         })
@@ -50,13 +49,13 @@ const UploadProfile = (props) => {
             }
         }) 
         .catch(err => {
-            alert("error")
+            Failure("삭제 실패", "이미지 삭제에 실패했습니다.")
         })
     }
 
     return(
         <>
-        {props.image ?
+        {props.profile ?
         (<Image src={props.profile} onClick={imageDelete} alt="upload image" />)
         :
         (<Image src={"/images/icon/user.svg"} alt="profile image" />)

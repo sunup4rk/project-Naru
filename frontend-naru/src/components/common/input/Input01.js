@@ -20,7 +20,7 @@ const Input = styled.input`
 const Input01 = (props) => {
     return (
         <Input type={props.type} placeholder={props.placeholder} size={props.size} disabled={props.disabled}
-        defaultValue={props.defaultValue} {...props.register}/>
+        defaultValue={props.defaultValue} {...props.register} onChange={props.onChange} /> 
     );
 };
 
