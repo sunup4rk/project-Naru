@@ -244,7 +244,6 @@ app.get('/explore/culture', function(req, res){
 // 커뮤니티 - 전체 글 불러오기
 app.get('/community', function(req, res) { 
     db.collection('post').find({writer: {$nin: [""]}}).toArray(function(err, result){
-        console.log(result.length)
         result.reverse()
         if (err) {
             res.json({message : "전송 실패"})
@@ -259,9 +258,19 @@ app.get('/community', function(req, res) {
     });
 })
 
+// 페이지 벗어났을 때 빈 게시물 삭제 (커뮤니티 페이지로 이동시)
 app.delete('/community', function(req, res){
-    // db.collection('post').deleteMany({writer : ""})
-    res.json({message : "삭제 완료"})
+    if(!req.isAuthenticated()){
+        res.json({message : "삭제 완료"})
+    }
+    else{
+        db.collection('post').findOne({user_id : req.user._id, writer : ""}, function(err, result){
+            if(result !== null){
+                db.collection('post').deleteOne({user_id : result.user_id, writer : ""})
+            }
+            res.json({message : "삭제 완료"})
+        })
+    }
 })
 
 // ======================================= 검색기능 ===================================================== //
