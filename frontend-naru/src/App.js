@@ -26,6 +26,9 @@ import MyPost from "./pages/mypage/MyPost";
 import MyEditpw from "./pages/mypage/MyEditpw";
 import Contents from './pages/main/Contents';
 import Point from "./pages/point/Point";
+import MyQna from "./pages/mypage/MyQna";
+import Qna from "./pages/qna/Qna";
+import QnaLayout from "./components/layout/QnaLayout";
 
 function App() {
   return (
@@ -41,7 +44,7 @@ function App() {
             <Route path="point" element={<PointLayout />}>
               <Route index element={<Point />} />
             </Route>
-            <Route path="qna" element={<QnaBanner />} />
+            <Route path="qna" element={<QnaLayout />} />
             <Route path="signin" element={<SignIn />} />
             <Route path="signup" element={<SignUp />} />
               
@@ -64,6 +67,7 @@ function App() {
               <Route path="editpw" element={<MyEditpw />} />
               <Route path="like" element={<MyLike />} />
               <Route path="post" element={<MyPost />} />
+              <Route path="qna" element={<MyQna />} />
             </Route>
           </Routes>
           <Footer />

@@ -4,7 +4,6 @@ import { Modal } from "../../components/common/modal/Modal";
 import Button01 from './../../components/common/button/Button01';
 import axios from 'axios';
 import './Point.scss';
-import Input01 from './../../components/common/input/Input01';
 
 const Point = () => {
     const navigate = useNavigate();

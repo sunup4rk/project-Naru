@@ -1,7 +1,6 @@
 import './Banner03.scss'
 
 export const ExploreBanner = () => {
-
     return(
         <div className='Banner03'>
             <div className='Banner03-text explore'>
@@ -13,7 +12,6 @@ export const ExploreBanner = () => {
 }
 
 export const CommunityBanner = () => {
-
     return(
         <div className='Banner03'>
             <div className='Banner03-text community'>
@@ -25,12 +23,11 @@ export const CommunityBanner = () => {
 }
 
 export const PointBanner = () => {
-
     return(
         <div className='Banner03'>
             <div className='Banner03-text point'>
                 <h1>포인트 게임</h1>
-                <p>일확천금의 행운을 빕니다!</p>
+                <p>행운을 빕니다!</p>
             </div>
         </div>
     )
@@ -38,7 +35,6 @@ export const PointBanner = () => {
 
 
 export const QnaBanner = () => {
-
     return(
         <div className='Banner03'>
             <div className='Banner03-text qna'>
