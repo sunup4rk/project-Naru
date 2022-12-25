@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { loginState } from '../../../assets/State';
+import { loginState } from './../../../store/State';
 import Nav03 from '../navigation/Nav03';
 import Nav02 from '../navigation/Nav02';
 import axios from 'axios';

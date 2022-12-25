@@ -1,18 +1,20 @@
 .banner01 {
-  background-color: #d9d9d9;
+  width: 100vw;
   
   .slick-slider {
     width: 100%;
   }
 
-  // .slick-prev {
-  //   left: 20px;
-  //   z-index: 99;
-  // }
+  .slick-prev {
+    // left: 20px;
+    // z-index: 99;
+    display: none;
+  }
 
-  // .slick-next {
-  //   right: 20px;
-  // }
+  .slick-next {
+    // right: 20px;
+    display: none;
+  }
 
   .slick-dots {
     color: #ffffff;
@@ -29,12 +31,12 @@
 
   h1 {
     font-family: Jalnan;
-    font-size: 2.26rem;
+    font-size: 2.25rem;
   }
 
   p {
     font-family: SUIT-Light;
-    font-size: 2.26rem;
+    font-size: 2.25rem;
     padding-top: 15px;
   }
 
@@ -45,6 +47,7 @@
     height: 31.25rem;
     color: #ffffff;
     outline: none;
+    padding: 10%;
   }
 
   &__left {
@@ -73,9 +76,9 @@
     }
   }
 
-
   &__right{
-    padding-left: 100px;
+    padding-left: 8rem;
+    width: 30rem;
   }
 }
 

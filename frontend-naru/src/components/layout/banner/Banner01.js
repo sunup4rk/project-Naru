@@ -17,16 +17,8 @@ const Banner01 = () => {
         autoplaySpeed: 2500
     };
 
-    const onClickMoveExplore = () => {
-        navigate("/explore/cafe");
-    }
-
-    const onClickMoveCommunity = () => {
-        navigate("/community");
-    }
-
-    const onClickMovePoint = () => {
-        navigate("/point");
+    const onClickMove = (page) => () => {
+        navigate(`/${page}`);
     }
     
     return(
@@ -37,7 +29,7 @@ const Banner01 = () => {
                     <h1>“기분 전환이 필요한 나. 근데 뭐하지?”</h1>
                     <p>지금 내 주변에서 찾아보세요.</p>
                     <div >
-                        <button onClick={onClickMoveExplore}>바로가기</button>
+                        <button onClick={onClickMove("explore/cafe")}>바로가기</button>
                         <img src="images/icon/rightArrow_white.svg" alt="arrow"/>
                     </div>
                 </div>
@@ -48,22 +40,22 @@ const Banner01 = () => {
                     <h1>나만의 장소를 추천하고 포인트 받자!</h1>
                     <p>포인트를 모아 등급을 올려보세요.</p>
                     <div>
-                        <button onClick={onClickMoveCommunity}>바로가기</button>
+                        <button onClick={onClickMove("community")}>바로가기</button>
                         <img src="images/icon/rightArrow_white.svg" alt="arrow"/>
                     </div>
                 </div>
-                <img src="images/carousel02.svg" alt="main_banner"/>
+                <img className="banner01__right" src="images/carousel02.svg" alt="main_banner"/>
             </div>
             <div className="banner01__item slideC">
                 <div className="banner01__left">
-                    <h1>포인트를 더 빨리 모으고 싶다면?</h1>
+                    <h1>포인트를 모으는 또다른 방법?</h1>
                     <p>미니게임에 도전해보세요!</p>
                     <div>
-                        <button onClick={onClickMovePoint}>바로가기</button>
+                        <button onClick={onClickMove("point")}>바로가기</button>
                         <img src="images/icon/rightArrow_white.svg" alt="arrow"/>
                     </div>
                 </div>
-                <img src="images/carousel03.svg" alt="main_banner"/>
+                <img className="banner01__right" src="images/carousel03.svg" alt="main_banner"/>
             </div>
             </Slider>
         </div>

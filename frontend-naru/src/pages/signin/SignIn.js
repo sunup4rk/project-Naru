@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import { Modal } from './../../components/common/modal/Modal';
 import { useRecoilState } from 'recoil';
-import { loginState } from '../../assets/State'; 
+import { loginState } from '../../store/State';
 import Button01 from "../../components/common/button/Button01";
 import Input01 from "../../components/common/input/Input01";
 import axios from 'axios';

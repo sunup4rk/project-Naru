@@ -1,10 +1,9 @@
-import { GlobalStyles } from "./components/common/styles/GlobalStyles";
+import { GlobalStyles } from "./styles/GlobalStyles";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 import Header from "./components/layout/header/Header";
 import Footer from "./components/layout/footer/Footer";
 import Nav01 from "./components/layout/navigation/Nav01";
-import { QnaBanner } from "./components/layout/banner/Banner03";
 import Cafe from "./pages/explore/Cafe";
 import Entertainment from "./pages/explore/Entertainment";
 import Culture from "./pages/explore/Culture";
@@ -24,11 +23,10 @@ import MyEdit from "./pages/mypage/MyEdit";
 import MyLike from "./pages/mypage/MyLike";
 import MyPost from "./pages/mypage/MyPost";
 import MyEditpw from "./pages/mypage/MyEditpw";
-import Contents from './pages/main/Contents';
 import Point from "./pages/point/Point";
 import MyQna from "./pages/mypage/MyQna";
-import Qna from "./pages/qna/Qna";
 import QnaLayout from "./components/layout/QnaLayout";
+import Main from "./pages/main/Main";
 
 function App() {
   return (
@@ -38,7 +36,7 @@ function App() {
           <Header category={<Nav01 />} />
           <Routes>
             <Route path="/" element={<Layout />}>
-              <Route index element={<Contents />} />
+              <Route index element={<Main />} />
             </Route>
 
             <Route path="point" element={<PointLayout />}>

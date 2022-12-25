@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import RankingCulture from './ranking/RankingCulture';
+import RankingCulture from '../../components/ranking/RankingCulture';
 import MapCategory from '../../components/common/map/MapCategory';
 import Button01 from '../../components/common/button/Button01';
 import './Explore.scss';

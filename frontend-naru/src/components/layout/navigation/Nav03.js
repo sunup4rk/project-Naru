@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useRecoilState } from 'recoil';
-import { loginState } from "../../../assets/State";
+import { loginState } from "../../../store/State";
 import { Modal } from "../../common/modal/Modal";
 import axios from 'axios';
 import "./Nav03.scss";

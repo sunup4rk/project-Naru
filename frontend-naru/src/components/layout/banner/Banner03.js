@@ -27,7 +27,6 @@ export const PointBanner = () => {
         <div className='Banner03'>
             <div className='Banner03-text point'>
                 <h1>포인트 게임</h1>
-                <p>행운을 빕니다!</p>
             </div>
         </div>
     )

@@ -34,18 +34,18 @@ export const Modal = () => {
         });
       };
 
-      const Question = (title, text) => {
+      const Info = (title, text) => {
         Swal.fire({
-            icon: "question",
+            icon: "info",
           title: title,
           text: text,
           confirmButtonColor: "#4461AA",
           showConfirmButton: true,
-          showCancelButton: true,
+          showCancelButton: false,
         });
       };
 
     return (
-        {Success, Warning, Failure, Question}
+        {Success, Warning, Failure, Info}
     );
 };

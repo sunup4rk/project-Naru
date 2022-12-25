@@ -1,6 +1,16 @@
 import './Footer.scss'
+import { Modal } from './../../common/modal/Modal';
 
 const Footer = () => {
+    const { Info } = Modal();
+
+    const onClickPhone = (text) => () => {
+        Info("Phone", text)
+    }
+
+    const onClickMail = (text) => () => {
+        Info("Mail", text)
+    }
 
     return(
         <div className="footer">
@@ -12,8 +22,8 @@ const Footer = () => {
                         </li>
                         <li className="footer-contents__member">
                             <span>김혜진</span>
-                            <img src="/images/icon/phone.svg" alt="phone"/>
-                            <img src="/images/icon/gmail.svg" alt="gmail"/>
+                            <img src="/images/icon/phone.svg" alt="phone" onClick={onClickPhone("010-2144-6422")}/>
+                            <img src="/images/icon/gmail.svg" alt="gmail" onClick={onClickMail("eunyu0604@gmail.com")}/>
                         </li>
                     </ul>
 
@@ -23,13 +33,13 @@ const Footer = () => {
                         </li>
                         <li className="footer-contents__member">
                             <span>박선우</span>
-                            <img src="/images/icon/phone.svg" alt="phone"/>
-                            <img src="/images/icon/gmail.svg" alt="gmail"/>
+                            <img src="/images/icon/phone.svg" alt="phone" onClick={onClickPhone("010-6242-4192")}/>
+                            <img src="/images/icon/gmail.svg" alt="gmail"onClick={onClickMail("sunup4rk@gmail.com")}/>
                         </li>
                         <li className="footer-contents__member">
                             <span>정두식</span>
-                            <img src="/images/icon/phone.svg" alt="phone"/>
-                            <img src="/images/icon/gmail.svg" alt="gmail"/>
+                            <img src="/images/icon/phone.svg" alt="phone" onClick={onClickPhone("010-7289-5988")}/>
+                            <img src="/images/icon/gmail.svg" alt="gmail" onClick={onClickMail("kkjo9573@gmail.com")}/>
                         </li>
                     </ul>
 
