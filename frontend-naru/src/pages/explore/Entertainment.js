@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import RankingEnt from './ranking/RankingEnt';
+import RankingEnt from '../../components/ranking/RankingEnt';
 import MapCategory from '../../components/common/map/MapCategory';
 import Button01 from './../../components/common/button/Button01';
 import './Explore.scss';

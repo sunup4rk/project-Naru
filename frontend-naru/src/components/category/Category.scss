@@ -1,0 +1,94 @@
+.category {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100px 0;
+  width: 100%;
+  background-color: #fafafa;
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 50px;
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  &__item {
+    width: 19rem;
+    height: 19rem;
+    box-shadow: 3px 3px 4px 0 rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    background-color: #ffffff;
+    margin: 10px;
+    font-size: 3rem;
+    font-family: 'Jalnan';
+    cursor: pointer;
+    overflow: hidden;
+
+    &__cafe {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.6)
+      ), url("../../assets/images/cafe.svg");
+      background-size: cover;
+      transition: all 1s ease;
+
+      &:hover {
+        background-image: url("../../assets/images/cafe.svg");
+        transition: all 1s ease;
+        transform: scale(1.2);
+        color: #ffffff;
+      }
+    }
+
+    &__ent {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.6)
+      ), url("../../assets/images/ent.svg");
+      background-size: cover;
+      transition: all 1s ease;
+
+      &:hover {
+        background-image: url("../../assets/images/ent.svg");
+        transition: all 1s ease;
+        transform: scale(1.2);
+        color: #ffffff;
+      }
+    }
+
+    &__culture {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.6)
+      ), url("../../assets/images/culture.svg");
+      background-size: cover;
+      transition: all 1s ease;
+
+      &:hover {
+        background-image: url("../../assets/images/culture.svg");
+        transition: all 1s ease;
+        transform: scale(1.2);
+        color: #ffffff;
+      }
+    }
+  }
+}

@@ -51,7 +51,6 @@ const Point = () => {
     return(
         <div className="game">
             <h1>카드 뽑기</h1>
-            <p>한 장의 카드를 고르세요.</p>
             <span>나의 포인트 : <strong>{point}</strong> P</span>
 
             <div className="game__list">
