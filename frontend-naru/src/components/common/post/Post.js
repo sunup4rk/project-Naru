@@ -19,15 +19,17 @@ const Img = styled.div`
     height: ${(props) => props.page === "list" || props.page === "info" ? "13rem" : ""};
     height: ${(props) => props.page === "best" && "15rem"};
     height: ${(props) => props.page === "like" && "10rem"};
+    border-radius: 20px 20px 0 0;
     cursor: pointer;
 `
 
 const PostImg = styled.img`
   width: 100%;
+  height: 100%;
   max-height: ${(props) => props.page === "list" || props.page === "info" ? "13rem" : ""};
   max-height: ${(props) => props.page === "best" && "15rem"};
   max-height: ${(props) => props.page === "like" && "10rem"};
-  border-radius: 20px 20px 10px 10px;
+  border-radius: 20px 20px 0 0;
 `
 
 const DefaultImg = styled.img`

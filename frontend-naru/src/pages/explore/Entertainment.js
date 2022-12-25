@@ -12,7 +12,7 @@ const Entertainment = () => {
   }
 
   return (
-    <div className='explore__wrapper'>
+    <div className='explore-wrapper'>
       <RankingEnt />
       <MapCategory search={search} value={"게임방"} />
       <Button01 text={"내 주변 오락시설 찾기"} onClick={onClickSearch}/>

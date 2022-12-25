@@ -12,7 +12,7 @@ const Cafe = () => {
   }
 
   return (
-    <div className="explore__wrapper">
+    <div className="explore-wrapper">
       <RankingCafe />
         <MapCategory search={search} value={"카페"} />
         <Button01 text={"내 주변 카페 찾기"} onClick={onClickSearch}/>

@@ -21,7 +21,7 @@ const Button = styled.button`
 
 const Button03 = (props) => {
     return (
-        <Button type={props.type} size={props.size} onClick={props.onClick}>
+        <Button type={props.type} size={props.size} onClick={props.onClick}> 
             {props.text}
         </Button>
     );

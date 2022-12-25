@@ -30,7 +30,7 @@ export const PointBanner = () => {
         <div className='Banner03'>
             <div className='Banner03-text point'>
                 <h1>포인트 게임</h1>
-                <p>좋은 장소를 찾으셨나요? 다른 회원들에게 공유하고 포인트도 받아가세요!</p>
+                <p>일확천금의 행운을 빕니다!</p>
             </div>
         </div>
     )

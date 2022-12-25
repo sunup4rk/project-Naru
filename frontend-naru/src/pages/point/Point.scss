@@ -1,0 +1,71 @@
+.game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 100px 0;
+
+  &__list {
+    display: flex;
+    padding-top: 50px;
+    padding-bottom: 20px;
+
+    div:not(:last-child) {
+      padding-right: 20px;
+    }
+  }
+
+  p {
+    font-size: 1.2rem;
+    padding-top: 15px;
+  }
+
+  span {
+    padding-top: 30px;
+    font-size: 1.25rem;
+
+    strong {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  input[type=radio] {
+    display: none;
+  }
+  
+  input[type=radio] + label {
+    display: flex;
+    justify-content: center;
+    align-items: center;    
+    width: 9rem;
+    border-radius: 1.4rem;
+    border: 2px solid #D1D9DE;
+    padding: 10px;
+    background-color: #ffffff;
+    font-family: "SUIT-Medium";
+    font-size: 1rem;
+    margin: 10px 0;
+    cursor: pointer;
+  
+    &:hover {
+        border: 2px solid #4461AA;
+    }
+  }
+  
+  input[type=radio]:checked+label {
+    background-color: #4461AA;
+    border: 2px solid #4461AA;
+    color: #ffffff;
+  }
+
+  button {
+    margin-top: 30px;
+  }
+
+}

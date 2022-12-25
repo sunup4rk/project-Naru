@@ -32,7 +32,6 @@ const Write = (props) => {
       axios.get("http://localhost:8080/community/write")
       .then((response) => {
         if(response.data) {
-          console.log(response.data.postId)
           setPostId(response.data.postId)
         }
       })

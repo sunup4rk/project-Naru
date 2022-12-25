@@ -8,8 +8,6 @@ const Map = styled.div`
 `;
 
 const MapCategory = (props) => {
-    console.log(props)
-
     const [ location, setLocation ] = useState({
         lat: 0.0,
         lon: 0.0
