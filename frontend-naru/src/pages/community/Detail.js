@@ -47,7 +47,6 @@ const Detail = () => {
         }
     })
     .catch((error) => {
-      console.log('오류')
       Failure("오류", "처리에 실패했습니다.")
     })
   }

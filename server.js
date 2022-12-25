@@ -591,7 +591,7 @@ app.delete('/community/delete/:id', function(req, res) {
 // 포인트 페이지 이동 API
 app.get("/point", function(req, res){
     if (!req.isAuthenticated()) {
-        res.json({message : "비회원"})
+        res.json({message : "로그인이 필요합니다."})
     }
     else{
         db.collection('user_info').findOne({_id : req.user._id}, function(err, result){
@@ -606,10 +606,10 @@ app.get("/point", function(req, res){
 // 포인트 게임 처리 코드
 app.post("/point/start", function(req, res){
     if (!req.isAuthenticated()) {
-        res.json({message : "비회원"})
+        res.json({message : "로그인이 필요합니다."})
     }
     else if (req.body.point < 100){
-        res.json({message : "포인트 부족"})
+        res.json({message : "포인트가 부족합니다."})
     }
     else{
         var tempPoint = req.body.point

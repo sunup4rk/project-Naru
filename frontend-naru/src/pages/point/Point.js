@@ -1,74 +1,16 @@
 import { useEffect, useState } from "react";
-import axios from 'axios';
-import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { Modal } from "../../components/common/modal/Modal";
-
-const Div =  styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100px;
-    height: 200px;
-    border: 2px solid black;
-    margin: 10px;
-`
-
-const DivR =  styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100px;
-    height: 200px;
-    border: 2px solid black;
-    margin: 10px;
-    background-color: #46BEFF;
-    color: #ffffff;
-`
-
-const DivSR =  styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100px;
-    height: 200px;
-    border: 2px solid black;
-    margin: 10px;
-    background-color: #FFE13C;
-    color: #000000;
-`
-
-const DivUR =  styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100px;
-    height: 200px;
-    border: 2px solid black;
-    margin: 10px;
-    // background-color: #FF9DFF;
-    background-color: #73EAA8;
-    color: #000000;
-`
-const Normal =  styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100px;
-    height: 200px;
-    border: 2px solid black;
-    margin: 10px;
-    background-color: #6E6E6E;
-    color: #000000;
-    border-radius : 10px;
-`
+import Button01 from './../../components/common/button/Button01';
+import axios from 'axios';
+import './Point.scss';
+import Input01 from './../../components/common/input/Input01';
 
 const Point = () => {
-    // 100포인트 있어야됨
     const navigate = useNavigate();
     const [ point, setPoint ] = useState();
-    const [ value, setValue ] = useState();
-    const [ cardValue, setCardValue ] = useState();
+    const [ select, setSelect ] = useState();
+    const [ result, setResult ] = useState();
     const { Warning } = Modal();
 
     useEffect(()=> {
@@ -79,59 +21,89 @@ const Point = () => {
                     setPoint(response.data.point)
                 }
                 else {
-                    Warning("포인트 게임", "로그인이 필요합니다.")
+                    Warning("포인트 게임", response.data.message)
                     navigate("/signin")
                 }
             })
         }
         fetchPoint();
-    }, [])
+    }, [result])
 
     const onClickReverse = () => {
         axios.post(`http://localhost:8080/point/start`, {
-            value : value,
+            value : select,
             point : point
         })
         .then((response) => {
             if(response.data.message === "포인트게임 완료") {
-                setCardValue(response.data.cardValue)
+                setResult(response.data.cardValue)
             }
             else {
-                Warning("포인트 게임", "로그인이 필요합니다.")
-                navigate("/signin")
+                Warning("포인트 게임", response.data.message)
             }
         })
     }
 
-    const onClickCard = (e) => {
-        setValue(e.target.value)
+    const onChangValue = (e) => {
+        setResult("")
+        setSelect(e.target.value)
     }
 
-    console.log(cardValue)
-    
-
     return(
-        <>
-        <div className="game-place">
-            <Div>N</Div>
-            <DivR>R</DivR>
-            <DivSR>SR</DivSR>
-            <DivUR>UR</DivUR>
-            <Normal></Normal>
+        <div className="game">
+            <h1>카드 뽑기</h1>
+            <p>한 장의 카드를 고르세요.</p>
+            <span>나의 포인트 : <strong>{point}</strong> P</span>
 
-              <input type="radio" name="card" value="card" onClick={onClickCard} readOnly/>
-              <input type="radio" name="card" value="radio-num-2"  onClick={onClickCard} readOnly/>
-             <input type="radio" name="card" value="radio-num-3" onClick={onClickCard} readOnly/>
-              <input type="radio" name="card" value="radio-num-4" onClick={onClickCard} readOnly/>
+            <div className="game__list">
+                <div className="game__card">
+                    {(select === "first" && result === "N") && <img src="/images/card/N.svg" alt="card" />}
+                    {(select === "first" && result === "R") && <img src="/images/card/R.svg" alt="card" />}
+                    {(select === "first" && result === "SR") && <img src="/images/card/SR.svg" alt="card" />}
+                    {(select === "first" && result === "UR") && <img src="/images/card/UR.svg" alt="card" />}
+                    {(!result || select !== "first") && <img src="/images/card/default.svg" alt="card" />}
+                    <input type="radio" name="card"  id="select01" value="first"onChange={onChangValue} />
+                    <label htmlFor="select01">선택</label>
+                </div>
 
-    </div>
-    
-    <form >
-        <button className="game-button" id="select-card" type="button" onClick={onClickReverse}>뒤집기</button>
-        <input className="result-area" id="card-result" /><p></p>
-        {point}
-    </form>
-    </>
+                <div className="game__card">
+                    {(select === "second" && result === "N") && <img src="/images/card/N.svg" alt="card" />}
+                    {(select === "second" && result === "R") && <img src="/images/card/R.svg" alt="card" />}
+                    {(select === "second" && result === "SR") && <img src="/images/card/SR.svg" alt="card" />}
+                    {(select === "second" && result === "UR") && <img src="/images/card/UR.svg" alt="card" />}
+                    {(!result || select !== "second") && <img src="/images/card/default.svg" alt="card" />}
+                    <input type="radio" name="card" id="select02" value="second" onChange={onChangValue} />
+                    <label htmlFor="select02">선택</label>
+                </div>
+
+                <div className="game__card">
+                    {(select === "third" && result === "N") && <img src="/images/card/N.svg" alt="card" />}
+                    {(select === "third" && result === "R") && <img src="/images/card/R.svg" alt="card" />}
+                    {(select === "third" && result === "SR") && <img src="/images/card/SR.svg" alt="card" />}
+                    {(select === "third" && result === "UR") && <img src="/images/card/UR.svg" alt="card" />}
+                    {(!result || select !== "third") && <img src="/images/card/default.svg" alt="card" />}
+                    <input type="radio" name="card" value="third" id="select03" onChange={onChangValue} />
+                    <label htmlFor="select03">선택</label>
+                </div>
+
+                <div className="game__card">
+                    {(select === "fourth" && result === "N") && <img src="/images/card/N.svg" alt="card" />}
+                    {(select === "fourth" && result === "R") && <img src="/images/card/R.svg" alt="card" />}
+                    {(select === "fourth" && result === "SR") && <img src="/images/card/SR.svg" alt="card" />}
+                    {(select === "fourth" && result === "UR") && <img src="/images/card/UR.svg" alt="card" />}
+                    {(!result || select !== "fourth") && <img src="/images/card/default.svg" alt="card" />}
+                    <input type="radio" name="card" value="fourth" id="select04" onChange={onChangValue} />
+                    <label htmlFor="select04">선택</label>
+                </div>
+            </div>
+
+            {!result && <p>1회당 100 포인트가 차감됩니다.</p>}
+            {result === "N" && <p>20 포인트 당첨! </p>}
+            {result === "R" && <p>45 포인트 당첨!</p>}
+            {result === "SR" && <p>200 포인트 당첨! 🎉</p>}
+            {result === "UR" && <p>🎉 400 포인트 당첨! 🎉</p>}
+            <Button01 text={"뒤집기"} onClick={onClickReverse} size={"s"}/>
+        </div>
     )
 }
 

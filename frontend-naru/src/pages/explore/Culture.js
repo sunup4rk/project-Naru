@@ -12,7 +12,7 @@ const Culture = () => {
   }
 
   return (
-    <div className='explore__wrapper'>
+    <div className='explore-wrapper'>
       <RankingCulture />
         <MapCategory search={search} value={"영화관"} />
         <Button01 text={"내 주변 문화시설 찾기"} onClick={onClickSearch}/>
