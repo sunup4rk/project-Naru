@@ -15,10 +15,15 @@
 
         div{
             margin: 15px 0;
-
-            span {
-                padding-right: 15px;
-            }
         }
+    }
+
+    span {
+        padding-right: 15px;
+    }
+
+    p {
+        color: red;
+        padding-top: 8px;
     }
 }

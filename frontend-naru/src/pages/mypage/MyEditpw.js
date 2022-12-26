@@ -2,16 +2,20 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import { Modal } from '../../components/common/modal/Modal';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
-import './MyEditpw.scss';
+import { schema } from './PasswordValidation';
+import { yupResolver } from '@hookform/resolvers/yup';
 import Input01 from './../../components/common/input/Input01';
 import Button01 from './../../components/common/button/Button01';
+import axios from 'axios';
+import './MyEditpw.scss';
 
 const MyEditpw = () => {
   const [check, setCheck] = useState(false);
   const { Success, Warning, Failure } = Modal();
-  const { register, handleSubmit, getValues, setValue } = useForm();
-  const navigate = useNavigate()
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm({
+    resolver: yupResolver(schema),
+    mode : 'onChange',
+  });  const navigate = useNavigate()
 
   useEffect(() => {
       axios.post("http://localhost:8080/islogin")
@@ -42,9 +46,9 @@ const MyEditpw = () => {
   }
 
   const onClickEdit = (data) => {
-    if(data.password === data.passwordCheck) {
+    if(data.passwordChange === data.passwordCheck) {
       axios.put("http://localhost:8080/mypage/editpw/change", {
-        password: data.password
+        password: data.passwordChange
       })
       .then((response) => {
           if(response.data.message === "비밀번호가 변경되었습니다.") {
@@ -64,8 +68,10 @@ const MyEditpw = () => {
       { check ? 
       <form className="myeditpw-wrapper" onSubmit={handleSubmit(onClickEdit)}>
         <span>비밀번호 변경</span>
-        <Input01 type={"password"} register={register("password")} placeholder={"비밀번호"}/>
+        <Input01 type={"password"} register={register("passwordChange")} placeholder={"비밀번호"}/>
+        <p>{errors.passwordChange?.message}</p>
         <Input01 type={"password"} register={register("passwordCheck")} placeholder={"비밀번호 확인"}/>
+        <p>{errors.passwordCheck?.message}</p>
         <Button01 text={"변경"} size={"s"} />
       </form>
       :
