@@ -611,19 +611,19 @@ app.post("/point/start", function(req, res){
         const value = req.body.value
         var cardResult = ""
 
-        if(cardValue > 0 && cardValue <= 5){
+        if(cardValue > 0 && cardValue <= 1){
             cardResult = "UR"
+            tempPoint = tempPoint + 900
+        }
+        else if(cardValue > 1 && cardValue <= 10){
+            cardResult = "SR"
             tempPoint = tempPoint + 300
         }
-        else if(cardValue > 5 && cardValue <= 20){
-            cardResult = "SR"
-            tempPoint = tempPoint + 100
-        }
-        else if(cardValue > 20 && cardValue <= 55){
+        else if(cardValue > 10 && cardValue <= 40){
             cardResult = "R"
-            tempPoint = tempPoint - 55
+            tempPoint = tempPoint - 50
         }
-        else if(cardValue > 55 && cardValue <= 100){
+        else if(cardValue > 40 && cardValue <= 100){
             cardResult = "N"
             tempPoint = tempPoint - 80
         }
