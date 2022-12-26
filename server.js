@@ -653,7 +653,7 @@ app.get('/mypage', (req, res) => {
         else{
             db.collection('post').find({like_user : req.user._id.toString()}).sort({'_id' : -1}).limit(3).toArray(function (err, result) {
                 const likeResult = result;
-                db.collection('post').find({writer: {$nin: [""]}}, {user_id : req.user._id}).sort({'_id' : -1}).limit(3).toArray(function(err, result){
+                db.collection('post').find({writer: {$nin: [""]}, user_id : req.user._id}).sort({'_id' : -1}).limit(3).toArray(function(err, result){
                     res.send({
                         message: "불러오기",
                         profile: userResult.profile_image_path,
@@ -744,7 +744,7 @@ app.get('/mypage/like', (req, res) => {
 
 // 내가 쓴 게시물 요청
 app.get('/mypage/post', (req, res) => { 
-    db.collection('post').find({writer: {$nin: [""]}}, {user_id : req.user._id}).sort({'_id' : -1}).toArray(function(err, result){
+    db.collection('post').find({writer: {$nin: [""]}, user_id : req.user._id}).sort({'_id' : -1}).toArray(function(err, result){
         res.send({
             message : "게시글",
             result : result,
