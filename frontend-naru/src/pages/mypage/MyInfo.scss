@@ -4,6 +4,21 @@
   align-items: center;
   width: 85%;
 
+  &__modal {
+    font-size: 1.2rem;
+
+    img {
+      width: 40px;
+      margin-right: 10px;
+    }
+
+    &__content {
+      display: flex;
+      align-items: center;
+      padding-bottom: 15px;
+    }
+  }
+
   &-profile {
     display: flex;
     align-items: center;
@@ -52,6 +67,20 @@
       span {
         font-size: 1rem;
         padding-bottom: 7px;
+      }
+
+      button {
+        border: 1px solid #D1D9DE;
+        background-color: #ffffff;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        line-height: 1.5;
+        margin-left: 5px;
+
+        &:hover {
+          border: 1px solid #4461AA;
+        }
       }
 
       strong {
