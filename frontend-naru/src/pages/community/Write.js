@@ -13,7 +13,6 @@ import axios from 'axios';
 import uuid from 'react-uuid'
 import './Write.scss';
 
-
 const Write = () => {
   const [isShown, setIsShown] = useState(false);
   const [images, setImages] = useState(["","","",""]);
