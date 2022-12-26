@@ -13,17 +13,17 @@ const Category = () => {
       <h1>찾아보기</h1>
       <div className="category__list">
         <div className="category__item" onClick={onClickMove("cafe")}>
-          <div className="category__item__cafe">
+          <div className="category__item__img --cafe">
             <span>카페</span>
             </div>
-        </div>
+          </div>
         <div className="category__item" onClick={onClickMove("entertainment")}>
-          <div className="category__item__ent">
+          <div className="category__item__img --ent">
             <span>오락</span>
           </div>
         </div>
         <div className="category__item" onClick={onClickMove("culture")}>
-          <div className="category__item__culture">
+          <div className="category__item__img --culture">
             <span>문화</span>
           </div>
         </div>

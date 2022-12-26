@@ -28,67 +28,53 @@
     cursor: pointer;
     overflow: hidden;
 
-    &__cafe {
+    &__img {
       display: flex;
       justify-content: center;
       align-items: center;
       width: 100%;
       height: 100%;
-      background: linear-gradient(
-        rgba(255, 255, 255, 0.6),
-        rgba(255, 255, 255, 0.6)
-      ), url("../../assets/images/cafe.svg");
       background-size: cover;
       transition: all 1s ease;
 
       &:hover {
-        background-image: url("../../assets/images/cafe.svg");
         transition: all 1s ease;
         transform: scale(1.2);
         color: #ffffff;
       }
     }
+  }
 
-    &__ent {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        rgba(255, 255, 255, 0.6),
-        rgba(255, 255, 255, 0.6)
-      ), url("../../assets/images/ent.svg");
-      background-size: cover;
-      transition: all 1s ease;
+  .--cafe {
+    background: linear-gradient(
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0.6)
+    ), url("../../assets/images/cafe.svg");
 
-      &:hover {
-        background-image: url("../../assets/images/ent.svg");
-        transition: all 1s ease;
-        transform: scale(1.2);
-        color: #ffffff;
-      }
+    &:hover {
+      background-image: url("../../assets/images/cafe.svg");
     }
+  }
 
-    &__culture {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(
-        rgba(255, 255, 255, 0.6),
-        rgba(255, 255, 255, 0.6)
-      ), url("../../assets/images/culture.svg");
-      background-size: cover;
-      transition: all 1s ease;
+  .--ent {
+    background: linear-gradient(
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0.6)
+    ), url("../../assets/images/ent.svg");
 
-      &:hover {
-        background-image: url("../../assets/images/culture.svg");
-        transition: all 1s ease;
-        transform: scale(1.2);
-        color: #ffffff;
-      }
+    &:hover {
+      background-image: url("../../assets/images/ent.svg");
+    }
+  }
+
+  .--culture {
+    background: linear-gradient(
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0.6)
+    ), url("../../assets/images/culture.svg");
+
+    &:hover {
+      background-image: url("../../assets/images/culture.svg");
     }
   }
 }
