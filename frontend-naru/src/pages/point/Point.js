@@ -12,7 +12,7 @@ const Point = () => {
     const [ select, setSelect ] = useState();
     const [ result, setResult ] = useState();
     const { Warning } = Modal();
-    const [isShown, setIsShown] = useState(false);
+    const [ isShown, setIsShown ] = useState(false);
 
     useEffect(()=> {
         const fetchPoint = () => {
@@ -31,18 +31,22 @@ const Point = () => {
     }, [result])
 
     const onClickReverse = () => {
-        axios.post(`http://localhost:8080/point/start`, {
-            value : select,
-            point : point
-        })
-        .then((response) => {
-            if(response.data.message === "포인트게임 완료") {
-                setResult(response.data.cardValue)
-            }
-            else {
-                Warning("포인트 게임", response.data.message)
-            }
-        })
+        if (!select) {
+            Warning("카드 뽑기", "카드를 선택해주세요.")
+        } else {
+            axios.post(`http://localhost:8080/point/start`, {
+                value : select,
+                point : point
+            })
+            .then((response) => {
+                if(response.data.message === "포인트게임 완료") {
+                    setResult(response.data.cardValue)
+                }
+                else {
+                    Warning("포인트 게임", response.data.message)
+                }
+            })
+        }
     }
 
     const onChangValue = (e) => {
