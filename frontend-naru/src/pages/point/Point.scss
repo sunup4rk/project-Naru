@@ -5,6 +5,41 @@
   width: 100%;
   padding: 100px 0;
 
+  &__modal {
+    font-size: 1.2rem;
+
+    img {
+      width: 40px;
+      margin-right: 10px;
+    }
+
+    &__content {
+      display: flex;
+      align-items: center;
+      padding-bottom: 15px;
+    }
+  }
+
+  h1 {
+    display: flex;
+    align-items: center;
+    button {
+      border: 1px solid #D1D9DE;
+      background-color: #ffffff;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      margin-top: 0;
+      margin-left: 5px;
+      font-size: 1rem;
+      line-height: 1.2;
+
+      &:hover {
+        border: 1px solid #4461AA;
+      }
+    }
+  }
+
   &__list {
     display: flex;
     padding-top: 50px;
