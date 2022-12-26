@@ -275,12 +275,6 @@ app.delete('/community', function(req, res){
 
 // ======================================= 검색기능 ===================================================== //
 
-app.get('/test', function(req, res){
-    db.collection('post').find().toArray(function(err, result){
-        res.render('community.ejs', {posts : result})
-    })
-})
-
 app.get('/search', function(req, res){
     const nullArr = []
     let condition = 
@@ -758,14 +752,6 @@ app.get('/mypage/post', (req, res) => {
         }); 
     })
 })
-        
-    
-    
-
-
-
-
-
 
 // control - userinfo 끝 ////////////////////////////////////////////////////////////////////////////
 
