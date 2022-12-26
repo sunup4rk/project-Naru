@@ -5,14 +5,9 @@ import { Modal } from '../../components/common/modal/Modal';
 import { schema } from './Validation'
 import Button01 from "../../components/common/button/Button01";
 import Input01 from "../../components/common/input/Input01";
-import styled from 'styled-components';
 import axios from 'axios';
 import './SignUp.scss';
 
-const Error = styled.p`
-    color: red;
-    padding: 3px;
-`
 const SignUp = () => {
     const navigate = useNavigate();
     const { register, handleSubmit, formState: { errors }, setValue, getValues, watch} = useForm ({
@@ -112,11 +107,11 @@ const SignUp = () => {
                     </div>
 
                     <Input01 type={"text"} placeholder={"닉네임 (한글,영문,숫자 포함 2~8자)"} size={"m"} register={register("nickname")} />
-                    <Error>{errors.nickname?.message}</Error>
+                    <p>{errors.nickname?.message}</p>
                     <Input01 type={"password"} placeholder={"비밀번호 (숫자 12~64자)"} size={"m"} register={register("password")}/>
-                    <Error>{errors.password?.message}</Error>
+                    <p>{errors.password?.message}</p>
                     <Input01 type={"password"} placeholder={"비밀번호 확인 (숫자 12~64자)"} size={"m"} register={register("passwordCheck")} />
-                    <Error>{errors.passwordCheck?.message}</Error>
+                    <p>{errors.passwordCheck?.message}</p>
                     <Button01 type={"submit"} text={"회원가입"} size={"m"}/>
             </form>
         </div>

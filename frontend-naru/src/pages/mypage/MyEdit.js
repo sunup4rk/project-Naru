@@ -2,17 +2,22 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Modal } from '../../components/common/modal/Modal';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { schema } from './NicknameValidation';
 import UploadProfile from '../../components/common/upload/UploadProfile';
-import axios from 'axios';
-import './MyEdit.scss';
 import Input01 from './../../components/common/input/Input01';
 import Button01 from './../../components/common/button/Button01';
+import axios from 'axios';
+import './MyEdit.scss';
 
 const MyEdit = () => {
   const [ user, setUser ] = useState();
   const [ image, setImage ] = useState([""]);
   const { Success, Warning, Failure } = Modal();
-  const { register, handleSubmit, getValues } = useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(schema),
+    mode : 'onChange',
+  });
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -47,9 +52,9 @@ const MyEdit = () => {
     setImage(img);
   }
 
-  const onClickEdit = () => {
+  const onClickEdit = (data) => {
     axios.post("http://localhost:8080/mypage/edit", {
-      nickname: getValues("nickname")
+      nickname: data.nickname
     })
     .then((response) => {
         if(response.data.message === "수정 성공") {
@@ -75,9 +80,10 @@ const MyEdit = () => {
         <div>
           <span>닉네임</span>
           <Input01 type={"text"} defaultValue={user?.nickname} register={register("nickname")} />
+          <p>{errors.nickname?.message}</p>
         </div>
       </div>
-        <Button01 text={"수정"} onClick={onClickEdit} size={"s"}/>
+        <Button01 text={"수정"} size={"s"}/>
       </form>
     </div>
   );
