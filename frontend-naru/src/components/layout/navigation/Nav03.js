@@ -30,22 +30,22 @@ const Nav03 = (props) => {
     return(
         <ul className="Nav03">
             <li className="Nav03__membership">
-                {props.level === 1 && <img src="images/membership/level1.svg" alt="membership"/>}
-                {props.level === 2 && <img src="images/membership/level2.svg" alt="membership"/>}
-                {props.level === 3 && <img src="images/membership/level3.svg" alt="membership"/>}
-                {props.level === 4 && <img src="images/membership/level4.svg" alt="membership"/>}
-                {props.level === 5 && <img src="images/membership/level5.svg" alt="membership"/>}
+                {props.level === 1 && <img src="/images/membership/level1.svg" alt="membership"/>}
+                {props.level === 2 && <img src="/images/membership/level2.svg" alt="membership"/>}
+                {props.level === 3 && <img src="/images/membership/level3.svg" alt="membership"/>}
+                {props.level === 4 && <img src="/images/membership/level4.svg" alt="membership"/>}
+                {props.level === 5 && <img src="/images/membership/level5.svg" alt="membership"/>}
             </li>
             <li className="Nav03__user">
                 <span>{props.nickname}</span><span>님</span>
             </li>
             <li className="Nav03__menu">
                 <Link to="/mypage">
-                    <img src="images/icon/mypage.svg" alt="mypage"/>
+                    <img src="/images/icon/mypage.svg" alt="mypage"/>
                 </Link>
             </li>
             <li className="Nav03__menu" onClick={onClickLogout}>
-                <img src="images/icon/logout.svg" alt="logout"/>
+                <img src="/images/icon/logout.svg" alt="logout"/>
             </li>
         </ul>
     )
