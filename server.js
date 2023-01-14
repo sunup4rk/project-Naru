@@ -1,23 +1,38 @@
-const express = require('express');
+import express from 'express';
+import config from './src/config/index.js';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import mongodb from 'mongodb';
+import http from 'http';
+import AWS from 'aws-sdk';
+import multiparty from 'multiparty'
+import methodOverride from 'method-override';
+import multer from 'multer';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import fileStore from 'session-file-store';
+import passport from 'passport';
+import passportLocal from 'passport-local';
+import moment from 'moment';
+import timeZone from 'moment-timezone';
+import { Server } from 'socket.io';
+import ejs from 'ejs';
+import nodemailer from 'nodemailer';
+
 const app = express();
 
-require('dotenv').config();
-
 // socket 세팅
-const http = require('http').createServer(app);
-const {Server} = require('socket.io');
-const io = new Server(http);
+const httpServer = http.createServer(app);
+const io = new Server(httpServer);
 
 
 // 미들웨어 설정
 app.use(express.json());
 app.set('view engine', 'ejs');
 
-const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true})); 
 app.use(bodyParser.json())
 
-const cors = require("cors");
 app.use(cors({
     origin: "http://localhost:3000",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -25,44 +40,39 @@ app.use(cors({
 }));
 
 var db;
-const MongoClient = require('mongodb').MongoClient;
-MongoClient.connect(process.env.DB_URL, function(err, client) {
+const MongoClient = mongodb.MongoClient;
+MongoClient.connect(config.databaseURL, function(err, client) {
     if (err) { return console.log(err) }
     db = client.db('Naru');
     app.db = db;
 
-    http.listen(process.env.PORT, function() {
-        console.log('listening on', process.env.PORT);
+    httpServer.listen(config.port, function() {
+        console.log('listening on', config.port);
     })
 })
 
 // AWS 설정
-const AWS = require('aws-sdk');
-const multiparty = require('multiparty');
-
-AWS.config.loadFromPath(__dirname + "/config/awsconfig.json");
+AWS.config.update({
+    "accessKeyId": config.AWS_CONFIG.accessKeyId,
+    "secretAccessKey": config.AWS_CONFIG.secretAccessKey,
+    "region": config.AWS_CONFIG.region
+})
 const BUCKET_NAME = 'bucket-sunu';
 const s3 = new AWS.S3();
 
-const methodOverride = require('method-override');
 app.use(methodOverride('_method'));
-
-const multer = require('multer');
-
 
 // public 폴더의 내용을 정적파일로 사용
 app.use('/public', express.static('public'));
 
  
 // 쿠키 미들웨어
-const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 // 세션 미들웨어
-const session = require('express-session');
-const FileStore = require('session-file-store')(session);
+const SessionFileStore = fileStore(session);
 app.use(session({
-    secret: process.env.COOKIE_SECRET,
+    secret: config.passportSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -70,19 +80,15 @@ app.use(session({
         secure: false,
         maxAge: 1000 * 60 * 60 * 3  // 3시간
     },
-    store: new FileStore()
+    store: new SessionFileStore()
 }));
 
 // 패스포트 passport 미들웨어
-const passport = require('passport');
-const localStrategy = require('passport-local').Strategy;
+const localStrategy = passportLocal.Strategy;
 app.use(passport.initialize());
 app.use(passport.session());
 
 // 시간 미들웨어
-var moment = require('moment');
-
-require('moment-timezone');
 moment.tz.setDefault("Asia/Seoul");
 
 // ================================= 사용자 레벨 체크 함수 ============================================ //
@@ -111,9 +117,11 @@ function LevelCheck(_id) {
 
 // ================================= 크롤링 코드 영역 ================================================== //
 
-const crawlTime = moment().format('YYYY-MM-DD')
-const puppeteer = require( "puppeteer" );
-const cheerio = require( "cheerio" );
+import puppeteer from 'puppeteer';
+import * as cheerio from 'cheerio';
+
+const crawlTime = moment().format('YYYY-MM-DD');
+
 async function CrawlGame () {
         
     const browser = await puppeteer.launch({
@@ -771,7 +779,7 @@ app.post('/mypage/profile', (req, res) => {
     
     // form 데이터 처리
     form.on('part', async part => {
-        profilePath = process.env.IMAGE_SERVER + "/" + imageDir + part.filename;
+        profilePath = config.AWS_BUCKET + "/" + imageDir + part.filename;
         // 이미지 저장 디렉토리
         if (!part.filename) { return part.resume(); }
         streamToBufferUpload(part, imageDir + part.filename);
@@ -820,7 +828,7 @@ app.delete('/mypage/profile', (req, res) => {
         {$set : {profile_image_path: ""}}, 
         (err, result) => {
             if (err) { return console.log(err); }
-            else { console.log(process.env.IMAGE_SERVER + "/" + (req.query.url).substr(52)) } 
+            else { console.log(config.AWS_BUCKET + "/" + (req.query.url).substr(52)) } 
         }
     );
 })
@@ -837,7 +845,7 @@ app.post('/image/upload', (req, res) => {
     
     // form 데이터 처리
     form.on('part', async (part) => {
-        imageAddress = process.env.IMAGE_SERVER + "/" + userID + "/" + part.filename;
+        imageAddress = config.AWS_BUCKET + "/" + userID + "/" + part.filename;
         const postID = Number(part.filename.split('/')[0]);
         // 파일명 X : 이미지 저장 디렉토리
         if (!part.filename) {
@@ -1056,11 +1064,9 @@ app.post('/signup/mail', (req, res) => {
     }
 })
 
-// 인증메일 변수
-const ejs = require('ejs');
-const nodemailer = require('nodemailer');
-const path = require('path');
-const appDir = path.dirname(require.main.filename) + '/templates/authMail.ejs';
+// 인증메일
+const appDir = './templates/authMail.ejs';
+
 
 // 인증메일 발송 function
 const SendAuthMail = (address) => {
@@ -1078,8 +1084,8 @@ const SendAuthMail = (address) => {
         port: 587,
         secure: false,
         auth: {
-            user: process.env.NODEMAILER_USER,
-            pass: process.env.NODEMAILER_PASS
+            user: config.emails.user,
+            pass: config.emails.pass
         }
     });
 
